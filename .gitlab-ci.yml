@@ -1,5 +1,6 @@
+image: 8-jdk
+
 before_script:
- - apt-get install openjdk-8-jdk
  - ./gradlew clean
 
 jar:
