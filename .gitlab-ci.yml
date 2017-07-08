@@ -1,0 +1,6 @@
+before_script:
+ - ./gradlew clean
+
+jar:
+  script:
+   - ./gradlew build
