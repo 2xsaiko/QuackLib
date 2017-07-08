@@ -14,22 +14,24 @@ import net.minecraft.world.World
 fun Item.makeStack(count: Int = 1, meta: Int = 0) = ItemStack(this, count, meta)
 
 fun ItemStack.spawnAt(world: World, x: Double, y: Double, z: Double) {
-  val item = EntityItem(world, x, y, z)
+  val item = EntityItem(world, x, y, z, this)
+  item.setDefaultPickupDelay()
   world.spawnEntity(item)
 }
 
 fun ItemStack.spawnAt(world: World, x: Double, y: Double, z: Double, velX: Double, velY: Double, velZ: Double) {
-  val item = EntityItem(world, x, y, z)
+  val item = EntityItem(world, x, y, z, this)
+  item.setDefaultPickupDelay()
   item.setVelocity(velX, velY, velZ)
   world.spawnEntity(item)
 }
 
 fun ItemStack.spawnAt(world: World, pos: BlockPos) {
-  spawnAt(world, pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble())
+  spawnAt(world, pos.x.toDouble() + 0.5, pos.y.toDouble() + 0.5, pos.z.toDouble() + 0.5)
 }
 
 fun ItemStack.spawnAt(world: World, pos: BlockPos, velX: Double, velY: Double, velZ: Double) {
-  spawnAt(world, pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble(), velX, velY, velZ)
+  spawnAt(world, pos.x.toDouble() + 0.5, pos.y.toDouble() + 0.5, pos.z.toDouble() + 0.5, velX, velY, velZ)
 }
 
 fun ItemStack.spawnAt(world: World, e: Entity) {

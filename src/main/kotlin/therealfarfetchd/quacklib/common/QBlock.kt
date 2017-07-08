@@ -36,7 +36,7 @@ abstract class QBlock {
   /**
    * Returns the raytrace collision box of the block
    */
-  open val rayCollisionBox: AxisAlignedBB
+  open val rayCollisionBox: AxisAlignedBB?
     get() = selectionBox
 
   /**
@@ -62,12 +62,12 @@ abstract class QBlock {
   /**
    * A set of all the blockstate properties. Must stay constant at all times.
    */
-  val properties: Set<IProperty<*>> = emptySet()
+  open val properties: Set<IProperty<*>> = emptySet()
 
   /**
    * A set of all the unlisted blockstate properties. Must stay constant at all times.
    */
-  val unlistedProperties: Set<IUnlistedProperty<*>> = emptySet()
+  open val unlistedProperties: Set<IUnlistedProperty<*>> = emptySet()
 
   /**
    * Called when the block gets added to the world.
@@ -75,17 +75,12 @@ abstract class QBlock {
   open fun onAdded() {}
 
   /**
-   * Called when the block gets removed from the world.
-   */
-  open fun onRemoved() {}
-
-  /**
    * Destroys the block. Returns true if it was successful.
    */
   fun dismantle(dropItems: Boolean = true, force: Boolean = false): Boolean {
     val flag = onBreakBlock(null) || force
     if (flag) {
-      if (dropItems) dropItems(null)
+      if (dropItems) dropItems()
       world.setBlockToAir(pos)
     }
     return flag
@@ -94,8 +89,8 @@ abstract class QBlock {
   /**
    * Drop the items in the world.
    */
-  open fun dropItems(player: EntityPlayer?) {
-    for (item in getDroppedItems(player)) {
+  open fun dropItems() {
+    for (item in getDroppedItems()) {
       item.spawnAt(world, pos)
     }
   }
@@ -138,7 +133,7 @@ abstract class QBlock {
   /**
    * Returns the items this block drops.
    */
-  abstract fun getDroppedItems(player: EntityPlayer?): List<ItemStack>
+  abstract fun getDroppedItems(): List<ItemStack>
 
   companion object {
     val FullAABB = AxisAlignedBB(0.0, 0.0, 0.0, 1.0, 1.0, 1.0)
