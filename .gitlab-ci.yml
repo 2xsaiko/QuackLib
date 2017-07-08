@@ -3,6 +3,13 @@ image: openjdk:8-jdk
 before_script:
  - ./gradlew clean
 
+stages:
+ - build
+
 jar:
+  stage: build
   script:
    - ./gradlew build
+  artifacts:
+    paths:
+     - build/libs/*
