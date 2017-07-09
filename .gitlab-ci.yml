@@ -2,6 +2,7 @@ image: openjdk:8-jdk
 
 stages:
  - build
+ - deploy
 
 jar:
   stage: build
@@ -10,3 +11,9 @@ jar:
   artifacts:
     paths:
      - build/libs/*
+
+upload:
+  stage: deploy
+  script:
+   - GIT_COMMIT="$(git log --format="%H" -n 1)"
+   - curl --data "user=the_real_farfetchd&repo=QuackLib&commit=$GIT_COMMIT" http://pootis.duckdns.org:2564/update_repo
