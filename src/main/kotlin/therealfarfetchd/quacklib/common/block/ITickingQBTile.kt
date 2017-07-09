@@ -9,6 +9,9 @@ interface ITickingQBTile : ITickable {
 
   val qb: QBlock
 
-  override fun update() = (qb as ITickable).update()
+  override fun update() {
+    @Suppress("SENSELESS_COMPARISON")
+    if (qb != null) (qb as ITickable).update()
+  }
 
 }

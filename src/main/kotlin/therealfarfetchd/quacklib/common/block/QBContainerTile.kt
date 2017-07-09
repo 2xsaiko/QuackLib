@@ -34,12 +34,12 @@ open class QBContainerTile() : TileEntity() {
 
   override fun setWorld(world: World) {
     super.setWorld(world)
-    qb.world = world
+    _qb?.world = world
   }
 
   override fun setPos(pos: BlockPos) {
     super.setPos(pos)
-    qb.pos = pos
+    _qb?.pos = pos
   }
 
   override fun writeToNBT(compound: NBTTagCompound): NBTTagCompound {
@@ -94,7 +94,7 @@ open class QBContainerTile() : TileEntity() {
 
   open class Ticking() : QBContainerTile(), ITickingQBTile {
     constructor(qbIn: QBlock) : this() {
-      QBContainerTile(qbIn)
+      qb = qbIn
     }
   }
 
