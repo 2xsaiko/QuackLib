@@ -1,16 +1,23 @@
-package therealfarfetchd.quacklib.common
+package therealfarfetchd.quacklib.common.block
 
 import net.minecraft.block.material.Material
 import net.minecraft.block.properties.IProperty
 import net.minecraft.block.state.IBlockState
+import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
+import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.EnumFacing
+import net.minecraft.util.EnumHand
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
+import net.minecraftforge.common.capabilities.Capability
 import net.minecraftforge.common.property.IExtendedBlockState
 import net.minecraftforge.common.property.IUnlistedProperty
+import therealfarfetchd.quacklib.common.DataTarget
+import therealfarfetchd.quacklib.common.extensions.isServer
+import therealfarfetchd.quacklib.common.extensions.spawnAt
 
 /**
  * Created by marco on 08.07.17.
@@ -75,15 +82,14 @@ abstract class QBlock {
   open fun onAdded() {}
 
   /**
-   * Destroys the block. Returns true if it was successful.
+   * Destroys the block.
    */
-  fun dismantle(dropItems: Boolean = true, force: Boolean = false): Boolean {
-    val flag = onBreakBlock(null) || force
-    if (flag) {
+  fun dismantle(dropItems: Boolean = true) {
+    if (world.isServer) {
+      onBreakBlock(null)
       if (dropItems) dropItems()
       world.setBlockToAir(pos)
     }
-    return flag
   }
 
   /**
@@ -114,10 +120,15 @@ abstract class QBlock {
   open fun canBePlacedOnSide(side: EnumFacing): Boolean = canStay()
 
   /**
+   * Gets called after the block is placed. Maybe. (only when placed by a player)
+   */
+  open fun onPlaced(placer: EntityLivingBase, stack: ItemStack, sidePlaced: EnumFacing) {}
+
+  /**
    * Gets called when one of the block's neighbors gets changed (broken, placed, …)
    */
   open fun onNeighborChanged(side: EnumFacing) {
-    if (!canStay()) dismantle(force = true)
+    if (!canStay()) dismantle()
   }
 
   /**
@@ -131,9 +142,44 @@ abstract class QBlock {
   open fun applyExtendedProperties(state: IExtendedBlockState): IBlockState = state
 
   /**
+   * Gets called when the block is clicked on. Returns true if the player should swing their hand.
+   */
+  open fun onActivated(player: EntityPlayer, hand: EnumHand, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean = false
+
+  /**
    * Returns the items this block drops.
    */
   abstract fun getDroppedItems(): List<ItemStack>
+
+  /**
+   * Gets called to save TE data to disk or to send to the client.
+   */
+  open fun saveData(nbt: NBTTagCompound, target: DataTarget) {}
+
+  /**
+   * Gets called to load TE data.
+   */
+  open fun loadData(nbt: NBTTagCompound, target: DataTarget) {}
+
+  /**
+   * Schedules the block for saving to disk.
+   */
+  fun dataChanged() {
+    world.markChunkDirty(pos, container)
+  }
+
+  /**
+   * Schedules the block for updating on the client side.
+   */
+  fun clientDataChanged(renderUpdate: Boolean = true) {
+    if (world.isServer) {
+      container.nextClientUpdateIsRender = renderUpdate || container.nextClientUpdateIsRender
+      val state = applyProperties(container.blockType.defaultState)
+      world.notifyBlockUpdate(pos, state, state, 3)
+    }
+  }
+
+  fun <T> getCapability(capability: Capability<T>, side: EnumFacing?): T? = null
 
   companion object {
     val FullAABB = AxisAlignedBB(0.0, 0.0, 0.0, 1.0, 1.0, 1.0)

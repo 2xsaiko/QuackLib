@@ -1,4 +1,4 @@
-package therealfarfetchd.quacklib.common
+package therealfarfetchd.quacklib.common.extensions
 
 import net.minecraft.entity.Entity
 import net.minecraft.entity.item.EntityItem

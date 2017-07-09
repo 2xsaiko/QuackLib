@@ -1,28 +1,31 @@
-package therealfarfetchd.quacklib.common
+package therealfarfetchd.quacklib.common.block
 
 import net.minecraft.block.Block
 import net.minecraft.block.ITileEntityProvider
 import net.minecraft.block.state.BlockStateContainer
 import net.minecraft.block.state.IBlockState
+import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.Item
+import net.minecraft.item.ItemStack
 import net.minecraft.tileentity.TileEntity
-import net.minecraft.util.EnumFacing
-import net.minecraft.util.EnumHand
-import net.minecraft.util.ITickable
-import net.minecraft.util.ResourceLocation
+import net.minecraft.util.*
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.IBlockAccess
 import net.minecraft.world.World
 import net.minecraftforge.common.property.ExtendedBlockState
 import net.minecraftforge.common.property.IExtendedBlockState
+import therealfarfetchd.quacklib.common.Scheduler
+import therealfarfetchd.quacklib.common.extensions.getFacing
+import therealfarfetchd.quacklib.common.extensions.minus
+import therealfarfetchd.quacklib.common.extensions.plus
 import java.util.*
 
 /**
  * Created by marco on 08.07.17.
  */
-open class QBContainer(rl: ResourceLocation, private val factory: () -> QBlock) : Block(factory.also { tempFactory = it }().material), ITileEntityProvider {
+open class QBContainer(rl: ResourceLocation, internal val factory: () -> QBlock) : Block(factory.also { tempFactory = it }().material), ITileEntityProvider {
 
   init {
     registryName = rl
@@ -66,10 +69,9 @@ open class QBContainer(rl: ResourceLocation, private val factory: () -> QBlock) 
       val block = getQBlockAt(world, pos)
       if (state is IExtendedBlockState) return block.applyExtendedProperties(state)
     } catch(e: IllegalStateException) {
-      // probably client is still loading, nop
+      // probably client is still loading
     }
     return state
-
   }
 
   override fun getMetaFromState(state: IBlockState?): Int = 0
@@ -86,14 +88,26 @@ open class QBContainer(rl: ResourceLocation, private val factory: () -> QBlock) 
   }
 
   override fun canPlaceBlockAt(world: World, pos: BlockPos): Boolean = tempQB(world, pos).canStay()
-  override fun canPlaceBlockOnSide(world: World, pos: BlockPos, side: EnumFacing): Boolean = tempQB(world, pos).canBePlacedOnSide(side)
+
+  override fun canPlaceBlockOnSide(world: World, pos: BlockPos, side: EnumFacing): Boolean {
+    sidePlaced = side.opposite
+    return tempQB(world, pos).canBePlacedOnSide(side)
+  }
+
+  override fun onBlockPlacedBy(world: World, pos: BlockPos, state: IBlockState?, placer: EntityLivingBase, stack: ItemStack) {
+    getQBlockAt(world, pos).onPlaced(placer, stack, sidePlaced)
+    sidePlaced = EnumFacing.DOWN
+  }
 
   override fun getItemDropped(state: IBlockState?, rand: Random?, fortune: Int): Item? = null
 
   override fun breakBlock(world: World, pos: BlockPos, state: IBlockState?) {
-    val qb = (world.getTileEntity(pos) as QBContainerTile).qb
-    qb.dropItems()
+    brokenQBlock = (world.getTileEntity(pos) as QBContainerTile).qb
     super.breakBlock(world, pos, state)
+  }
+
+  override fun getDrops(drops: NonNullList<ItemStack>, world: IBlockAccess, pos: BlockPos, state: IBlockState?, fortune: Int) {
+    drops.addAll(brokenQBlock.getDroppedItems())
   }
 
   override fun getSelectedBoundingBox(state: IBlockState?, world: World, pos: BlockPos): AxisAlignedBB = getQBlockAt(world, pos).selectionBox + pos
@@ -106,20 +120,26 @@ open class QBContainer(rl: ResourceLocation, private val factory: () -> QBlock) 
     }.rayCollisionBox
   }
 
+  override fun getBoundingBox(state: IBlockState?, world: IBlockAccess, pos: BlockPos): AxisAlignedBB = getQBlockAt(world, pos).collisionBox
+
   override fun onBlockAdded(world: World, pos: BlockPos, state: IBlockState?) {
     Scheduler.schedule(1) {
       getQBlockAt(world, pos).onAdded()
     }
   }
 
-  override fun onBlockActivated(worldIn: World?, pos: BlockPos?, state: IBlockState?, playerIn: EntityPlayer?, hand: EnumHand?, facing: EnumFacing?, hitX: Float, hitY: Float, hitZ: Float): Boolean {
-    return super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ)
+  override fun onBlockActivated(world: World, pos: BlockPos, state: IBlockState?, player: EntityPlayer, hand: EnumHand, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean {
+    return getQBlockAt(world, pos).onActivated(player, hand, facing, hitX, hitY, hitZ)
   }
 
-  override fun getBoundingBox(state: IBlockState?, world: IBlockAccess, pos: BlockPos): AxisAlignedBB = getQBlockAt(world, pos).collisionBox
+  override fun neighborChanged(state: IBlockState?, world: World, pos: BlockPos, blockIn: Block?, fromPos: BlockPos) {
+    getQBlockAt(world, pos).onNeighborChanged((fromPos - pos).getFacing())
+  }
 
   companion object {
     internal lateinit var tempFactory: () -> QBlock
+    internal lateinit var brokenQBlock: QBlock
+    internal var sidePlaced: EnumFacing = EnumFacing.DOWN
   }
 
 }

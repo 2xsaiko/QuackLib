@@ -12,11 +12,12 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.registry.GameRegistry
+import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.LogManager
-import therealfarfetchd.quacklib.common.QBContainer
-import therealfarfetchd.quacklib.common.QBContainerTile
 import therealfarfetchd.quacklib.common.Scheduler
-import therealfarfetchd.quacklib.common.TestQB
+import therealfarfetchd.quacklib.common.block.QBContainer
+import therealfarfetchd.quacklib.common.block.QBContainerTile
+import therealfarfetchd.quacklib.common.test.TestQB
 
 /**
  * Created by marco on 08.07.17.
@@ -28,10 +29,10 @@ const val ModID = "quacklib"
 object QuackLib {
   val debug = Launch.blackboard["fml.deobfuscatedEnvironment"] as Boolean
 
-  val Logger = LogManager.getLogger(ModID)
+  internal val Logger = LogManager.getLogger(ModID)!!
 
-  val testblock: QBContainer = QBContainer(ResourceLocation("quacklib", "testblock1"), ::TestQB)
-  val tbitem: Item = ItemBlock(testblock).also { it.setRegistryName("quacklib:testblock1") }
+  internal val testblock: QBContainer = QBContainer(ResourceLocation("quacklib", "testblock1"), ::TestQB)
+  internal val tbitem: Item = ItemBlock(testblock).also { it.setRegistryName("quacklib:testblock1") }
 
   init {
     MinecraftForge.EVENT_BUS.register(this)
@@ -39,7 +40,9 @@ object QuackLib {
 
   @Mod.EventHandler
   fun preInit(e: FMLPreInitializationEvent) {
+    if (debug) Logger.log(Level.INFO, "Running in a dev environment; registering test blocks!")
     GameRegistry.registerTileEntity(QBContainerTile::class.java, "qblock_container")
+    GameRegistry.registerTileEntity(QBContainerTile.Ticking::class.java, "qblock_container_t")
   }
 
   @SubscribeEvent

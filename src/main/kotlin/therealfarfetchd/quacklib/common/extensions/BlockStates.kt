@@ -1,4 +1,4 @@
-package therealfarfetchd.quacklib.common
+package therealfarfetchd.quacklib.common.extensions
 
 import net.minecraft.block.properties.IProperty
 import net.minecraft.block.state.IBlockState
