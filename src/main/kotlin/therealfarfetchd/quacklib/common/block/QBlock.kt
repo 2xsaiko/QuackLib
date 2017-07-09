@@ -52,6 +52,16 @@ abstract class QBlock {
   open val collisionBox: AxisAlignedBB = FullAABB
 
   /**
+   * Returns true if this block is a full (0,0,0->1,1,1) cube. Must stay constant at all times.
+   */
+  open val isFullBlock = true
+
+  /**
+   * Returns true if this block is opaque (no transparent textures or full block). Must stay constant at all times.
+   */
+  open val isOpaque: Boolean = true
+
+  /**
    * The tile entity this QBlock is in.
    */
   lateinit var container: QBContainerTile
@@ -179,6 +189,7 @@ abstract class QBlock {
     }
   }
 
+  @Suppress("UNUSED_PARAMETER")
   fun <T> getCapability(capability: Capability<T>, side: EnumFacing?): T? = null
 
   companion object {

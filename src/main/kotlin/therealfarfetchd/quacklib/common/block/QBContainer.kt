@@ -16,6 +16,8 @@ import net.minecraft.world.IBlockAccess
 import net.minecraft.world.World
 import net.minecraftforge.common.property.ExtendedBlockState
 import net.minecraftforge.common.property.IExtendedBlockState
+import org.apache.logging.log4j.Level
+import therealfarfetchd.quacklib.QuackLib
 import therealfarfetchd.quacklib.common.Scheduler
 import therealfarfetchd.quacklib.common.extensions.getFacing
 import therealfarfetchd.quacklib.common.extensions.minus
@@ -30,19 +32,27 @@ open class QBContainer(rl: ResourceLocation, internal val factory: () -> QBlock)
   init {
     registryName = rl
     unlocalizedName = rl.toString()
+
+    val factory1 = factory()
+
+    @Suppress("LeakingThis")
+    if (factory1 is QBlockMultipart && this !is QBContainerMultipart)
+      QuackLib.Logger.log(Level.WARN, "Using a multipart-enabled QBlock ($factory1) in a non-multipart Block! This means you won't get any multipart capabilities.")
   }
 
-  private fun checkValid(world: IBlockAccess, pos: BlockPos) = world.getBlockState(pos).block == this && world.getTileEntity(pos) is QBContainerTile
+  internal open fun checkValid(world: IBlockAccess, pos: BlockPos) = world.getBlockState(pos).block == this && world.getTileEntity(pos) is QBContainerTile
 
-  private fun requireValid(world: IBlockAccess, pos: BlockPos) {
-    check(world.getBlockState(pos).block == this, { "Block state at $pos is not a QBContainer!" })
+  internal open fun requireValid(world: IBlockAccess, pos: BlockPos) {
+    val block = world.getBlockState(pos).block
+    check(block == this, { "Block at $pos is not $this, but $block!" })
     check(world.getTileEntity(pos) != null, { "There is no tile entity at $pos!" })
     check(world.getTileEntity(pos) is QBContainerTile, { "Tile entity at $pos is not a QBContainerTile!" })
   }
 
-  private fun tempQB(world: World?, pos: BlockPos?): QBlock = factory().also { qb -> world?.also { qb.world = it }; pos?.also { qb.pos = it } }
+  @Suppress("USELESS_ELVIS")
+  internal open fun tempQB(world: World?, pos: BlockPos?): QBlock = (factory ?: tempFactory)().also { qb -> world?.also { qb.world = it }; pos?.also { qb.pos = it } }
 
-  fun getQBlockAt(world: IBlockAccess, pos: BlockPos): QBlock {
+  internal open fun getQBlockAt(world: IBlockAccess, pos: BlockPos): QBlock {
     requireValid(world, pos)
     val te = world.getTileEntity(pos) as QBContainerTile
     return te.qb
@@ -121,6 +131,10 @@ open class QBContainer(rl: ResourceLocation, internal val factory: () -> QBlock)
   }
 
   override fun getBoundingBox(state: IBlockState?, world: IBlockAccess, pos: BlockPos): AxisAlignedBB = getQBlockAt(world, pos).collisionBox
+
+  override fun isFullCube(state: IBlockState?): Boolean = tempQB(null, null).isFullBlock
+
+  override fun isOpaqueCube(state: IBlockState?): Boolean = tempQB(null, null).isOpaque
 
   override fun onBlockAdded(world: World, pos: BlockPos, state: IBlockState?) {
     Scheduler.schedule(1) {

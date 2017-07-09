@@ -6,7 +6,6 @@ import net.minecraft.network.NetworkManager
 import net.minecraft.network.play.server.SPacketUpdateTileEntity
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.EnumFacing
-import net.minecraft.util.ITickable
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
@@ -93,14 +92,10 @@ open class QBContainerTile() : TileEntity() {
     return qb.getCapability(capability, facing) ?: super.getCapability(capability, facing)
   }
 
-  open class Ticking() : QBContainerTile(), ITickable {
+  open class Ticking() : QBContainerTile(), ITickingQBTile {
     constructor(qbIn: QBlock) : this() {
       QBContainerTile(qbIn)
     }
-
-    private val tickable get() = qb as ITickable
-
-    override fun update() = tickable.update()
   }
 
 }

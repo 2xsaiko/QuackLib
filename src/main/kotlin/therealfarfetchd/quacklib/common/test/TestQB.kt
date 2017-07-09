@@ -1,5 +1,7 @@
 package therealfarfetchd.quacklib.common.test
 
+import mcmultipart.api.slot.EnumFaceSlot
+import mcmultipart.api.slot.IPartSlot
 import net.minecraft.block.material.Material
 import net.minecraft.block.properties.IProperty
 import net.minecraft.block.properties.PropertyBool
@@ -11,18 +13,19 @@ import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand
-import net.minecraft.util.ITickable
 import net.minecraft.util.math.AxisAlignedBB
 import therealfarfetchd.quacklib.QuackLib
 import therealfarfetchd.quacklib.common.DataTarget
-import therealfarfetchd.quacklib.common.block.QBlock
+import therealfarfetchd.quacklib.common.block.QBlockMultipart
 import therealfarfetchd.quacklib.common.extensions.isServer
 import therealfarfetchd.quacklib.common.extensions.makeStack
+import therealfarfetchd.quacklib.common.extensions.rotate
 
 /**
  * Created by marco on 08.07.17.
  */
-internal class TestQB : QBlock() {
+internal class TestQB : QBlockMultipart() {
+
   private var boolToggle = false
   private var facing = EnumFacing.DOWN
 
@@ -32,7 +35,11 @@ internal class TestQB : QBlock() {
 
   override val properties: Set<IProperty<*>> = super.properties + PropBool + PropFacing
 
-  override val collisionBox: AxisAlignedBB = AxisAlignedBB(0.0, 0.0, 0.0, 1.0, 0.5, 1.0)
+  override val collisionBox: AxisAlignedBB
+    get() = AxisAlignedBB(0.0, 0.0, 0.0, 1.0, 0.5, 1.0).rotate(facing)
+
+  override val isOpaque: Boolean = false
+  override val isFullBlock: Boolean = false
 
   override fun onAdded() {
     println("Welcome to $pos!")
@@ -67,11 +74,13 @@ internal class TestQB : QBlock() {
 
   override fun applyProperties(state: IBlockState): IBlockState = state.withProperty(PropBool, boolToggle).withProperty(PropFacing, facing)
 
-//  override fun update() {
-//    println(facing)
-//  }
+  override fun getPartSlot(): IPartSlot = EnumFaceSlot.fromFace(facing)
 
-  companion object {
+  override fun getPlacementSlot(facing: EnumFacing?, hitX: Float, hitY: Float, hitZ: Float, placer: EntityLivingBase?): IPartSlot {
+    return EnumFaceSlot.fromFace(facing?.opposite ?: EnumFacing.DOWN)
+  }
+
+  internal companion object {
     val PropBool = PropertyBool.create("boolean")!!
     val PropFacing = PropertyEnum.create("facing", EnumFacing::class.java)
   }

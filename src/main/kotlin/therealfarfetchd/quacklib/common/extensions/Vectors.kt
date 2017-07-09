@@ -33,3 +33,26 @@ operator fun Vec3d.minus(other: Vec3d): Vec3d = Vec3d(this.x - other.x, this.y -
 fun Vec3i.getFacing(): EnumFacing = EnumFacing.getFacingFromVector(x.toFloat(), y.toFloat(), z.toFloat())
 
 fun Vec3d.getFacing(): EnumFacing = EnumFacing.getFacingFromVector(x.toFloat(), y.toFloat(), z.toFloat())
+
+fun AxisAlignedBB.rotate(direction: EnumFacing): AxisAlignedBB = when (direction) {
+  EnumFacing.UP ->
+    AxisAlignedBB(this.minX, 1 - this.minY, this.minZ, this.maxX, 1 - this.maxY, this.maxZ)
+  EnumFacing.NORTH ->
+    AxisAlignedBB(this.minX, this.minZ, this.minY, this.maxX, this.maxZ, this.maxY)
+  EnumFacing.SOUTH ->
+    AxisAlignedBB(1 - this.maxX, this.minZ, 1 - this.minY, 1 - this.minX, this.maxZ, 1 - this.maxY)
+  EnumFacing.EAST ->
+    AxisAlignedBB(1 - this.minY, this.minZ, this.minX, 1 - this.maxY, this.maxZ, this.maxX)
+  EnumFacing.WEST ->
+    AxisAlignedBB(this.minY, this.minZ, 1 - this.maxX, this.maxY, this.maxZ, 1 - this.minX)
+  else -> this
+}
+
+fun AxisAlignedBB.rotateY(direction: EnumFacing): AxisAlignedBB {
+  var aabb = this
+  val flip90: Boolean = (direction.horizontalIndex and 1) != 0
+  val flip180: Boolean = (direction.horizontalIndex and 2) != 0
+  if (!flip180) aabb = AxisAlignedBB(1 - aabb.minX, aabb.minY, 1 - aabb.minZ, 1 - aabb.maxX, aabb.maxY, 1 - aabb.maxZ)
+  if (flip90) aabb = AxisAlignedBB(1 - aabb.minZ, aabb.minY, aabb.minX, 1 - aabb.maxZ, aabb.maxY, aabb.maxX)
+  return aabb
+}
