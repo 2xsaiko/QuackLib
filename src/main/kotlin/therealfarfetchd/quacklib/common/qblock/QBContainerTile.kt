@@ -1,4 +1,4 @@
-package therealfarfetchd.quacklib.common.block
+package therealfarfetchd.quacklib.common.qblock
 
 import net.minecraft.block.Block
 import net.minecraft.nbt.NBTTagCompound
@@ -17,14 +17,7 @@ import therealfarfetchd.quacklib.common.DataTarget
  */
 open class QBContainerTile() : TileEntity() {
 
-  private var _qb: QBlock? = null
-  var qb: QBlock
-    get() = _qb!!
-    set(value) {
-      check(_qb == null || _qb == value) { "nope" }
-      _qb = value
-      value.container = this
-    }
+  internal lateinit var qb: QBlock
 
   var nextClientUpdateIsRender: Boolean = false
 
@@ -34,12 +27,12 @@ open class QBContainerTile() : TileEntity() {
 
   override fun setWorld(world: World) {
     super.setWorld(world)
-    _qb?.world = world
+    qb.world = world
   }
 
   override fun setPos(pos: BlockPos) {
     super.setPos(pos)
-    _qb?.pos = pos
+    qb.pos = pos
   }
 
   override fun writeToNBT(compound: NBTTagCompound): NBTTagCompound {
@@ -52,7 +45,9 @@ open class QBContainerTile() : TileEntity() {
 
   override fun readFromNBT(compound: NBTTagCompound) {
     super.readFromNBT(compound)
-    if (_qb == null) {
+    try {
+      qb
+    } catch (e: UninitializedPropertyAccessException) {
       val rl = ResourceLocation(compound.getString("BlockType"))
       val block = Block.REGISTRY.getObject(rl)
       if (block is QBContainer) qb = block.factory()

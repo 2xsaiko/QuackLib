@@ -16,15 +16,16 @@ import net.minecraft.util.EnumHand
 import net.minecraft.util.math.AxisAlignedBB
 import therealfarfetchd.quacklib.QuackLib
 import therealfarfetchd.quacklib.common.DataTarget
-import therealfarfetchd.quacklib.common.block.QBlockMultipart
 import therealfarfetchd.quacklib.common.extensions.isServer
 import therealfarfetchd.quacklib.common.extensions.makeStack
 import therealfarfetchd.quacklib.common.extensions.rotate
+import therealfarfetchd.quacklib.common.qblock.IQBlockMultipart
+import therealfarfetchd.quacklib.common.qblock.QBlock
 
 /**
  * Created by marco on 08.07.17.
  */
-internal class TestQB : QBlockMultipart() {
+internal class TestQB : QBlock(), IQBlockMultipart {
 
   private var boolToggle = false
   private var facing = EnumFacing.DOWN
@@ -68,7 +69,7 @@ internal class TestQB : QBlockMultipart() {
     facing = EnumFacing.getFront(nbt.getByte("facing").toInt())
   }
 
-  override fun onPlaced(placer: EntityLivingBase, stack: ItemStack, sidePlaced: EnumFacing) {
+  override fun onPlaced(placer: EntityLivingBase?, stack: ItemStack?, sidePlaced: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) {
     facing = sidePlaced
   }
 

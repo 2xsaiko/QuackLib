@@ -1,4 +1,4 @@
-package therealfarfetchd.quacklib.common.block
+package therealfarfetchd.quacklib.common.qblock
 
 import net.minecraft.block.Block
 import net.minecraft.block.ITileEntityProvider
@@ -36,7 +36,7 @@ open class QBContainer(rl: ResourceLocation, internal val factory: () -> QBlock)
     val factory1 = factory()
 
     @Suppress("LeakingThis")
-    if (factory1 is QBlockMultipart && this !is QBContainerMultipart)
+    if (factory1 is IQBlockMultipart && this !is QBContainerMultipart)
       QuackLib.Logger.log(Level.WARN, "Using a multipart-enabled QBlock ($factory1) in a non-multipart Block! This means you won't get any multipart capabilities.")
   }
 
@@ -45,8 +45,9 @@ open class QBContainer(rl: ResourceLocation, internal val factory: () -> QBlock)
   internal open fun requireValid(world: IBlockAccess, pos: BlockPos) {
     val block = world.getBlockState(pos).block
     check(block == this, { "Block at $pos is not $this, but $block!" })
-    check(world.getTileEntity(pos) != null, { "There is no tile entity at $pos!" })
-    check(world.getTileEntity(pos) is QBContainerTile, { "Tile entity at $pos is not a QBContainerTile!" })
+    val tileEntity = world.getTileEntity(pos)
+    check(tileEntity != null, { "There is no tile entity at $pos!" })
+    check(tileEntity is QBContainerTile, { "Tile entity at $pos is not a QBContainerTile, but ${tileEntity!!::class}!" })
   }
 
   @Suppress("USELESS_ELVIS")
@@ -84,6 +85,22 @@ open class QBContainer(rl: ResourceLocation, internal val factory: () -> QBlock)
     return state
   }
 
+  override fun getStateForPlacement(worldIn: World?, pos: BlockPos?, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float, meta: Int, placer: EntityLivingBase?): IBlockState {
+    placedX = hitX
+    placedY = hitY
+    placedZ = hitZ
+    sidePlaced = facing.opposite
+    when (sidePlaced) {
+      EnumFacing.DOWN -> placedY = 0.0f
+      EnumFacing.UP -> placedY = 1.0f
+      EnumFacing.NORTH -> placedZ = 0.0f
+      EnumFacing.SOUTH -> placedZ = 1.0f
+      EnumFacing.WEST -> placedX = 0.0f
+      EnumFacing.EAST -> placedX = 1.0f
+    }
+    return super.getStateForPlacement(worldIn, pos, facing, hitX, hitY, hitZ, meta, placer)
+  }
+
   override fun getMetaFromState(state: IBlockState?): Int = 0
   override fun getStateFromMeta(meta: Int): IBlockState = defaultState
 
@@ -100,13 +117,15 @@ open class QBContainer(rl: ResourceLocation, internal val factory: () -> QBlock)
   override fun canPlaceBlockAt(world: World, pos: BlockPos): Boolean = tempQB(world, pos).canStay()
 
   override fun canPlaceBlockOnSide(world: World, pos: BlockPos, side: EnumFacing): Boolean {
-    sidePlaced = side.opposite
     return tempQB(world, pos).canBePlacedOnSide(side)
   }
 
   override fun onBlockPlacedBy(world: World, pos: BlockPos, state: IBlockState?, placer: EntityLivingBase, stack: ItemStack) {
-    getQBlockAt(world, pos).onPlaced(placer, stack, sidePlaced)
+    getQBlockAt(world, pos).onPlaced(placer, stack, sidePlaced, placedX, placedY, placedZ)
     sidePlaced = EnumFacing.DOWN
+    placedX = 0.0f
+    placedY = 0.0f
+    placedZ = 0.0f
   }
 
   override fun getItemDropped(state: IBlockState?, rand: Random?, fortune: Int): Item? = null
@@ -127,15 +146,15 @@ open class QBContainer(rl: ResourceLocation, internal val factory: () -> QBlock)
       getQBlockAt(world, pos)
     } catch(e: IllegalStateException) {
       tempQB(world as World, pos)
-    }.rayCollisionBox
+    }.collisionBox
   }
 
-  override fun getBoundingBox(state: IBlockState?, world: IBlockAccess, pos: BlockPos): AxisAlignedBB {
+  override fun getBoundingBox(state: IBlockState?, world: IBlockAccess, pos: BlockPos): AxisAlignedBB? {
     if (checkValid(world, pos)) {
-      return getQBlockAt(world, pos).collisionBox
+      return getQBlockAt(world, pos).rayCollisionBox
     } else if (checkValid(world, pos.down())) {
       // net.minecraft.client.renderer.entity.Render.renderShadowSingle calls this method but with an offset position >.<
-      return getQBlockAt(world, pos.down()).collisionBox
+      return getQBlockAt(world, pos.down()).rayCollisionBox
     } else throw IllegalArgumentException("There's no QBlock at $pos!")
   }
 
@@ -161,6 +180,9 @@ open class QBContainer(rl: ResourceLocation, internal val factory: () -> QBlock)
     internal lateinit var tempFactory: () -> QBlock
     internal lateinit var brokenQBlock: QBlock
     internal var sidePlaced: EnumFacing = EnumFacing.DOWN
+    internal var placedX: Float = 0.0f
+    internal var placedY: Float = 0.0f
+    internal var placedZ: Float = 0.0f
   }
 
 }

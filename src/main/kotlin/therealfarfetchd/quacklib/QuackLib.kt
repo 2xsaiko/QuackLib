@@ -1,12 +1,12 @@
 package therealfarfetchd.quacklib
 
-import mcmultipart.api.item.ItemBlockMultipart
 import net.minecraft.block.Block
 import net.minecraft.item.Item
 import net.minecraft.launchwrapper.Launch
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.RegistryEvent
+import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -15,10 +15,10 @@ import net.minecraftforge.fml.common.registry.GameRegistry
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.LogManager
 import therealfarfetchd.quacklib.common.Scheduler
-import therealfarfetchd.quacklib.common.block.QBContainerMultipart
-import therealfarfetchd.quacklib.common.block.QBContainerTile
-import therealfarfetchd.quacklib.common.block.QBContainerTileMultipart
 import therealfarfetchd.quacklib.common.item.ItemBlockMultipartSideAware
+import therealfarfetchd.quacklib.common.qblock.QBContainerMultipart
+import therealfarfetchd.quacklib.common.qblock.QBContainerTile
+import therealfarfetchd.quacklib.common.qblock.QBContainerTileMultipart
 import therealfarfetchd.quacklib.common.test.TestQB
 
 /**
@@ -48,8 +48,11 @@ object QuackLib {
     // register tile entities that come with the library
     GameRegistry.registerTileEntity(QBContainerTile::class.java, "$ModID:qblock_container")
     GameRegistry.registerTileEntity(QBContainerTile.Ticking::class.java, "$ModID:qblock_container_t")
-    GameRegistry.registerTileEntity(QBContainerTileMultipart::class.java, "$ModID:qblock_container_mp")
-    GameRegistry.registerTileEntity(QBContainerTileMultipart.Ticking::class.java, "$ModID:qblock_container_mp_t")
+
+    if (Loader.isModLoaded("mcmultipart")) {
+      GameRegistry.registerTileEntity(QBContainerTileMultipart::class.java, "$ModID:qblock_container_mp")
+      GameRegistry.registerTileEntity(QBContainerTileMultipart.Ticking::class.java, "$ModID:qblock_container_mp_t")
+    }
   }
 
   @Suppress("unused")

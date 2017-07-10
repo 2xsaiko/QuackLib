@@ -1,4 +1,4 @@
-package therealfarfetchd.quacklib.common.block
+package therealfarfetchd.quacklib.common.qblock
 
 import mcmultipart.api.multipart.IMultipartTile
 import mcmultipart.api.ref.MCMPCapabilities
@@ -10,10 +10,11 @@ import net.minecraftforge.common.capabilities.Capability
  */
 open class QBContainerTileMultipart() : QBContainerTile(), IMultipartTile {
 
-  val qbmp: QBlockMultipart
-    get() = qb as QBlockMultipart
+  val qbmp: IQBlockMultipart
+    get() = qb as IQBlockMultipart
 
-  constructor(qbIn: QBlockMultipart) : this() {
+  constructor(qbIn: QBlock) : this() {
+    check(qbIn is IQBlockMultipart) { "Illegal type: qbIn must be QBlock with IQBlockMultipart" }
     qb = qbIn
   }
 
@@ -30,8 +31,9 @@ open class QBContainerTileMultipart() : QBContainerTile(), IMultipartTile {
   }
 
   open class Ticking() : QBContainerTileMultipart(), ITickingQBTile {
-    constructor(qbIn: QBlockMultipart) : this() {
-      QBContainerTileMultipart(qbIn)
+    constructor(qbIn: QBlock) : this() {
+      check(qbIn is IQBlockMultipart) { "Illegal type: qbIn must be QBlock with IQBlockMultipart" }
+      qb = qbIn
     }
   }
 

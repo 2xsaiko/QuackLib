@@ -1,4 +1,4 @@
-package therealfarfetchd.quacklib.common.block
+package therealfarfetchd.quacklib.common.qblock
 
 import net.minecraft.util.ITickable
 
@@ -7,9 +7,8 @@ import net.minecraft.util.ITickable
  */
 interface ITickingQBTile : ITickable {
 
-  val qb: QBlock
-
   override fun update() {
+    val qb = (this as QBContainerTile).qb
     @Suppress("SENSELESS_COMPARISON")
     if (qb != null) (qb as ITickable).update()
   }

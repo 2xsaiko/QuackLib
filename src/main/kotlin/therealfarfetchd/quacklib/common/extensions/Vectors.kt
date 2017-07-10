@@ -34,6 +34,10 @@ fun Vec3i.getFacing(): EnumFacing = EnumFacing.getFacingFromVector(x.toFloat(), 
 
 fun Vec3d.getFacing(): EnumFacing = EnumFacing.getFacingFromVector(x.toFloat(), y.toFloat(), z.toFloat())
 
+infix fun Vec3i.distanceTo(other: Vec3i): Double = this.getDistance(other.x, other.y, other.z)
+
+infix fun Vec3d.distanceTo(other: Vec3d): Double = this.distanceTo(other)
+
 fun AxisAlignedBB.rotate(direction: EnumFacing): AxisAlignedBB = when (direction) {
   EnumFacing.UP ->
     AxisAlignedBB(this.minX, 1 - this.minY, this.minZ, this.maxX, 1 - this.maxY, this.maxZ)

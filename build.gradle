@@ -19,6 +19,9 @@ sourceCompatibility = targetCompatibility = '1.8'
 compileJava {
     sourceCompatibility = targetCompatibility = '1.8'
 }
+compileKotlin {
+    sourceCompatibility = targetCompatibility = '1.8'
+}
 
 minecraft {
     version = "1.12-14.21.1.2402"

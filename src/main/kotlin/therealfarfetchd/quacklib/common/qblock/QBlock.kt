@@ -1,4 +1,4 @@
-package therealfarfetchd.quacklib.common.block
+package therealfarfetchd.quacklib.common.qblock
 
 import net.minecraft.block.material.Material
 import net.minecraft.block.properties.IProperty
@@ -38,7 +38,7 @@ abstract class QBlock {
    * Returns the mouseover selection box of the block.
    */
   open val selectionBox: AxisAlignedBB
-    get() = collisionBox
+    get() = collisionBox ?: FullAABB
 
   /**
    * Returns the raytrace collision box of the block
@@ -49,7 +49,7 @@ abstract class QBlock {
   /**
    * Returns the entity collision box of the block.
    */
-  open val collisionBox: AxisAlignedBB = FullAABB
+  open val collisionBox: AxisAlignedBB? = FullAABB
 
   /**
    * Returns true if this block is a full (0,0,0->1,1,1) cube. Must stay constant at all times.
@@ -59,7 +59,7 @@ abstract class QBlock {
   /**
    * Returns true if this block is opaque (no transparent textures or full block). Must stay constant at all times.
    */
-  open val isOpaque: Boolean = true
+  open val isOpaque: Boolean = isFullBlock
 
   /**
    * The tile entity this QBlock is in.
@@ -131,8 +131,9 @@ abstract class QBlock {
 
   /**
    * Gets called after the block is placed. Maybe. (only when placed by a player)
+   * Also gets called if the block was placed as a multipart.
    */
-  open fun onPlaced(placer: EntityLivingBase, stack: ItemStack, sidePlaced: EnumFacing) {}
+  open fun onPlaced(placer: EntityLivingBase?, stack: ItemStack?, sidePlaced: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) {}
 
   /**
    * Gets called when one of the block's neighbors gets changed (broken, placed, …)
