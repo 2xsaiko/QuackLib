@@ -130,7 +130,14 @@ open class QBContainer(rl: ResourceLocation, internal val factory: () -> QBlock)
     }.rayCollisionBox
   }
 
-  override fun getBoundingBox(state: IBlockState?, world: IBlockAccess, pos: BlockPos): AxisAlignedBB = getQBlockAt(world, pos).collisionBox
+  override fun getBoundingBox(state: IBlockState?, world: IBlockAccess, pos: BlockPos): AxisAlignedBB {
+    if (checkValid(world, pos)) {
+      return getQBlockAt(world, pos).collisionBox
+    } else if (checkValid(world, pos.down())) {
+      // net.minecraft.client.renderer.entity.Render.renderShadowSingle calls this method but with an offset position >.<
+      return getQBlockAt(world, pos.down()).collisionBox
+    } else throw IllegalArgumentException("There's no QBlock at $pos!")
+  }
 
   override fun isFullCube(state: IBlockState?): Boolean = tempQB(null, null).isFullBlock
 
