@@ -17,7 +17,13 @@ import therealfarfetchd.quacklib.common.DataTarget
  */
 open class QBContainerTile() : TileEntity() {
 
-  internal lateinit var qb: QBlock
+  private var _qb: QBlock? = null
+  var qb: QBlock
+    get() = _qb!!
+    internal set(value) {
+      _qb = value
+      value.container = this
+    }
 
   var nextClientUpdateIsRender: Boolean = false
 
@@ -45,9 +51,7 @@ open class QBContainerTile() : TileEntity() {
 
   override fun readFromNBT(compound: NBTTagCompound) {
     super.readFromNBT(compound)
-    try {
-      qb
-    } catch (e: UninitializedPropertyAccessException) {
+    if (_qb == null) {
       val rl = ResourceLocation(compound.getString("BlockType"))
       val block = Block.REGISTRY.getObject(rl)
       if (block is QBContainer) qb = block.factory()

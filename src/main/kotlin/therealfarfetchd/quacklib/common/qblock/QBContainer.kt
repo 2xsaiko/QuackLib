@@ -27,6 +27,7 @@ import java.util.*
 /**
  * Created by marco on 08.07.17.
  */
+@Suppress("OverridingDeprecatedMember", "DEPRECATION")
 open class QBContainer(rl: ResourceLocation, internal val factory: () -> QBlock) : Block(factory.also { tempFactory = it }().material), ITileEntityProvider {
 
   init {
@@ -166,6 +167,11 @@ open class QBContainer(rl: ResourceLocation, internal val factory: () -> QBlock)
     Scheduler.schedule(1) {
       getQBlockAt(world, pos).onAdded()
     }
+  }
+
+  override fun rotateBlock(world: World, pos: BlockPos, axis: EnumFacing): Boolean {
+    val qb = getQBlockAt(world, pos)
+    return qb.rotateBlock(axis)
   }
 
   override fun onBlockActivated(world: World, pos: BlockPos, state: IBlockState?, player: EntityPlayer, hand: EnumHand, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean {

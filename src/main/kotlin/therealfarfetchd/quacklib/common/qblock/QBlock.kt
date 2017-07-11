@@ -136,6 +136,11 @@ abstract class QBlock {
   open fun onPlaced(placer: EntityLivingBase?, stack: ItemStack?, sidePlaced: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) {}
 
   /**
+   * Gets called when the block gets rotated. (clicked on by a wrench)
+   */
+  open fun rotateBlock(axis: EnumFacing): Boolean = false
+
+  /**
    * Gets called when one of the block's neighbors gets changed (broken, placed, …)
    */
   open fun onNeighborChanged(side: EnumFacing) {
@@ -176,7 +181,9 @@ abstract class QBlock {
    * Schedules the block for saving to disk.
    */
   fun dataChanged() {
-    world.markChunkDirty(pos, container)
+    if (world.isServer) {
+      world.markChunkDirty(pos, container)
+    }
   }
 
   /**

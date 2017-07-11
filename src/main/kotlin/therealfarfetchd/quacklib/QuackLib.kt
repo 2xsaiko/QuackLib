@@ -1,9 +1,12 @@
 package therealfarfetchd.quacklib
 
 import net.minecraft.block.Block
+import net.minecraft.client.renderer.block.model.ModelResourceLocation
 import net.minecraft.item.Item
 import net.minecraft.launchwrapper.Launch
 import net.minecraft.util.ResourceLocation
+import net.minecraftforge.client.event.ModelRegistryEvent
+import net.minecraftforge.client.model.ModelLoader
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.fml.common.Loader
@@ -16,6 +19,7 @@ import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.LogManager
 import therealfarfetchd.quacklib.common.Scheduler
 import therealfarfetchd.quacklib.common.item.ItemBlockMultipartSideAware
+import therealfarfetchd.quacklib.common.item.Wrench
 import therealfarfetchd.quacklib.common.qblock.QBContainerMultipart
 import therealfarfetchd.quacklib.common.qblock.QBContainerTile
 import therealfarfetchd.quacklib.common.qblock.QBContainerTileMultipart
@@ -58,15 +62,21 @@ object QuackLib {
   @Suppress("unused")
   @SubscribeEvent
   fun registerBlocks(e: RegistryEvent.Register<Block>) {
-    if (!debug) return
-    e.registry.register(testblock)
+    if (debug) e.registry.register(testblock)
   }
 
   @Suppress("unused")
   @SubscribeEvent
   fun registerItems(e: RegistryEvent.Register<Item>) {
-    if (!debug) return
-    e.registry.register(tbitem)
+    if (debug) e.registry.register(tbitem)
+
+    e.registry.register(Wrench)
+  }
+
+  @Suppress("unused")
+  @SubscribeEvent
+  fun registerModels(e: ModelRegistryEvent) {
+    ModelLoader.setCustomModelResourceLocation(Wrench, 0, ModelResourceLocation(Wrench.registryName, "inventory"))
   }
 
   @Suppress("unused")

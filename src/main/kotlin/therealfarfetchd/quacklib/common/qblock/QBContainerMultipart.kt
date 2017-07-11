@@ -23,6 +23,7 @@ import therealfarfetchd.quacklib.common.extensions.plus
 /**
  * Created by marco on 09.07.17.
  */
+@Suppress("OverridingDeprecatedMember", "DEPRECATION")
 open class QBContainerMultipart(rl: ResourceLocation, factory: () -> QBlock) : QBContainer(rl, factory), IMultipart {
 
   init {
