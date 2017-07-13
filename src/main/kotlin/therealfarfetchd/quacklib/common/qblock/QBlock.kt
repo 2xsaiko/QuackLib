@@ -6,7 +6,6 @@ import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand
 import net.minecraft.util.math.AxisAlignedBB
@@ -18,6 +17,7 @@ import net.minecraftforge.common.property.IUnlistedProperty
 import therealfarfetchd.quacklib.common.DataTarget
 import therealfarfetchd.quacklib.common.extensions.isServer
 import therealfarfetchd.quacklib.common.extensions.spawnAt
+import therealfarfetchd.quacklib.common.util.QNBTCompound
 
 /**
  * Created by marco on 08.07.17.
@@ -170,12 +170,12 @@ abstract class QBlock {
   /**
    * Gets called to save TE data to disk or to send to the client.
    */
-  open fun saveData(nbt: NBTTagCompound, target: DataTarget) {}
+  open fun saveData(nbt: QNBTCompound, target: DataTarget) {}
 
   /**
    * Gets called to load TE data.
    */
-  open fun loadData(nbt: NBTTagCompound, target: DataTarget) {}
+  open fun loadData(nbt: QNBTCompound, target: DataTarget) {}
 
   /**
    * Schedules the block for saving to disk.

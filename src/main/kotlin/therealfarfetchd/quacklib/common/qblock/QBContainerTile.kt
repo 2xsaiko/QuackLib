@@ -11,6 +11,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import net.minecraftforge.common.capabilities.Capability
 import therealfarfetchd.quacklib.common.DataTarget
+import therealfarfetchd.quacklib.common.util.QNBTCompound
 
 /**
  * Created by marco on 08.07.17.
@@ -44,7 +45,7 @@ open class QBContainerTile() : TileEntity() {
   override fun writeToNBT(compound: NBTTagCompound): NBTTagCompound {
     val subTag = NBTTagCompound()
     compound.setString("BlockType", getBlockType().registryName.toString())
-    qb.saveData(subTag, DataTarget.Save)
+    qb.saveData(QNBTCompound(subTag), DataTarget.Save)
     compound.setTag("QBlockData", subTag)
     return super.writeToNBT(compound)
   }
@@ -58,7 +59,7 @@ open class QBContainerTile() : TileEntity() {
       else throw IllegalStateException("Block is not a QBContainer! (got block $rl ($block) which is ${block::class}")
     }
     val subTag = compound.getCompoundTag("QBlockData")
-    qb.loadData(subTag, DataTarget.Save)
+    qb.loadData(QNBTCompound(subTag), DataTarget.Save)
   }
 
   override fun getUpdatePacket(): SPacketUpdateTileEntity? = SPacketUpdateTileEntity(pos, 0, updateTag)
@@ -66,7 +67,7 @@ open class QBContainerTile() : TileEntity() {
   override fun getUpdateTag(): NBTTagCompound {
     val tag = super.getUpdateTag()
     val subTag = NBTTagCompound()
-    qb.saveData(subTag, DataTarget.Client)
+    qb.saveData(QNBTCompound(subTag), DataTarget.Client)
     tag.setTag("D", subTag)
     tag.setBoolean("R", nextClientUpdateIsRender)
     nextClientUpdateIsRender = false
@@ -77,7 +78,7 @@ open class QBContainerTile() : TileEntity() {
 
   override fun handleUpdateTag(tag: NBTTagCompound) {
     super.readFromNBT(tag)
-    qb.loadData(tag.getCompoundTag("D"), DataTarget.Client)
+    qb.loadData(QNBTCompound(tag.getCompoundTag("D")), DataTarget.Client)
     if (tag.getBoolean("R")) {
       world.markBlockRangeForRenderUpdate(pos, pos)
     }

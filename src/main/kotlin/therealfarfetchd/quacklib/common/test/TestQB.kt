@@ -10,7 +10,6 @@ import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand
 import net.minecraft.util.math.AxisAlignedBB
@@ -21,6 +20,7 @@ import therealfarfetchd.quacklib.common.extensions.makeStack
 import therealfarfetchd.quacklib.common.extensions.rotate
 import therealfarfetchd.quacklib.common.qblock.IQBlockMultipart
 import therealfarfetchd.quacklib.common.qblock.QBlock
+import therealfarfetchd.quacklib.common.util.QNBTCompound
 
 /**
  * Created by marco on 08.07.17.
@@ -59,14 +59,14 @@ internal class TestQB : QBlock(), IQBlockMultipart {
     return true
   }
 
-  override fun saveData(nbt: NBTTagCompound, target: DataTarget) {
-    nbt.setBoolean("toggle", boolToggle)
-    nbt.setByte("facing", facing.index.toByte())
+  override fun saveData(nbt: QNBTCompound, target: DataTarget) {
+    nbt.bool["toggle"] = boolToggle
+    nbt.ubyte["facing"] = facing.index
   }
 
-  override fun loadData(nbt: NBTTagCompound, target: DataTarget) {
-    boolToggle = nbt.getBoolean("toggle")
-    facing = EnumFacing.getFront(nbt.getByte("facing").toInt())
+  override fun loadData(nbt: QNBTCompound, target: DataTarget) {
+    boolToggle = nbt.bool["toggle"]
+    facing = EnumFacing.getFront(nbt.ubyte["facing"])
   }
 
   override fun onPlaced(placer: EntityLivingBase?, stack: ItemStack?, sidePlaced: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) {
@@ -83,6 +83,6 @@ internal class TestQB : QBlock(), IQBlockMultipart {
 
   internal companion object {
     val PropBool = PropertyBool.create("boolean")!!
-    val PropFacing = PropertyEnum.create("facing", EnumFacing::class.java)
+    val PropFacing = PropertyEnum.create("facing", EnumFacing::class.java)!!
   }
 }
