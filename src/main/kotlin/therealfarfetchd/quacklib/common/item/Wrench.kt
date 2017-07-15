@@ -32,10 +32,14 @@ object Wrench : Item() {
         else block.rotateBlock(world, pos, facing)
 
     if (result) {
-      world.playSound(null, pos, SoundEvents.ITEM_ARMOR_EQUIP_IRON, SoundCategory.BLOCKS, 1.0f, 1.5f)
+      playWrenchSound(world, pos)
       return EnumActionResult.SUCCESS
     }
-    return EnumActionResult.FAIL
+    return EnumActionResult.PASS
+  }
+
+  fun playWrenchSound(world: World, pos: BlockPos) {
+    world.playSound(null, pos, SoundEvents.ITEM_ARMOR_EQUIP_IRON, SoundCategory.BLOCKS, 1.0f, 1.5f)
   }
 
 }
