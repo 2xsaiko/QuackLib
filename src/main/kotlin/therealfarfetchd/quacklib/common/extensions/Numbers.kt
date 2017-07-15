@@ -1,0 +1,23 @@
+package therealfarfetchd.quacklib.common.extensions
+
+/**
+ * Created by marco on 15.07.17.
+ */
+
+val Byte.unsigned: Int
+  get() = this.toInt() and 0xFF
+
+val Short.unsigned: Int
+  get() = this.toInt() and 0xFFFF
+
+infix fun Int.pmod(i: Int): Int = (this % i).let { if (it < 0) it + i else it }
+
+infix fun Byte.pmod(i: Int): Byte = (this % i).let { if (it < 0) (it + i).toByte() else it.toByte() }
+
+infix fun Byte.shr(i: Int): Byte = (this.toInt() shr i).toByte()
+infix fun Byte.ushr(i: Int): Byte = (this.unsigned ushr i).toByte()
+infix fun Byte.shl(i: Int): Byte = (this.toInt() shl i).toByte()
+
+infix fun Short.shr(i: Int): Short = (this.toInt() shr i).toShort()
+infix fun Short.ushr(i: Int): Short = (this.unsigned ushr i).toShort()
+infix fun Short.shl(i: Int): Short = (this.toInt() shl i).toShort()
