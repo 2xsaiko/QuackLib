@@ -59,6 +59,7 @@ abstract class QBlock {
   /**
    * Returns true if this block is opaque (no transparent textures or full block). Must stay constant at all times.
    */
+  @Suppress("LeakingThis")
   open val isOpaque: Boolean = isFullBlock
 
   /**
@@ -197,8 +198,7 @@ abstract class QBlock {
     }
   }
 
-  @Suppress("UNUSED_PARAMETER")
-  fun <T> getCapability(capability: Capability<T>, side: EnumFacing?): T? = null
+  open fun <T> getCapability(capability: Capability<T>, side: EnumFacing?): T? = null
 
   companion object {
     val FullAABB = AxisAlignedBB(0.0, 0.0, 0.0, 1.0, 1.0, 1.0)
