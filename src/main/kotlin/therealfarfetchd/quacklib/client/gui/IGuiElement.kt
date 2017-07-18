@@ -10,6 +10,8 @@ interface IGuiElement {
 
   var elements: Set<GuiElement>
 
+  var properties: Map<String, Any?>
+
   fun render(mouseX: Int, mouseY: Int)
 
 }

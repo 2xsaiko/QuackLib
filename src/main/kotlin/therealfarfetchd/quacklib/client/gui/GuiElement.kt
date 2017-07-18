@@ -1,16 +1,18 @@
 package therealfarfetchd.quacklib.client.gui
 
+import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.GlStateManager
-import java.math.BigDecimal
-import java.math.BigInteger
-import kotlin.properties.ReadWriteProperty
-import kotlin.reflect.KProperty
-import kotlin.reflect.jvm.jvmErasure
+import net.minecraft.util.ResourceLocation
+import therealfarfetchd.quacklib.ModID
 
 /**
  * Created by marco on 16.07.17.
  */
 abstract class GuiElement : IGuiElement {
+  internal val sprites = ResourceLocation("$ModID:textures/gui/elements.png")
+
+  protected val mc = Minecraft.getMinecraft()
+
   var x: Int by number()
   var y: Int by number()
   override final var width: Int by number()
@@ -21,7 +23,7 @@ abstract class GuiElement : IGuiElement {
   internal lateinit var parent: IGuiElement
   override final var elements: Set<GuiElement> = emptySet()
 
-  internal var properties: Map<String, Any?> = emptyMap()
+  override final var properties: Map<String, Any?> = emptyMap()
 
   init {
     x = 0
@@ -34,72 +36,29 @@ abstract class GuiElement : IGuiElement {
 
   open fun transformAndRender(mouseX: Int, mouseY: Int) {
     GlStateManager.pushMatrix()
-    GlStateManager.translate(getEffectiveX(x), getEffectiveY(y), 1f)
+    val effx = getEffectiveX(x)
+    val effy = getEffectiveY(y)
+    GlStateManager.translate(effx.toDouble(), effy.toDouble(), 1.0)
     GlStateManager.pushMatrix()
-    render(mouseX, mouseY)
+    render(mouseX - effx, mouseY - effy)
     GlStateManager.popMatrix()
-    elements.forEach { it.transformAndRender(mouseX, mouseY) }
+    elements.forEach { it.transformAndRender(mouseX - effx, mouseY - effy) }
     GlStateManager.popMatrix()
   }
 
-  open fun getEffectiveX(x: Int): Float {
+  open fun getEffectiveX(x: Int): Int {
     when (relx) {
-      RelativeX.Left -> return x * 1f
-      RelativeX.Center -> return x + parent.width / 2f - width / 2f
-      RelativeX.Right -> return x + parent.width - width * 1f
+      RelativeX.Left -> return x
+      RelativeX.Center -> return x + parent.width / 2 - width / 2
+      RelativeX.Right -> return x + parent.width - width
     }
   }
 
-  open fun getEffectiveY(y: Int): Float {
+  open fun getEffectiveY(y: Int): Int {
     when (rely) {
-      RelativeY.Top -> return y * 1f
-      RelativeY.Center -> return y + parent.height / 2f - height / 2f
-      RelativeY.Bottom -> return y + parent.height - height * 1f
-    }
-  }
-
-  private class mapper<T> : ReadWriteProperty<GuiElement, T> {
-    override fun getValue(thisRef: GuiElement, property: KProperty<*>): T {
-      @Suppress("UNCHECKED_CAST")
-      return thisRef.properties[property.name] as T
-    }
-
-    override fun setValue(thisRef: GuiElement, property: KProperty<*>, value: T) {
-      thisRef.properties += property.name to value
-    }
-  }
-
-  private class transform<T, Store>(private val serialize: (T).() -> Store, private val deserialize: (Store).() -> T) : ReadWriteProperty<GuiElement, T> {
-    override fun getValue(thisRef: GuiElement, property: KProperty<*>): T {
-      @Suppress("UNCHECKED_CAST")
-      return deserialize(thisRef.properties[property.name] as Store)
-    }
-
-    override fun setValue(thisRef: GuiElement, property: KProperty<*>, value: T) {
-      thisRef.properties += property.name to serialize(value)
-    }
-  }
-
-  private class number<T> : ReadWriteProperty<GuiElement, T> {
-    @Suppress("UNCHECKED_CAST", "IMPLICIT_CAST_TO_ANY")
-    override fun getValue(thisRef: GuiElement, property: KProperty<*>): T {
-      val bigdec = thisRef.properties[property.name] as BigDecimal
-      return when (property.returnType.jvmErasure) {
-        Byte::class -> bigdec.toByte()
-        Short::class -> bigdec.toShort()
-        Char::class -> bigdec.toChar()
-        Int::class -> bigdec.toInt()
-        Long::class -> bigdec.toLong()
-        Float::class -> bigdec.toFloat()
-        Double::class -> bigdec.toDouble()
-        BigInteger::class -> bigdec.toBigInteger()
-        BigDecimal::class -> bigdec
-        else -> throw IllegalStateException("Invalid number type ${property.returnType.jvmErasure}")
-      } as T
-    }
-
-    override fun setValue(thisRef: GuiElement, property: KProperty<*>, value: T) {
-      thisRef.properties += property.name to BigDecimal(value.toString())
+      RelativeY.Top -> return y
+      RelativeY.Center -> return y + parent.height / 2 - height / 2
+      RelativeY.Bottom -> return y + parent.height - height
     }
   }
 

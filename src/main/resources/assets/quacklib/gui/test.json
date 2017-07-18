@@ -7,23 +7,44 @@
       "height": 80,
       "relx": "center",
       "rely": "center",
+      "y": -30,
       "elements": [
         {
           "type": "textbox",
           "value": "Type text here!",
           "width": 50,
-          "height": 20,
+          "height": 10,
           "x": -10,
-          "y": 30
+          "y": 30,
+          "relx": "right"
         },
         {
           "type": "button",
-          "value": "#gui.ok",
+          "value": "#gui.done",
           "width": 40,
-          "height": 20,
+          "height": 10,
           "x": 0,
           "y": 60,
           "relx": "center"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "width": 120,
+      "height": 50,
+      "relx": "center",
+      "rely": "center",
+      "y": 50,
+      "r": 0.5,
+      "g": 0.8,
+      "b": 0.5,
+      "elements": [
+        {
+          "type": "label",
+          "value": "#gui.done",
+          "relx": "center",
+          "rely": "center"
         }
       ]
     }

@@ -7,6 +7,8 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import therealfarfetchd.quacklib.client.gui.GuiElementRegistry
 import therealfarfetchd.quacklib.client.gui.elements.Dummy
+import therealfarfetchd.quacklib.client.gui.elements.Frame
+import therealfarfetchd.quacklib.client.gui.elements.Label
 import therealfarfetchd.quacklib.common.Proxy
 import therealfarfetchd.quacklib.common.item.Wrench
 
@@ -18,6 +20,8 @@ class Proxy : Proxy() {
   override fun init(e: FMLInitializationEvent) {
     super.init(e)
     GuiElementRegistry.register("quacklib:dummy", Dummy::class)
+    GuiElementRegistry.register("minecraft:frame", Frame::class)
+    GuiElementRegistry.register("minecraft:label", Label::class)
   }
 
   @SubscribeEvent

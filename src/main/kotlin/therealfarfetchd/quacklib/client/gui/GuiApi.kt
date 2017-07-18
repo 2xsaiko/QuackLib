@@ -20,8 +20,10 @@ object GuiApi {
     val tree = p.parse(InputStreamReader(istr))
     val gui = QGuiScreen()
     if (!tree.isJsonObject) throw GuiParserException()
-    if (tree.asJsonObject.has("elements")) {
-      parseElementsTag(tree.asJsonObject["elements"].asJsonArray).forEach {
+    val jo = tree.asJsonObject
+    populate(gui.root, jo.entrySet().filter { it.key !in setOf("elements") }.map { it.key to it.value }.toMap())
+    if (jo.has("elements")) {
+      parseElementsTag(jo["elements"].asJsonArray).forEach {
         gui.root.elements += it
         it.parent = gui.root
       }
@@ -47,7 +49,7 @@ object GuiApi {
     return el
   }
 
-  internal fun populate(el: GuiElement, props: Map<String, JsonElement>) {
+  internal fun populate(el: IGuiElement, props: Map<String, JsonElement>) {
     el.properties += props.map { it.key to javaRepr(it.value) }
   }
 
