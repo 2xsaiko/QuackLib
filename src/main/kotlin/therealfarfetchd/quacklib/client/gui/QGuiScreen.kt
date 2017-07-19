@@ -38,6 +38,18 @@ class QGuiScreen : GuiScreen() {
     GlStateManager.popMatrix()
   }
 
+  override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int) {
+    root.mouseClicked((mouseX / realScale).toInt(), (mouseY / realScale).toInt(), mouseButton)
+  }
+
+  override fun mouseReleased(mouseX: Int, mouseY: Int, state: Int) {
+    root.mouseReleased(mouseX, mouseY, state)
+  }
+
+  override fun mouseClickMove(mouseX: Int, mouseY: Int, clickedMouseButton: Int, timeSinceLastClick: Long) {
+    root.mouseDragged(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)
+  }
+
   inner class ScreenRoot : IGuiElement {
     override val width: Int
       get() = (this@QGuiScreen.width / realScale).toInt()

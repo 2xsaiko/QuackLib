@@ -11,7 +11,7 @@ import therealfarfetchd.quacklib.ModID
 abstract class GuiElement : IGuiElement {
   internal val sprites = ResourceLocation("$ModID:textures/gui/elements.png")
 
-  protected val mc = Minecraft.getMinecraft()
+  protected val mc = Minecraft.getMinecraft()!!
 
   var x: Int by number()
   var y: Int by number()

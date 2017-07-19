@@ -1,7 +1,7 @@
 package therealfarfetchd.quacklib.client.gui.elements
 
 import net.minecraft.client.gui.Gui
-import net.minecraft.client.resources.I18n
+import net.minecraft.client.renderer.GlStateManager
 import therealfarfetchd.quacklib.client.gui.GuiElement
 import therealfarfetchd.quacklib.client.gui.mapper
 import therealfarfetchd.quacklib.client.gui.number
@@ -29,10 +29,8 @@ class Label : GuiElement() {
   }
 
   override fun render(mouseX: Int, mouseY: Int) {
-    var text = value
-    if (value.startsWith("#") && I18n.hasKey(value.substring(1))) {
-      text = I18n.format(value.substring(1))
-    }
+    GlStateManager.enableTexture2D()
+    val text = localized(value)
     width = mc.fontRenderer.getStringWidth(text) + 4
     val color = 0xFF000000.toInt() or
         ((r * 255).toInt() shl 16) or
