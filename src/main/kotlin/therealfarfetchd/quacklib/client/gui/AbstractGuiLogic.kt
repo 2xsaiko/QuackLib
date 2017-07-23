@@ -1,9 +1,12 @@
 package therealfarfetchd.quacklib.client.gui
 
+import net.minecraft.client.Minecraft
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 abstract class AbstractGuiLogic {
+
+  val mc = Minecraft.getMinecraft()
 
   lateinit var root: QGuiScreen.ScreenRoot
 
@@ -11,7 +14,11 @@ abstract class AbstractGuiLogic {
 
   abstract fun init()
 
-  fun update() {}
+  open fun update() {}
+
+  protected fun close() {
+    mc.displayGuiScreen(null)
+  }
 
   protected fun flatElements(ge: IGuiElement = root): Set<GuiElement> {
     return ge.elements + ge.elements.flatMap(this::flatElements)
