@@ -32,6 +32,7 @@ class QGuiScreen(private val logic: AbstractGuiLogic) : GuiScreen() {
   }
 
   override fun drawScreen(mouseX: Int, mouseY: Int, partialTicks: Float) {
+    logic.update()
     drawDefaultBackground()
     GlStateManager.pushMatrix()
     GlStateManager.scale(realScale, realScale, 1F)

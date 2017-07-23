@@ -1,10 +1,17 @@
 package therealfarfetchd.quacklib.client.gui
 
+import kotlin.properties.ReadOnlyProperty
+import kotlin.reflect.KProperty
+
 abstract class AbstractGuiLogic {
 
   lateinit var root: QGuiScreen.ScreenRoot
 
   lateinit var params: Map<String, Any?>
+
+  abstract fun init()
+
+  fun update() {}
 
   protected fun flatElements(ge: IGuiElement = root): Set<GuiElement> {
     return ge.elements + ge.elements.flatMap(this::flatElements)
@@ -19,9 +26,19 @@ abstract class AbstractGuiLogic {
     this.action = op as GuiElement.() -> Any?
   }
 
-  abstract fun init()
+  @Suppress("UNCHECKED_CAST")
+  protected fun <T> params(): ReadOnlyProperty<Any?, T> = object : ReadOnlyProperty<Any?, T> {
+    override fun getValue(thisRef: Any?, property: KProperty<*>): T = params[property.name] as T
+  }
 
-  fun update() {}
+  protected inline fun <reified T : Any> component(): ReadOnlyProperty<Any?, T> = object : ReadOnlyProperty<Any?, T> {
+    var el: T? = null
+
+    override fun getValue(thisRef: Any?, property: KProperty<*>): T {
+      if (el == null) el = component(property.name)
+      return el!!
+    }
+  }
 
 }
 

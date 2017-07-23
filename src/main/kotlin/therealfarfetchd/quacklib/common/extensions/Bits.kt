@@ -39,7 +39,7 @@ fun packByte(vararg bools: Boolean): Byte {
       (b[7].bitmask and -128)
 }
 
-fun flags(b: Byte): BooleanArray {
+fun unpack(b: Byte): BooleanArray {
   val arr = BooleanArray(8)
   for (i in 0..7) {
     arr[i] = (b and (1 shl i).toByte()) != 0.toByte()
@@ -67,7 +67,7 @@ fun packShort(vararg bools: Boolean): Short {
       (b[15].bitmaskS and -32768)
 }
 
-fun flags(b: Short): BooleanArray {
+fun unpack(b: Short): BooleanArray {
   val arr = BooleanArray(16)
   for (i in 0..15) {
     arr[i] = (b and (1 shl i).toShort()) != 0.toShort()
@@ -111,7 +111,7 @@ fun packInt(vararg bools: Boolean): Int {
       (b[31].bitmaskI and -2147483648)
 }
 
-fun flags(b: Int): BooleanArray {
+fun unpack(b: Int): BooleanArray {
   val arr = BooleanArray(32)
   for (i in 0..31) {
     arr[i] = (b and (1 shl i)) != 0

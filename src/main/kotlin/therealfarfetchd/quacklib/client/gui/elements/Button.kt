@@ -68,14 +68,14 @@ open class Button : GuiElement() {
     fireEvent()
   }
 
-  override fun mouseClicked(mouseX: Int, mouseY: Int, button: Int) {
-    super.mouseClicked(mouseX, mouseY, button)
-    if (mouseX in 0..width && mouseY in 0..height) clicked = true
+  override fun mouseClicked(x: Int, y: Int, button: Int) {
+    super.mouseClicked(x, y, button)
+    if (x in 0..width && y in 0..height) clicked = true
   }
 
-  override fun mouseReleased(mouseX: Int, mouseY: Int, button: Int) {
-    super.mouseReleased(mouseX, mouseY, button)
-    if (mouseX in 0..width && mouseY in 0..height && clicked) {
+  override fun mouseReleased(x: Int, y: Int, button: Int) {
+    super.mouseReleased(x, y, button)
+    if (x in 0..width && y in 0..height && clicked) {
       clicked = false
       if (enabled) buttonClick(button)
     }

@@ -40,16 +40,16 @@ interface IGuiElement {
     GlStateManager.color(1f, 1f, 1f)
   }
 
-  fun mouseClicked(mouseX: Int, mouseY: Int, button: Int) {
-    elements.forEach { it.mouseClicked(mouseX - it.getEffectiveX(it.x), mouseY - it.getEffectiveY(it.y), button) }
+  fun mouseClicked(x: Int, y: Int, button: Int) {
+    elements.forEach { it.mouseClicked(x - it.getEffectiveX(it.x), y - it.getEffectiveY(it.y), button) }
   }
 
-  fun mouseReleased(mouseX: Int, mouseY: Int, button: Int) {
-    elements.forEach { it.mouseReleased(mouseX - it.getEffectiveX(it.x), mouseY - it.getEffectiveY(it.y), button) }
+  fun mouseReleased(x: Int, y: Int, button: Int) {
+    elements.forEach { it.mouseReleased(x - it.getEffectiveX(it.x), y - it.getEffectiveY(it.y), button) }
   }
 
-  fun mouseDragged(mouseX: Int, mouseY: Int, button: Int, timeSinceLastClick: Long) {
-    elements.forEach { it.mouseDragged(mouseX - it.getEffectiveX(it.x), mouseY - it.getEffectiveY(it.y), button, timeSinceLastClick) }
+  fun mouseDragged(x: Int, y: Int, button: Int, timeSinceLastClick: Long) {
+    elements.forEach { it.mouseDragged(x - it.getEffectiveX(it.x), y - it.getEffectiveY(it.y), button, timeSinceLastClick) }
   }
 
   fun localized(str: String): String {
