@@ -6,6 +6,8 @@ import net.minecraftforge.client.model.ModelLoader
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import therealfarfetchd.quacklib.client.gui.GuiElementRegistry
+import therealfarfetchd.quacklib.client.gui.GuiLogicRegistry
+import therealfarfetchd.quacklib.client.gui.NullGuiLogic
 import therealfarfetchd.quacklib.client.gui.elements.Button
 import therealfarfetchd.quacklib.client.gui.elements.Dummy
 import therealfarfetchd.quacklib.client.gui.elements.Frame
@@ -24,6 +26,8 @@ class Proxy : Proxy() {
     GuiElementRegistry.register("minecraft:frame", Frame::class)
     GuiElementRegistry.register("minecraft:label", Label::class)
     GuiElementRegistry.register("minecraft:button", Button::class)
+
+    GuiLogicRegistry.register("quacklib:null_logic", NullGuiLogic::class)
   }
 
   @SubscribeEvent

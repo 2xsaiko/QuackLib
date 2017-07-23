@@ -39,3 +39,18 @@ fun Collection<Float>.copyTo(array: FloatArray, arrStart: Int = 0) = this.toFloa
 fun DoubleArray.copyTo(array: DoubleArray, arrStart: Int = 0) = System.arraycopy(this, 0, array, arrStart, minOf(this.size, array.size - arrStart))
 
 fun Collection<Double>.copyTo(array: DoubleArray, arrStart: Int = 0) = this.toDoubleArray().copyTo(array, arrStart)
+
+@Suppress("UNCHECKED_CAST")
+fun <T> Collection<T?>.filterNotNull(): List<T> {
+  return filter { it != null } as List<T>
+}
+
+@Suppress("UNCHECKED_CAST")
+fun <K, V> Map<K?, V>.filterKeysNotNull(): Map<K, V> {
+  return filterKeys { it != null } as Map<K, V>
+}
+
+@Suppress("UNCHECKED_CAST")
+fun <K, V> Map<K, V?>.filterValuesNotNull(): Map<K, V> {
+  return filterValues { it != null } as Map<K, V>
+}

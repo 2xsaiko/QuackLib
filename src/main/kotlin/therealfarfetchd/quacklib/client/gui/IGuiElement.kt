@@ -3,6 +3,7 @@ package therealfarfetchd.quacklib.client.gui
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.resources.I18n
 import org.lwjgl.opengl.GL11
+import therealfarfetchd.quacklib.common.util.ObservableMap
 
 /**
  * Created by marco on 16.07.17.
@@ -14,7 +15,9 @@ interface IGuiElement {
 
   var elements: Set<GuiElement>
 
-  var properties: Map<String, Any?>
+  val properties: ObservableMap<String, Any?>
+
+  val name: String?
 
   fun render(mouseX: Int, mouseY: Int) {
     GlStateManager.disableTexture2D()

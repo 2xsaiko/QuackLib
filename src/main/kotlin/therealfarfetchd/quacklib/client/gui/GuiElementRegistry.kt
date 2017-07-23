@@ -43,7 +43,7 @@ object GuiElementRegistry {
   fun construct(rl: ResourceLocation): GuiElement {
     return constructOrNull(rl)
            ?: constructOrNull(fallback)
-           ?: throw IllegalStateException("Fallback GUI element ($rl) not registered! Are we still initializing?")
+           ?: throw IllegalStateException("Fallback GUI element ($fallback) not registered! Are we still initializing?")
   }
 
   fun construct(name: String): GuiElement {

@@ -3,12 +3,13 @@ package therealfarfetchd.quacklib.client.gui
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
+import therealfarfetchd.quacklib.common.util.ObservableMap
 import java.math.BigDecimal
 
 /**
  * Created by marco on 16.07.17.
  */
-class QGuiScreen : GuiScreen() {
+class QGuiScreen(private val logic: AbstractGuiLogic) : GuiScreen() {
 
   val root = ScreenRoot()
 
@@ -51,6 +52,8 @@ class QGuiScreen : GuiScreen() {
   }
 
   inner class ScreenRoot : IGuiElement {
+    override val name: String = "root"
+
     override val width: Int
       get() = (this@QGuiScreen.width / realScale).toInt()
 
@@ -58,7 +61,7 @@ class QGuiScreen : GuiScreen() {
       get() = (this@QGuiScreen.height / realScale).toInt()
 
     override var elements: Set<GuiElement> = emptySet()
-    override var properties: Map<String, Any?> = emptyMap()
+    override val properties: ObservableMap<String, Any?> = ObservableMap()
 
     var scale: List<Int> by transform<List<Int>, List<BigDecimal>>({ map { BigDecimal(it) } }, { map { it.intValueExact() } })
     var pause: Boolean by mapper()

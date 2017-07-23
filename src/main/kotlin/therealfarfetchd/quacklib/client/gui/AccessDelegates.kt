@@ -17,7 +17,7 @@ class mapper<T> : ReadWriteProperty<IGuiElement, T> {
   }
 
   override fun setValue(thisRef: IGuiElement, property: KProperty<*>, value: T) {
-    thisRef.properties += property.name to value
+    thisRef.properties[property.name] = value
   }
 }
 
@@ -28,7 +28,7 @@ class transform<T, Store>(private val serialize: (T).() -> Store, private val de
   }
 
   override fun setValue(thisRef: IGuiElement, property: KProperty<*>, value: T) {
-    thisRef.properties += property.name to serialize(value)
+    thisRef.properties[property.name] = serialize(value)
   }
 }
 
@@ -51,6 +51,6 @@ class number<T> : ReadWriteProperty<IGuiElement, T> {
   }
 
   override fun setValue(thisRef: IGuiElement, property: KProperty<*>, value: T) {
-    thisRef.properties += property.name to BigDecimal(value.toString())
+    thisRef.properties [property.name] = BigDecimal(value.toString())
   }
 }

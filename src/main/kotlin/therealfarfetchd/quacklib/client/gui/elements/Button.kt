@@ -15,9 +15,9 @@ open class Button : GuiElement() {
   protected val texture = ResourceLocation("textures/gui/widgets.png")
 
   var value: String by mapper()
-  var enabled: Boolean by mapper()
+  protected var enabled: Boolean by mapper()
 
-  var clicked: Boolean = false
+  protected var clicked: Boolean = false
 
   init {
     value = ""
@@ -65,7 +65,7 @@ open class Button : GuiElement() {
 
   open fun buttonClick(button: Int) {
     mc.soundHandler.playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0f))
-    // TODO send event!
+    fireEvent()
   }
 
   override fun mouseClicked(mouseX: Int, mouseY: Int, button: Int) {

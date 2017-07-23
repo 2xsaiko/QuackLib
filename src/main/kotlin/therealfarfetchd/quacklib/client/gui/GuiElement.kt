@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.util.ResourceLocation
 import therealfarfetchd.quacklib.ModID
+import therealfarfetchd.quacklib.common.util.ObservableMap
 
 /**
  * Created by marco on 16.07.17.
@@ -20,10 +21,16 @@ abstract class GuiElement : IGuiElement {
   var relx: RelativeX by transform<RelativeX, String>({ name.toLowerCase() }, { RelativeX.byName(this) })
   var rely: RelativeY by transform<RelativeY, String>({ name.toLowerCase() }, { RelativeY.byName(this) })
 
-  internal lateinit var parent: IGuiElement
+  var parent: IGuiElement? = null
+    internal set
+
+  override var name: String? = null
+
   override final var elements: Set<GuiElement> = emptySet()
 
-  override final var properties: Map<String, Any?> = emptyMap()
+  override final val properties: ObservableMap<String, Any?> = ObservableMap()
+
+  var action: GuiElement.() -> Any? = {}
 
   init {
     x = 0
@@ -32,6 +39,10 @@ abstract class GuiElement : IGuiElement {
     height = 20
     relx = RelativeX.Left
     rely = RelativeY.Top
+  }
+
+  protected fun fireEvent() {
+    action(this)
   }
 
   open fun transformAndRender(mouseX: Int, mouseY: Int) {
@@ -49,16 +60,16 @@ abstract class GuiElement : IGuiElement {
   open fun getEffectiveX(x: Int): Int {
     when (relx) {
       RelativeX.Left -> return x
-      RelativeX.Center -> return x + parent.width / 2 - width / 2
-      RelativeX.Right -> return x + parent.width - width
+      RelativeX.Center -> return x + parent!!.width / 2 - width / 2
+      RelativeX.Right -> return x + parent!!.width - width
     }
   }
 
   open fun getEffectiveY(y: Int): Int {
     when (rely) {
       RelativeY.Top -> return y
-      RelativeY.Center -> return y + parent.height / 2 - height / 2
-      RelativeY.Bottom -> return y + parent.height - height
+      RelativeY.Center -> return y + parent!!.height / 2 - height / 2
+      RelativeY.Bottom -> return y + parent!!.height - height
     }
   }
 
