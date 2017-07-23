@@ -12,6 +12,7 @@ import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.*
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
+import net.minecraft.world.Explosion
 import net.minecraft.world.IBlockAccess
 import net.minecraft.world.World
 import net.minecraftforge.common.property.ExtendedBlockState
@@ -136,8 +137,13 @@ open class QBContainer(rl: ResourceLocation, internal val factory: () -> QBlock)
     super.breakBlock(world, pos, state)
   }
 
+  override fun onBlockExploded(world: World, pos: BlockPos, explosion: Explosion?) {
+    super.onBlockExploded(world, pos, explosion)
+  }
+
   override fun getDrops(drops: NonNullList<ItemStack>, world: IBlockAccess, pos: BlockPos, state: IBlockState?, fortune: Int) {
-    drops.addAll(brokenQBlock.getDroppedItems())
+    val qb = (world.getTileEntity(pos) as? QBContainerTile)?.qb ?: brokenQBlock
+    drops.addAll(qb.getDroppedItems())
   }
 
   override fun getSelectedBoundingBox(state: IBlockState?, world: World, pos: BlockPos): AxisAlignedBB = getQBlockAt(world, pos).selectionBox + pos
