@@ -84,10 +84,10 @@ open class Button : GuiElement() {
   override fun mouseReleased(x: Int, y: Int, button: Int) {
     super.mouseReleased(x, y, button)
     if (x in 0..width && y in 0..height && clicked) {
-      clicked = false
       if (variant == ButtonType.Toggle) toggled = !toggled
       if (enabled) buttonClick(button)
     }
+    clicked = false
   }
 
 }
