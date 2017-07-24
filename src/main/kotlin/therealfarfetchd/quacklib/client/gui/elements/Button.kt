@@ -5,8 +5,10 @@ import net.minecraft.client.gui.Gui
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.init.SoundEvents
 import net.minecraft.util.ResourceLocation
+import therealfarfetchd.quacklib.client.gui.ButtonType
 import therealfarfetchd.quacklib.client.gui.GuiElement
 import therealfarfetchd.quacklib.client.gui.mapper
+import therealfarfetchd.quacklib.client.gui.transform
 
 /**
  * Created by marco on 18.07.17.
@@ -16,7 +18,9 @@ open class Button : GuiElement() {
 
   var value: String by mapper()
   protected var enabled: Boolean by mapper()
+  protected var variant: ButtonType by transform<ButtonType, String>({ name.toLowerCase() }, { ButtonType.byName(this) })
 
+  protected var toggled: Boolean = false
   protected var clicked: Boolean = false
 
   init {
@@ -24,6 +28,7 @@ open class Button : GuiElement() {
     enabled = true
     width = 200
     height = 20
+    variant = ButtonType.Normal
   }
 
   override fun render(mouseX: Int, mouseY: Int) {
@@ -35,8 +40,9 @@ open class Button : GuiElement() {
     mc.textureManager.bindTexture(texture)
     GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f)
     val hovered = mouseX in 0..width && mouseY in 0..height
+    val on = hovered || (variant == ButtonType.Toggle && toggled)
     val i = if (enabled) {
-      if (hovered) 2 else 1
+      if (on) 2 else 1
     } else 0
 
     GlStateManager.enableBlend()
@@ -56,8 +62,10 @@ open class Button : GuiElement() {
 
     if (!enabled) {
       j = 0xA0A0A0
-    } else if (hovered) {
-      j = 0xFFFFA0
+    } else {
+      if (on) {
+        j = 0xFFFFA0
+      }
     }
 
     g.drawCenteredString(fontrenderer, text, partWidth, (height - 8) / 2, j)
@@ -77,6 +85,7 @@ open class Button : GuiElement() {
     super.mouseReleased(x, y, button)
     if (x in 0..width && y in 0..height && clicked) {
       clicked = false
+      if (variant == ButtonType.Toggle) toggled = !toggled
       if (enabled) buttonClick(button)
     }
   }

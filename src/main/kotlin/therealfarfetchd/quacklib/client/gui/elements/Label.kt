@@ -25,7 +25,7 @@ class Label : GuiElement() {
     r = 1F
     g = 1F
     b = 1F
-    height = mc.fontRenderer.FONT_HEIGHT + 4
+    height = mc.fontRenderer.FONT_HEIGHT + 3
   }
 
   override fun render(mouseX: Int, mouseY: Int) {
