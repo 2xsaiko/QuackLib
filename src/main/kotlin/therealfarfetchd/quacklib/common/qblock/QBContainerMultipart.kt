@@ -18,6 +18,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.RayTraceResult
 import net.minecraft.world.IBlockAccess
 import net.minecraft.world.World
+import therealfarfetchd.quacklib.common.extensions.getQBlock
 import therealfarfetchd.quacklib.common.extensions.plus
 
 /**
@@ -30,18 +31,8 @@ open class QBContainerMultipart(rl: ResourceLocation, factory: () -> QBlock) : Q
     check(factory() is IQBlockMultipart) { "Illegal type: factory() must be QBlock with IQBlockMultipart" }
   }
 
-  override fun checkValid(world: IBlockAccess, pos: BlockPos) = world.getBlockState(pos).block == this && world.getTileEntity(pos) is QBContainerTile
-
-  override fun requireValid(world: IBlockAccess, pos: BlockPos) {
-    val block = world.getBlockState(pos).block
-    check(block == this, { "Block at $pos is not $this, but $block!" })
-    val tileEntity = world.getTileEntity(pos)
-    check(tileEntity != null, { "There is no tile entity at $pos!" })
-    check(tileEntity is QBContainerTileMultipart, { "Tile entity at $pos is not a QBContainerTileMultipart, but ${tileEntity!!::class}!" })
-  }
-
   override fun getSlotFromWorld(world: IBlockAccess, pos: BlockPos, state: IBlockState?): IPartSlot {
-    return getQBlockAt(world, pos).asmp.getPartSlot()
+    return world.getQBlock(pos)!!.asmp.getPartSlot()
   }
 
   override fun getSlotForPlacement(world: World, pos: BlockPos, state: IBlockState?, facing: EnumFacing?, hitX: Float, hitY: Float, hitZ: Float, placer: EntityLivingBase?): IPartSlot {

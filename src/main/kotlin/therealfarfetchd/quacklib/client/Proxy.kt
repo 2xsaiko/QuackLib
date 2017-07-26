@@ -22,10 +22,12 @@ class Proxy : Proxy() {
 
   override fun init(e: FMLInitializationEvent) {
     super.init(e)
-    GuiElementRegistry.register("quacklib:dummy", Dummy::class)
-    GuiElementRegistry.register("minecraft:frame", Frame::class)
-    GuiElementRegistry.register("minecraft:label", Label::class)
-    GuiElementRegistry.register("minecraft:button", Button::class)
+    with(GuiElementRegistry) {
+      register("quacklib:dummy", Dummy::class)
+      register("minecraft:frame", Frame::class)
+      register("minecraft:label", Label::class)
+      register("minecraft:button", Button::class)
+    }
 
     GuiLogicRegistry.register("quacklib:null_logic", NullGuiLogic::class)
   }
