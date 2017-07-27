@@ -20,7 +20,7 @@ open class Button : GuiElement() {
   protected var enabled: Boolean by mapper()
   protected var variant: ButtonType by transform<ButtonType, String>({ name.toLowerCase() }, { ButtonType.byName(this) })
 
-  protected var toggled: Boolean = false
+  var toggled: Boolean = false
   protected var clicked: Boolean = false
 
   init {
