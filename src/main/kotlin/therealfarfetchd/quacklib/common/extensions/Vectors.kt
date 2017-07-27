@@ -30,6 +30,10 @@ operator fun Vec3i.minus(other: Vec3i): BlockPos = BlockPos(this.x - other.x, th
 
 operator fun Vec3d.minus(other: Vec3d): Vec3d = Vec3d(this.x - other.x, this.y - other.y, this.z - other.z)
 
+operator fun Vec3i.times(i: Int): BlockPos = BlockPos(x * i, y * i, z * i)
+
+operator fun Vec3d.times(d: Double): Vec3d = Vec3d(x * d, y * d, z * d)
+
 fun Vec3i.getFacing(): EnumFacing = EnumFacing.getFacingFromVector(x.toFloat(), y.toFloat(), z.toFloat())
 
 fun Vec3d.getFacing(): EnumFacing = EnumFacing.getFacingFromVector(x.toFloat(), y.toFloat(), z.toFloat())
@@ -37,6 +41,14 @@ fun Vec3d.getFacing(): EnumFacing = EnumFacing.getFacingFromVector(x.toFloat(), 
 infix fun Vec3i.distanceTo(other: Vec3i): Double = this.getDistance(other.x, other.y, other.z)
 
 infix fun Vec3d.distanceTo(other: Vec3d): Double = this.distanceTo(other)
+
+operator fun Vec3d.component1(): Double = x
+operator fun Vec3d.component2(): Double = y
+operator fun Vec3d.component3(): Double = z
+
+operator fun Vec3i.component1(): Int = x
+operator fun Vec3i.component2(): Int = y
+operator fun Vec3i.component3(): Int = z
 
 fun AxisAlignedBB.rotate(direction: EnumFacing): AxisAlignedBB = when (direction) {
   EnumFacing.UP ->
