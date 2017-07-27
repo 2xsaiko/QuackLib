@@ -1,6 +1,5 @@
 package therealfarfetchd.quacklib.common
 
-import net.minecraft.block.Block
 import net.minecraft.item.Item
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.RegistryEvent
@@ -42,14 +41,7 @@ open class Proxy {
   open fun postInit(e: FMLPostInitializationEvent) {}
 
   @SubscribeEvent
-  fun registerBlocks(e: RegistryEvent.Register<Block>) {
-    if (QuackLib.debug) e.registry.register(QuackLib.testblock)
-  }
-
-  @SubscribeEvent
   fun registerItems(e: RegistryEvent.Register<Item>) {
-    if (QuackLib.debug) e.registry.register(QuackLib.tbitem)
-
     e.registry.register(Wrench)
   }
 
