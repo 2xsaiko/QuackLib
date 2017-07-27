@@ -19,7 +19,6 @@ import net.minecraftforge.common.property.ExtendedBlockState
 import net.minecraftforge.common.property.IExtendedBlockState
 import org.apache.logging.log4j.Level
 import therealfarfetchd.quacklib.QuackLib
-import therealfarfetchd.quacklib.common.Scheduler
 import therealfarfetchd.quacklib.common.extensions.getFacing
 import therealfarfetchd.quacklib.common.extensions.getQBlock
 import therealfarfetchd.quacklib.common.extensions.minus
@@ -32,12 +31,12 @@ import java.util.*
 @Suppress("OverridingDeprecatedMember", "DEPRECATION")
 open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(factory.also { tempFactory = it }().material), ITileEntityProvider {
 
-  private var __factory: (() -> QBlock)? = null
+  private var _factory: (() -> QBlock)? = null
   internal val factory: () -> QBlock
-    get() = __factory ?: tempFactory
+    get() = _factory ?: tempFactory
 
   init {
-    __factory = tempFactory
+    _factory = tempFactory
 
     registryName = rl
     unlocalizedName = rl.toString()
@@ -46,7 +45,7 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
 
     @Suppress("LeakingThis")
     if (factory1 is IQBlockMultipart && this !is QBContainerMultipart)
-      QuackLib.Logger.log(Level.WARN, "Using a multipart-enabled QBlock ($factory1) in a non-multipart Block! This means you won't get any multipart capabilities.")
+      QuackLib.Logger.log(Level.WARN, "Using a multipart-enabled QBlock ($factory1) in a non-multipart container! This means you won't get any multipart capabilities.")
   }
 
   protected fun noqb(pos: BlockPos? = null): Nothing = error("No QBlock${if (pos != null) " at $pos" else ""}.")
@@ -141,12 +140,6 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
   override fun isFullCube(state: IBlockState?): Boolean = tempQB(null, null).isFullBlock
 
   override fun isOpaqueCube(state: IBlockState?): Boolean = tempQB(null, null).isOpaque
-
-  override fun onBlockAdded(world: World, pos: BlockPos, state: IBlockState?) {
-    Scheduler.schedule(1) {
-      world.getQBlock(pos)?.onAdded()
-    }
-  }
 
   override fun rotateBlock(world: World, pos: BlockPos, axis: EnumFacing): Boolean {
     return world.getQBlock(pos)?.rotateBlock(axis) ?: false

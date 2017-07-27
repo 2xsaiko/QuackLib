@@ -48,7 +48,7 @@ repositories {
 }
 
 dependencies {
-    deobfCompile "MCMultiPart2:MCMultiPart-exp:2.2.2_37"
+    deobfCompile "MCMultiPart2:MCMultiPart-exp:2.2.2_38"
     deobfCompile "mezz.jei:jei_1.12:4.7.1.71"
     compile group: "net.shadowfacts", name: "Forgelin", version: "1.5.0"
 }

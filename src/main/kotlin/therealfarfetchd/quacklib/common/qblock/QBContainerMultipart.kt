@@ -82,6 +82,10 @@ open class QBContainerMultipart(rl: ResourceLocation, factory: () -> QBlock) : Q
     return tempQB.asmp.getPartPlacementBoundingBox(side, placedX, placedY, placedZ)
   }
 
+  override fun onPartChanged(part: IPartInfo, otherPart: IPartInfo) {
+    (part.tile as QBContainerTile).qb.asmp.onPartChanged(otherPart)
+  }
+
   override fun getLightOpacity(state: IBlockState?): Int = this.lightOpacity
   override fun getLightValue(state: IBlockState?): Int = this.lightValue
 

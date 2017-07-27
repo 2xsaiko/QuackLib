@@ -4,7 +4,7 @@ package therealfarfetchd.quacklib.common.extensions
  * Created by marco on 13.07.17.
  */
 
-inline fun <reified T> Collection<T>.copyTo(array: Array<T>, arrStart: Int = 0) = this.toTypedArray().copyTo(array, 0)
+inline fun <reified T> Collection<T>.copyTo(array: Array<T>, arrStart: Int = 0) = this.toTypedArray().copyTo(array, arrStart)
 
 inline fun <reified T> Array<T>.copyTo(array: Array<T>, arrStart: Int = 0) = System.arraycopy(this, 0, array, arrStart, minOf(this.size, array.size - arrStart))
 

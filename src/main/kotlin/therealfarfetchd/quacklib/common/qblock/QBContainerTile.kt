@@ -11,6 +11,8 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import net.minecraftforge.common.capabilities.Capability
 import therealfarfetchd.quacklib.common.DataTarget
+import therealfarfetchd.quacklib.common.extensions.packByte
+import therealfarfetchd.quacklib.common.extensions.unpack
 import therealfarfetchd.quacklib.common.util.QNBTCompound
 
 /**
@@ -25,6 +27,12 @@ open class QBContainerTile() : TileEntity() {
       _qb = value
       value.container = this
     }
+
+  /**
+   * 0: qb.onAdded() called
+   * 1-6: unused
+   */
+  protected var bits: BooleanArray = BooleanArray(8)
 
   var nextClientUpdateIsRender: Boolean = false
 
@@ -44,6 +52,7 @@ open class QBContainerTile() : TileEntity() {
 
   override fun writeToNBT(compound: NBTTagCompound): NBTTagCompound {
     val subTag = NBTTagCompound()
+    compound.setByte("Bits", packByte(*bits))
     compound.setString("BlockType", getBlockType().registryName.toString())
     qb.saveData(QNBTCompound(subTag), DataTarget.Save)
     compound.setTag("QBlockData", subTag)
@@ -52,6 +61,7 @@ open class QBContainerTile() : TileEntity() {
 
   override fun readFromNBT(compound: NBTTagCompound) {
     super.readFromNBT(compound)
+    bits = unpack(compound.getByte("Bits"))
     if (_qb == null) {
       val rl = ResourceLocation(compound.getString("BlockType"))
       val block = Block.REGISTRY.getObject(rl)
@@ -82,6 +92,20 @@ open class QBContainerTile() : TileEntity() {
     if (tag.getBoolean("R")) {
       world.markBlockRangeForRenderUpdate(pos, pos)
     }
+  }
+
+  override fun onLoad() {
+    super.onLoad()
+    if (!bits[0]) {
+      bits[0] = true
+      qb.onAdded()
+    }
+    qb.onLoad()
+  }
+
+  override fun onChunkUnload() {
+    super.onChunkUnload()
+    qb.onUnload()
   }
 
   override fun hasCapability(capability: Capability<*>, facing: EnumFacing?): Boolean {

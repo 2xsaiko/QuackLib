@@ -93,6 +93,16 @@ abstract class QBlock {
   open fun onAdded() {}
 
   /**
+   * Called when the block is loaded.
+   */
+  open fun onLoad() {}
+
+  /**
+   * Called when the block is unloaded.
+   */
+  open fun onUnload() {}
+
+  /**
    * Destroys the block.
    */
   fun dismantle(dropItems: Boolean = true) {
