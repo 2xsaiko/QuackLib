@@ -3,6 +3,7 @@ package therealfarfetchd.quacklib.client.gui
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
+import org.lwjgl.input.Keyboard
 import therealfarfetchd.quacklib.common.util.ObservableMap
 import java.math.BigDecimal
 
@@ -23,6 +24,7 @@ class QGuiScreen(private val logic: AbstractGuiLogic) : GuiScreen() {
     super.initGui()
     val res = ScaledResolution(mc)
     realScale = findScale(res.scaleFactor, root.scale) / res.scaleFactor.toFloat()
+    Keyboard.enableRepeatEvents(root.repeat_keys)
   }
 
   private fun findScale(mcScale: Int, validScales: List<Int>): Int {
@@ -52,6 +54,11 @@ class QGuiScreen(private val logic: AbstractGuiLogic) : GuiScreen() {
     root.mouseDragged(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)
   }
 
+  override fun onGuiClosed() {
+    super.onGuiClosed()
+    Keyboard.enableRepeatEvents(false)
+  }
+
   inner class ScreenRoot : IGuiElement {
     override val name: String = "root"
 
@@ -66,10 +73,12 @@ class QGuiScreen(private val logic: AbstractGuiLogic) : GuiScreen() {
 
     var scale: List<Int> by transform<List<Int>, List<BigDecimal>>({ map { BigDecimal(it) } }, { map { it.intValueExact() } })
     var pause: Boolean by mapper()
+    var repeat_keys: Boolean by mapper()
 
     init {
       scale = emptyList() // let MC handle the scaling
       pause = false
+      repeat_keys = false
     }
 
     override fun render(mouseX: Int, mouseY: Int) {
