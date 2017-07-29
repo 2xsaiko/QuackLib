@@ -15,7 +15,7 @@ class ChangeListener(vararg val values: KProperty0<*>) {
     val new = mkMap()
     val result = map == new
     if (update) map = new
-    return result
+    return !result
   }
 
 }

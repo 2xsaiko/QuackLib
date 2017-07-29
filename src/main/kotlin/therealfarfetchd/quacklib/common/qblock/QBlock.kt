@@ -107,7 +107,7 @@ abstract class QBlock {
    */
   fun dismantle(dropItems: Boolean = true) {
     if (world.isServer) {
-      onBreakBlock(null)
+      onBreakBlock()
       if (dropItems) dropItems()
       world.setBlockToAir(pos)
     }
@@ -124,11 +124,8 @@ abstract class QBlock {
 
   /**
    * Called when the block gets broken. This does not actually remove the block from the world.
-   * Returns true if the block is allowed to be removed from the world.
    */
-  open fun onBreakBlock(player: EntityPlayer?): Boolean {
-    return true
-  }
+  open fun onBreakBlock() {}
 
   /**
    * Returns true if this is a valid position for the block

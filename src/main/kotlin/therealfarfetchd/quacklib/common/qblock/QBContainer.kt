@@ -112,6 +112,7 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
 
   override fun breakBlock(world: World, pos: BlockPos, state: IBlockState?) {
     brokenQBlock = (world.getTileEntity(pos) as QBContainerTile).qb
+    brokenQBlock.onBreakBlock()
     super.breakBlock(world, pos, state)
   }
 

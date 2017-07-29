@@ -33,6 +33,10 @@ abstract class AbstractGuiLogic {
     this.action = op as GuiElement.() -> Any?
   }
 
+  protected fun QGuiScreen.ScreenRoot.key(op: (char: Char, keyCode: Int) -> Any?) {
+    this.kbd = op
+  }
+
   @Suppress("UNCHECKED_CAST")
   protected fun <T> params(): ReadOnlyProperty<Any?, T> = object : ReadOnlyProperty<Any?, T> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): T = params[property.name] as T

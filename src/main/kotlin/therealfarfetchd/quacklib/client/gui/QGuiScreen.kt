@@ -54,6 +54,13 @@ class QGuiScreen(private val logic: AbstractGuiLogic) : GuiScreen() {
     root.mouseDragged(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)
   }
 
+  override fun keyTyped(typedChar: Char, keyCode: Int) {
+    super.keyTyped(typedChar, keyCode)
+    if (keyCode != Keyboard.KEY_ESCAPE) {
+      root.kbd(typedChar, keyCode)
+    }
+  }
+
   override fun onGuiClosed() {
     super.onGuiClosed()
     Keyboard.enableRepeatEvents(false)
@@ -74,6 +81,8 @@ class QGuiScreen(private val logic: AbstractGuiLogic) : GuiScreen() {
     var scale: List<Int> by transform<List<Int>, List<BigDecimal>>({ map { BigDecimal(it) } }, { map { it.intValueExact() } })
     var pause: Boolean by mapper()
     var repeat_keys: Boolean by mapper()
+
+    var kbd: (Char, Int) -> Any? = { _, _ -> }
 
     init {
       scale = emptyList() // let MC handle the scaling
