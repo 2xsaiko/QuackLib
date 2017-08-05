@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Level
 import therealfarfetchd.quacklib.ModID
 import therealfarfetchd.quacklib.QuackLib
 import therealfarfetchd.quacklib.common.item.Wrench
+import therealfarfetchd.quacklib.common.qblock.QBContainer
 import therealfarfetchd.quacklib.common.qblock.QBContainerTile
 import therealfarfetchd.quacklib.common.qblock.QBContainerTileMultipart
 
@@ -43,6 +44,16 @@ open class Proxy {
   @SubscribeEvent
   fun registerItems(e: RegistryEvent.Register<Item>) {
     e.registry.register(Wrench)
+  }
+
+  @SubscribeEvent
+  fun clientTick(e: TickEvent.ClientTickEvent) {
+    QBContainer.clearBlocksMap()
+  }
+
+  @SubscribeEvent
+  fun serverTick(e: TickEvent.ServerTickEvent) {
+    QBContainer.clearBlocksMap()
   }
 
   @SubscribeEvent

@@ -25,9 +25,13 @@ interface IQBlockMultipart {
 
   fun getPartSlot(): IPartSlot
 
-  fun getPlacementSlot(facing: EnumFacing?, hitX: Float, hitY: Float, hitZ: Float, placer: EntityLivingBase?): IPartSlot
+  /**
+   * Gets called before the block is placed in the world - useful for setting state based on the parameters
+   */
+  fun beforePlace(sidePlaced: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) {}
 
-  fun getPartPlacementBoundingBox(facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): AxisAlignedBB? = qb.collisionBox
+  val partPlacementBoundingBox: AxisAlignedBB?
+    get() = qb.collisionBox
 
   fun onPartChanged(part: IPartInfo): Unit {
     with(qb) {

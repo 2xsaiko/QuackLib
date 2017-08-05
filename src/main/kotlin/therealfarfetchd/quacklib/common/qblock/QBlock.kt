@@ -156,6 +156,11 @@ abstract class QBlock {
   }
 
   /**
+   * Gets called when one of the block's neighbor TEs changes
+   */
+  open fun onNeighborTEChanged(side: EnumFacing) {}
+
+  /**
    * Add the properties to the block state.
    */
   open fun applyProperties(state: IBlockState): IBlockState = state

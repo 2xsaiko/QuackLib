@@ -10,6 +10,9 @@ val Byte.unsigned: Int
 val Short.unsigned: Int
   get() = this.toInt() and 0xFFFF
 
+val Int.unsigned: Long
+  get() = this.toLong() and 0xFFFFFFFF
+
 infix fun Int.pmod(i: Int): Int = (this % i).let { if (it < 0) it + i else it }
 infix fun Long.pmod(i: Int): Int = (this % i).let { if (it < 0) (it + i).toInt() else it.toInt() }
 infix fun Long.pmod(l: Long): Long = (this % l).let { if (it < 0) it + l else it }

@@ -11,6 +11,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import net.minecraftforge.common.capabilities.Capability
 import therealfarfetchd.quacklib.common.DataTarget
+import therealfarfetchd.quacklib.common.extensions.copyTo
 import therealfarfetchd.quacklib.common.extensions.packByte
 import therealfarfetchd.quacklib.common.extensions.unpack
 import therealfarfetchd.quacklib.common.util.QNBTCompound
@@ -30,9 +31,10 @@ open class QBContainerTile() : TileEntity() {
 
   /**
    * 0: qb.onAdded() called
-   * 1-6: unused
+   * 1: Use cached qblock instead of creating a new one
+   * 2-6: unused
    */
-  protected var bits: BooleanArray = BooleanArray(8)
+  protected val bits: BooleanArray = BooleanArray(8)
 
   var nextClientUpdateIsRender: Boolean = false
 
@@ -61,7 +63,7 @@ open class QBContainerTile() : TileEntity() {
 
   override fun readFromNBT(compound: NBTTagCompound) {
     super.readFromNBT(compound)
-    bits = unpack(compound.getByte("Bits"))
+    unpack(compound.getByte("Bits")).copyTo(bits)
     if (_qb == null) {
       val rl = ResourceLocation(compound.getString("BlockType"))
       val block = Block.REGISTRY.getObject(rl)
@@ -69,6 +71,7 @@ open class QBContainerTile() : TileEntity() {
       else throw IllegalStateException("Block is not a QBContainer! (got block $rl ($block) which is ${block::class}")
     }
     val subTag = compound.getCompoundTag("QBlockData")
+    qb.pos = getPos()
     qb.loadData(QNBTCompound(subTag), DataTarget.Save)
   }
 

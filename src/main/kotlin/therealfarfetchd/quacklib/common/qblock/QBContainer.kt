@@ -17,6 +17,8 @@ import net.minecraft.world.IBlockAccess
 import net.minecraft.world.World
 import net.minecraftforge.common.property.ExtendedBlockState
 import net.minecraftforge.common.property.IExtendedBlockState
+import net.minecraftforge.fml.common.FMLCommonHandler
+import net.minecraftforge.fml.relauncher.Side
 import org.apache.logging.log4j.Level
 import therealfarfetchd.quacklib.QuackLib
 import therealfarfetchd.quacklib.common.extensions.getFacing
@@ -65,18 +67,32 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
     return (state as? IExtendedBlockState)?.also { world.getQBlock(pos)?.applyExtendedProperties(it) } ?: state
   }
 
+  fun preparePlaceBlock(world: World, pos: BlockPos): QBlock {
+    println("PREPARING TO PLACE BLOCK AT $pos")
+    val qb = if (placeInProgress.containsKey(world to pos)) {
+      println("WARNING: there is already an old QBlock at $pos… Using that!")
+      getCachedBlock(world, pos)
+    } else factory()
+    qb.world = world
+    qb.pos = pos
+    placeInProgress += (world to pos) to qb
+    latestPos = pos
+    latestWorld = world
+    return qb
+  }
+
   override fun getStateForPlacement(worldIn: World?, pos: BlockPos?, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float, meta: Int, placer: EntityLivingBase?): IBlockState {
     placedX = hitX
     placedY = hitY
     placedZ = hitZ
     sidePlaced = facing.opposite
     when (sidePlaced) {
-      EnumFacing.DOWN -> placedY = 0.0f
-      EnumFacing.UP -> placedY = 1.0f
-      EnumFacing.NORTH -> placedZ = 0.0f
-      EnumFacing.SOUTH -> placedZ = 1.0f
-      EnumFacing.WEST -> placedX = 0.0f
-      EnumFacing.EAST -> placedX = 1.0f
+      EnumFacing.DOWN -> if (placedY == 1.0f) placedY = 0.0f
+      EnumFacing.UP -> if (placedY == 0.0f) placedY = 1.0f
+      EnumFacing.NORTH -> if (placedZ == 1.0f) placedZ = 0.0f
+      EnumFacing.SOUTH -> if (placedZ == 0.0f) placedZ = 1.0f
+      EnumFacing.WEST -> if (placedX == 1.0f) placedX = 0.0f
+      EnumFacing.EAST -> if (placedX == 0.0f) placedX = 1.0f
     }
     return super.getStateForPlacement(worldIn, pos, facing, hitX, hitY, hitZ, meta, placer)
   }
@@ -89,19 +105,20 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
   }
 
   override fun createNewTileEntity(worldIn: World?, meta: Int): TileEntity {
-    val qb = factory()
+    val qb = if (QBContainer.hasLatest()) QBContainer.getCachedBlock() else factory()
     if (qb is ITickable) return QBContainerTile.Ticking(qb)
     else return QBContainerTile(qb)
   }
 
-  override fun canPlaceBlockAt(world: World, pos: BlockPos): Boolean = tempQB(world, pos).canStay()
+  override fun canPlaceBlockAt(world: World, pos: BlockPos): Boolean = getCachedBlock(world, pos).canStay()
 
   override fun canPlaceBlockOnSide(world: World, pos: BlockPos, side: EnumFacing): Boolean {
-    return tempQB(world, pos).canBePlacedOnSide(side)
+    return getCachedBlock(world, pos).canBePlacedOnSide(side)
   }
 
   override fun onBlockPlacedBy(world: World, pos: BlockPos, state: IBlockState?, placer: EntityLivingBase, stack: ItemStack) {
-    world.getQBlock(pos)?.onPlaced(placer, stack, sidePlaced, placedX, placedY, placedZ)
+    val qBlock = world.getQBlock(pos)
+    qBlock?.onPlaced(placer, stack, sidePlaced, placedX, placedY, placedZ)
     sidePlaced = EnumFacing.DOWN
     placedX = 0.0f
     placedY = 0.0f
@@ -130,7 +147,14 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
   }
 
   override fun getCollisionBoundingBox(blockState: IBlockState?, world: IBlockAccess, pos: BlockPos): AxisAlignedBB? {
-    return (world.getQBlock(pos) ?: tempQB(world as? World, pos)).collisionBox
+    // This is the first call when placing a block, so we're going to assume we're placing a new block when there's no block
+    val qb = world.getQBlock(pos)
+    if (qb != null) return qb.collisionBox
+    else if (world is World) return preparePlaceBlock(world, pos).collisionBox
+    else {
+      error("This should never happen! Raise hell if it does…")
+      //      return tempQB(world as? World, pos).collisionBox
+    }
   }
 
   override fun getBoundingBox(state: IBlockState?, world: IBlockAccess, pos: BlockPos): AxisAlignedBB? {
@@ -154,6 +178,10 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
     world.getQBlock(pos)?.onNeighborChanged((fromPos - pos).getFacing())
   }
 
+  override fun onNeighborChange(world: IBlockAccess, pos: BlockPos, neighbor: BlockPos) {
+    world.getQBlock(pos)?.onNeighborTEChanged((neighbor - pos).getFacing())
+  }
+
   companion object {
     private lateinit var tempFactory: () -> QBlock
     internal lateinit var brokenQBlock: QBlock
@@ -161,6 +189,43 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
     internal var placedX: Float = 0.0f
     internal var placedY: Float = 0.0f
     internal var placedZ: Float = 0.0f
+
+    private var clientpip: Map<Pair<World, BlockPos>, QBlock> = emptyMap()
+    private var serverpip: Map<Pair<World, BlockPos>, QBlock> = emptyMap()
+
+    internal fun getCachedBlock(world: World, pos: BlockPos): QBlock = placeInProgress[world to pos]!!
+    internal fun getCachedBlock(): QBlock = getCachedBlock(latestWorld!!, latestPos!!)
+
+    internal fun clearCachedBlock() {
+      if (latestWorld != null && latestPos != null)
+        placeInProgress -= latestWorld!! to latestPos!!
+    }
+
+    internal fun hasLatest(): Boolean = latestPos != null && latestWorld != null
+
+    internal fun clearBlocksMap() {
+      placeInProgress = emptyMap()
+      latestPos = null
+      latestWorld = null
+    }
+
+    private var latestPos: BlockPos? = null
+    private var latestWorld: World? = null
+
+    @Suppress("WHEN_ENUM_CAN_BE_NULL_IN_JAVA")
+    private var placeInProgress: Map<Pair<World, BlockPos>, QBlock>
+      get() {
+        return when (FMLCommonHandler.instance().effectiveSide) {
+          Side.CLIENT -> clientpip
+          Side.SERVER -> serverpip
+        }
+      }
+      set(value) {
+        when (FMLCommonHandler.instance().effectiveSide) {
+          Side.CLIENT -> clientpip = value
+          Side.SERVER -> serverpip = value
+        }
+      }
   }
 
 }

@@ -3,6 +3,7 @@ package therealfarfetchd.quacklib.common.qblock
 import mcmultipart.MCMultiPart
 import mcmultipart.api.container.IPartInfo
 import mcmultipart.api.multipart.IMultipart
+import mcmultipart.api.multipart.IMultipartTile
 import mcmultipart.api.slot.IPartSlot
 import mcmultipart.block.TileMultipartContainer
 import net.minecraft.block.state.IBlockState
@@ -37,7 +38,7 @@ open class QBContainerMultipart(rl: ResourceLocation, factory: () -> QBlock) : Q
 
   override fun getSlotForPlacement(world: World, pos: BlockPos, state: IBlockState?, facing: EnumFacing?, hitX: Float, hitY: Float, hitZ: Float, placer: EntityLivingBase?): IPartSlot {
     // QBContainer.sidePlaced = facing?.opposite ?: EnumFacing.DOWN
-    return tempQB(world, pos).asmp.getPlacementSlot(facing, hitX, hitY, hitZ, placer)
+    return preparePlaceBlock(world, pos).asmp.getPartSlot()
   }
 
   override fun getSelectedBoundingBox(state: IBlockState?, world: World, pos: BlockPos): AxisAlignedBB {
@@ -55,6 +56,19 @@ open class QBContainerMultipart(rl: ResourceLocation, factory: () -> QBlock) : Q
       }
     }
     return super.getSelectedBoundingBox(state, world, pos)
+  }
+
+  override fun createMultipartTile(world: World?, slot: IPartSlot?, state: IBlockState?): IMultipartTile {
+    if (QBContainer.hasLatest()) {
+      val qb = QBContainer.getCachedBlock()
+      val te = if (qb is ITickable) QBContainerTileMultipart.Ticking(qb)
+      else QBContainerTileMultipart(qb)
+      return convertToMultipartTile(te)
+    } else return super.createMultipartTile(world, slot, state)
+  }
+
+  override fun getOcclusionBoxes(part: IPartInfo): MutableList<AxisAlignedBB> {
+    return mutableListOf(getBoundingBox(part) ?: AxisAlignedBB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
   }
 
   override fun getBoundingBox(part: IPartInfo): AxisAlignedBB? {
@@ -77,9 +91,10 @@ open class QBContainerMultipart(rl: ResourceLocation, factory: () -> QBlock) : Q
    * this is only used when placing the block
    */
   override fun getCollisionBoundingBox(world: World, pos: BlockPos, state: IBlockState?): AxisAlignedBB? {
-    val side = sidePlaced.opposite
-    val tempQB = tempQB(world, pos)
-    return tempQB.asmp.getPartPlacementBoundingBox(side, placedX, placedY, placedZ)
+    val side = sidePlaced
+    val tempQB = preparePlaceBlock(world, pos)
+    (tempQB as IQBlockMultipart).beforePlace(side, placedX, placedY, placedZ)
+    return tempQB.asmp.partPlacementBoundingBox
   }
 
   override fun onPartChanged(part: IPartInfo, otherPart: IPartInfo) {
@@ -90,7 +105,7 @@ open class QBContainerMultipart(rl: ResourceLocation, factory: () -> QBlock) : Q
   override fun getLightValue(state: IBlockState?): Int = this.lightValue
 
   override fun createNewTileEntity(worldIn: World?, meta: Int): TileEntity {
-    val qb = factory()
+    val qb = if (QBContainer.hasLatest()) QBContainer.getCachedBlock() else factory()
     if (qb is ITickable) return QBContainerTileMultipart.Ticking(qb)
     else return QBContainerTileMultipart(qb)
   }
