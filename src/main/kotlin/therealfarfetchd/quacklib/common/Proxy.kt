@@ -17,6 +17,7 @@ import therealfarfetchd.quacklib.common.item.Wrench
 import therealfarfetchd.quacklib.common.qblock.QBContainer
 import therealfarfetchd.quacklib.common.qblock.QBContainerTile
 import therealfarfetchd.quacklib.common.qblock.QBContainerTileMultipart
+import therealfarfetchd.quacklib.common.util.QNBTCompound
 
 /**
  * Created by marco on 16.07.17.
@@ -48,12 +49,16 @@ open class Proxy {
 
   @SubscribeEvent
   fun clientTick(e: TickEvent.ClientTickEvent) {
-    QBContainer.clearBlocksMap()
+    QBContainer.savedWorld = null
+    QBContainer.savedPos = null
+    QBContainer.savedNbt = QNBTCompound()
   }
 
   @SubscribeEvent
   fun serverTick(e: TickEvent.ServerTickEvent) {
-    QBContainer.clearBlocksMap()
+    QBContainer.savedWorld = null
+    QBContainer.savedPos = null
+    QBContainer.savedNbt = QNBTCompound()
   }
 
   @SubscribeEvent

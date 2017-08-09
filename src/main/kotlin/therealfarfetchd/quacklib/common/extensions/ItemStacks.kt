@@ -1,17 +1,21 @@
 package therealfarfetchd.quacklib.common.extensions
 
+import net.minecraft.block.Block
 import net.minecraft.entity.Entity
 import net.minecraft.entity.item.EntityItem
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
+import therealfarfetchd.quacklib.common.util.Random
 
 /**
  * Created by marco on 08.07.17.
  */
 
 fun Item.makeStack(count: Int = 1, meta: Int = 0) = ItemStack(this, count, meta)
+
+fun Block.makeStack(count: Int = 1, meta: Int = 0) = this.getItemDropped(defaultState, Random, 0).makeStack(count, meta)
 
 fun ItemStack.spawnAt(world: World, x: Double, y: Double, z: Double) {
   val item = EntityItem(world, x, y, z, this)
