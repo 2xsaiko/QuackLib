@@ -88,6 +88,11 @@ abstract class QBlock {
   open val unlistedProperties: Set<IUnlistedProperty<*>> = emptySet()
 
   /**
+   * True if this block is not yet placed.
+   */
+  var prePlaced: Boolean = false
+
+  /**
    * Called when the block gets added to the world.
    */
   open fun onAdded() {}

@@ -3,7 +3,6 @@ package therealfarfetchd.quacklib.common.qblock
 import mcmultipart.MCMultiPart
 import mcmultipart.api.container.IPartInfo
 import mcmultipart.api.multipart.IMultipart
-import mcmultipart.api.multipart.IMultipartTile
 import mcmultipart.api.slot.IPartSlot
 import mcmultipart.block.TileMultipartContainer
 import net.minecraft.block.state.IBlockState
@@ -38,7 +37,7 @@ open class QBContainerMultipart(rl: ResourceLocation, factory: () -> QBlock) : Q
   }
 
   override fun getSlotForPlacement(world: World, pos: BlockPos, state: IBlockState?, facing: EnumFacing?, hitX: Float, hitY: Float, hitZ: Float, placer: EntityLivingBase?): IPartSlot {
-     QBContainer.sidePlaced = facing?.opposite ?: EnumFacing.DOWN
+    QBContainer.sidePlaced = facing?.opposite ?: EnumFacing.DOWN
     return buildPart(world, pos) {
       asmp.getPartSlot()
     }
@@ -102,7 +101,11 @@ open class QBContainerMultipart(rl: ResourceLocation, factory: () -> QBlock) : Q
     val qb = factory()
     (worldIn ?: savedWorld)?.also { qb.world = it }
     savedPos?.also { qb.pos = it }
-    qb.loadData(savedNbt, DataTarget.Save)
+    if (savedNbt != null) {
+      qb.prePlaced = true
+      qb.loadData(savedNbt!!, DataTarget.Save)
+      qb.prePlaced = false
+    }
     if (qb is ITickable) return QBContainerTileMultipart.Ticking(qb)
     else return QBContainerTileMultipart(qb)
   }

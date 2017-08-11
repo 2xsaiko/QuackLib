@@ -51,14 +51,14 @@ open class Proxy {
   fun clientTick(e: TickEvent.ClientTickEvent) {
     QBContainer.savedWorld = null
     QBContainer.savedPos = null
-    QBContainer.savedNbt = QNBTCompound()
+    QBContainer.savedNbt = null
   }
 
   @SubscribeEvent
   fun serverTick(e: TickEvent.ServerTickEvent) {
     QBContainer.savedWorld = null
     QBContainer.savedPos = null
-    QBContainer.savedNbt = QNBTCompound()
+    QBContainer.savedNbt = null
   }
 
   @SubscribeEvent

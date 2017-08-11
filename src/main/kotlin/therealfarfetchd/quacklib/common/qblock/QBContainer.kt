@@ -53,7 +53,7 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
 
   protected fun noqb(pos: BlockPos? = null): Nothing = error("No QBlock${if (pos != null) " at $pos" else ""}.")
 
-  internal open fun tempQB(world: World?, pos: BlockPos?): QBlock = factory().also { qb -> world?.also { qb.world = it }; pos?.also { qb.pos = it } }
+  internal open fun tempQB(world: World?, pos: BlockPos?): QBlock = factory().also { qb -> world?.also { qb.world = it }; pos?.also { qb.pos = it }; qb.prePlaced = true }
 
   override fun createBlockState(): BlockStateContainer {
     val qb = factory()
@@ -95,7 +95,11 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
     val qb = factory()
     (worldIn ?: savedWorld)?.also { qb.world = it }
     savedPos?.also { qb.pos = it }
-    qb.loadData(savedNbt, DataTarget.Save)
+    if (savedNbt != null) {
+      qb.prePlaced = true
+      qb.loadData(savedNbt!!, DataTarget.Save)
+      qb.prePlaced = false
+    }
     if (qb is ITickable) return QBContainerTile.Ticking(qb)
     else return QBContainerTile(qb)
   }
@@ -183,9 +187,9 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
     world?.also { savedWorld = it }
     pos?.also { savedPos = it }
     val myqb = tempQB(savedWorld, savedPos)
-    myqb.loadData(savedNbt, DataTarget.Save)
+    if (savedNbt != null) myqb.loadData(savedNbt!!, DataTarget.Save)
     val ret = op(myqb)
-    myqb.saveData(savedNbt, DataTarget.Save)
+    myqb.saveData(QNBTCompound().also { savedNbt = it }, DataTarget.Save)
     return ret
   }
 
@@ -199,7 +203,7 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
 
     internal var savedPos: BlockPos? by ClientServerSeparateData { null }
     internal var savedWorld: World? by ClientServerSeparateData { null }
-    internal var savedNbt: QNBTCompound by ClientServerSeparateData { QNBTCompound() }
+    internal var savedNbt: QNBTCompound? by ClientServerSeparateData { null }
   }
 
 }

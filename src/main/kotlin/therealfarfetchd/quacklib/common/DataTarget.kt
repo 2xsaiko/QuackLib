@@ -5,7 +5,7 @@ package therealfarfetchd.quacklib.common
  */
 enum class DataTarget {
   /**
-   * The data will be saved to disk.
+   * The data will be saved to disk or stored temporarily while the block is in the process of being placed.
    */
   Save,
 
