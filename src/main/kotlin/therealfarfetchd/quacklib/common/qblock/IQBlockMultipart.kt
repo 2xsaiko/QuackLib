@@ -3,7 +3,6 @@ package therealfarfetchd.quacklib.common.qblock
 import mcmultipart.api.container.IPartInfo
 import mcmultipart.api.slot.IPartSlot
 import mcmultipart.util.MCMPWorldWrapper
-import net.minecraft.entity.EntityLivingBase
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.world.World
@@ -32,6 +31,9 @@ interface IQBlockMultipart {
 
   val partPlacementBoundingBox: AxisAlignedBB?
     get() = qb.collisionBox
+
+  val occlusionBoxes: List<AxisAlignedBB>
+    get() = listOf(partPlacementBoundingBox).filterNotNull()
 
   fun onPartChanged(part: IPartInfo): Unit {
     with(qb) {

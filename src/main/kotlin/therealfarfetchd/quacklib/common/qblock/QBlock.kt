@@ -173,7 +173,7 @@ abstract class QBlock {
   /**
    * Add the extended properties to the block state.
    */
-  open fun applyExtendedProperties(state: IExtendedBlockState): IBlockState = state
+  open fun applyExtendedProperties(state: IExtendedBlockState): IExtendedBlockState = state
 
   /**
    * Gets called when the block is clicked on. Returns true if the player should swing their hand.

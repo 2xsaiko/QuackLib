@@ -65,7 +65,7 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
   }
 
   override fun getExtendedState(state: IBlockState, world: IBlockAccess, pos: BlockPos): IBlockState {
-    return (state as? IExtendedBlockState)?.also { world.getQBlock(pos)?.applyExtendedProperties(it) } ?: state
+    return (state as? IExtendedBlockState)?.let { world.getQBlock(pos)?.applyExtendedProperties(it) } ?: state
   }
 
   override fun getStateForPlacement(worldIn: World?, pos: BlockPos?, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float, meta: Int, placer: EntityLivingBase?): IBlockState {
@@ -106,13 +106,13 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
 
   override fun canPlaceBlockAt(world: World, pos: BlockPos): Boolean {
     return buildPart(world, pos) {
-      canStay()
+       canStay()
     }
   }
 
   override fun canPlaceBlockOnSide(world: World, pos: BlockPos, side: EnumFacing): Boolean {
     return buildPart(world, pos) {
-      canBePlacedOnSide(side)
+      canBePlacedOnSide(side.opposite)
     }
   }
 

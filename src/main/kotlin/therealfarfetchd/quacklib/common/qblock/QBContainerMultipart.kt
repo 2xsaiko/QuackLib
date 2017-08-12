@@ -61,7 +61,8 @@ open class QBContainerMultipart(rl: ResourceLocation, factory: () -> QBlock) : Q
   }
 
   override fun getOcclusionBoxes(part: IPartInfo): MutableList<AxisAlignedBB> {
-    return mutableListOf(getBoundingBox(part) ?: AxisAlignedBB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
+    val qb = (part.tile as QBContainerTile).qb
+    return qb.asmp.occlusionBoxes.toMutableList()
   }
 
   override fun getBoundingBox(part: IPartInfo): AxisAlignedBB? {
