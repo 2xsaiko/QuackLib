@@ -212,6 +212,10 @@ abstract class QBlock {
       container.nextClientUpdateIsRender = renderUpdate || container.nextClientUpdateIsRender
       val state = applyProperties(container.blockType.defaultState)
       world.notifyBlockUpdate(pos, state, state, 3)
+    } else {
+      if (renderUpdate) {
+        world.markBlockRangeForRenderUpdate(pos, pos)
+      }
     }
   }
 

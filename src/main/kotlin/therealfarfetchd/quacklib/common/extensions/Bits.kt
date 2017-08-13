@@ -7,6 +7,27 @@ import kotlin.experimental.or
  * Created by marco on 13.07.17.
  */
 
+fun List<Int>.nibbles(): List<Byte> {
+  var list: List<Byte> = emptyList()
+  var inList: List<Int> = this
+  if (size % 2 != 0) inList += 0
+  for (i in 0 until inList.size / 2) {
+    val part1 = inList[i * 2].toByte() and 0x0F
+    val part2 = inList[i * 2 + 1].toByte() and 0x0F
+    list += part1 or (part2 shl 4)
+  }
+  return list
+}
+
+fun List<Byte>.unpackNibbles(): List<Int> {
+  var list: List<Int> = emptyList()
+  for (b in this) {
+    list += (b and 0x0F).unsigned
+    list += (b ushr 4).unsigned
+  }
+  return list
+}
+
 private val Boolean.bitmask: Byte
   get() = if (this) -1 else 0
 
@@ -23,7 +44,7 @@ private fun BooleanArray.firstN(i: Int): BooleanArray {
 }
 
 fun BooleanArray.flip(index: Int) {
-  check(index < size) {"Index out of range (expected 0..$size, got $index)"}
+  check(index < size) { "Index out of range (expected 0..$size, got $index)" }
   this[index] = !this[index]
 }
 
