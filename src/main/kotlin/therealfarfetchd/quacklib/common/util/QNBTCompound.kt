@@ -6,7 +6,7 @@ import net.minecraft.nbt.NBTTagList
 import java.util.*
 
 /**
- * Created by marco on 13.07.17.
+ * A wrapper around NBTTagCompound to make using NBT more concise.
  */
 class QNBTCompound(val self: NBTTagCompound) {
   constructor() : this(NBTTagCompound())
