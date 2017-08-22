@@ -31,8 +31,7 @@ open class QBContainerTile() : TileEntity() {
 
   /**
    * 0: qb.onAdded() called
-   * 1: Use cached qblock instead of creating a new one
-   * 2-6: unused
+   * 1-6: unused
    */
   protected val bits: BooleanArray = BooleanArray(8)
 

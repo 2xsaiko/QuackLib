@@ -2,6 +2,8 @@ package therealfarfetchd.quacklib.common.extensions
 
 import mcmultipart.api.slot.IPartSlot
 import mcmultipart.block.TileMultipartContainer
+import net.minecraft.tileentity.TileEntity
+import net.minecraft.util.EnumFacing
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.IBlockAccess
 import net.minecraft.world.World
@@ -31,4 +33,11 @@ fun IBlockAccess.getQBlock(pos: BlockPos, slot: IPartSlot): QBlock? {
     return (te.getPartTile(slot).orElse(null)?.tileEntity as? QBContainerTile)?.qb
   }
   return null
+}
+
+fun TileEntity.notifyNeighborsOfSides(vararg sides: EnumFacing) {
+  for (side in sides) {
+    val p = pos.offset(side)
+    world.notifyNeighborsOfStateExcept(p, world.getBlockState(p).block, side.opposite)
+  }
 }

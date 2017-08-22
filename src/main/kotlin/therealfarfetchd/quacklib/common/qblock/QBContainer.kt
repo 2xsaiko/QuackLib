@@ -38,6 +38,8 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
   internal val factory: () -> QBlock
     get() = _factory ?: tempFactory
 
+  private val isRedstone: Boolean by lazy { tempQB(null, null) is IQBlockRedstone }
+
   init {
     _factory = tempFactory
 
@@ -106,7 +108,7 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
 
   override fun canPlaceBlockAt(world: World, pos: BlockPos): Boolean {
     return buildPart(world, pos) {
-       canStay()
+      canStay()
     }
   }
 
@@ -140,6 +142,29 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
   override fun getDrops(drops: NonNullList<ItemStack>, world: IBlockAccess, pos: BlockPos, state: IBlockState?, fortune: Int) {
     val qb = (world.getTileEntity(pos) as? QBContainerTile)?.qb ?: brokenQBlock
     drops.addAll(qb.getDroppedItems())
+  }
+
+  override fun canProvidePower(state: IBlockState?): Boolean = isRedstone
+
+  override fun canConnectRedstone(state: IBlockState?, world: IBlockAccess, pos: BlockPos, side: EnumFacing?): Boolean {
+    if (side != null) {
+      return (world.getQBlock(pos) as? IQBlockRedstone)?.canConnect(side) ?: false
+    }
+    return false
+  }
+
+  override fun getWeakPower(blockState: IBlockState?, blockAccess: IBlockAccess, pos: BlockPos, side: EnumFacing?): Int {
+    if (side != null) {
+      return (blockAccess.getQBlock(pos) as? IQBlockRedstone)?.getOutput(side, false) ?: 0
+    }
+    return 0
+  }
+
+  override fun getStrongPower(blockState: IBlockState?, blockAccess: IBlockAccess, pos: BlockPos, side: EnumFacing?): Int {
+    if (side != null) {
+      return (blockAccess.getQBlock(pos) as? IQBlockRedstone)?.getOutput(side, true) ?: 0
+    }
+    return 0
   }
 
   override fun getSelectedBoundingBox(state: IBlockState?, world: World, pos: BlockPos): AxisAlignedBB {
