@@ -9,6 +9,7 @@ import net.minecraft.block.state.IBlockState
 import net.minecraft.client.Minecraft
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EntityLivingBase
+import net.minecraft.item.ItemStack
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.ITickable
@@ -79,6 +80,11 @@ open class QBContainerMultipart(rl: ResourceLocation, factory: () -> QBlock) : Q
         collidingBoxes.add(axisalignedbb)
       }
     }
+  }
+
+  override fun getDrops(world: IBlockAccess?, pos: BlockPos?, part: IPartInfo, fortune: Int): MutableList<ItemStack> {
+    val qb = (part.tile as QBContainerTile).qb
+    return qb.getDroppedItems().toMutableList()
   }
 
   /**

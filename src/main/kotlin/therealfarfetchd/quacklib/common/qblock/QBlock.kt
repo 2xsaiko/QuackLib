@@ -10,6 +10,7 @@ import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
+import net.minecraft.world.IBlockAccess
 import net.minecraft.world.World
 import net.minecraftforge.common.capabilities.Capability
 import net.minecraftforge.common.property.IExtendedBlockState
@@ -179,6 +180,42 @@ abstract class QBlock {
    * Gets called when the block is clicked on. Returns true if the player should swing their hand.
    */
   open fun onActivated(player: EntityPlayer, hand: EnumHand, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean = false
+
+  /**
+   * Determines the strength of this QBlock (how long it will take to break)
+   */
+  open fun blockStrength(player: EntityPlayer): Float {
+    if (hardness < 0.0f) {
+      return 0.0f
+    }
+
+    val state = world.getBlockState(pos)
+
+    return if (!canHarvestBlock(player, world, pos)) {
+      player.getDigSpeed(state, pos) / hardness / 100f
+    } else {
+      player.getDigSpeed(state, pos) / hardness / 30f
+    }
+  }
+
+  open fun canHarvestBlock(player: EntityPlayer, world: IBlockAccess, pos: BlockPos): Boolean {
+    var state = world.getBlockState(pos)
+    state = state.block.getActualState(state, world, pos)
+    if (material.isToolNotRequired) {
+      return true
+    }
+
+    val stack = player.heldItemMainhand
+    val tool = container.blockType.getHarvestTool(this.world.getBlockState(this.pos))
+    if (stack.isEmpty || tool == null) {
+      return player.canHarvestBlock(state)
+    }
+
+    val toolLevel = stack.item.getHarvestLevel(stack, tool, player, state)
+    return if (toolLevel < 0) {
+      player.canHarvestBlock(state)
+    } else toolLevel >= container.blockType.getHarvestLevel(this.world.getBlockState(this.pos))
+  }
 
   /**
    * Returns the items this block drops.

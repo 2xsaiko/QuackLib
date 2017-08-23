@@ -93,6 +93,18 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
     return world.getQBlock(pos)?.hardness ?: noqb(pos)
   }
 
+  override fun canHarvestBlock(world: IBlockAccess, pos: BlockPos, player: EntityPlayer): Boolean {
+    return world.getQBlock(pos)?.canHarvestBlock(player, world, pos) ?: noqb(pos)
+  }
+
+  override fun getPlayerRelativeBlockHardness(state: IBlockState?, player: EntityPlayer, world: World, pos: BlockPos): Float {
+    return world.getQBlock(pos)?.blockStrength(player) ?: noqb(pos)
+  }
+
+  override fun getHarvestTool(state: IBlockState?): String? {
+    return super.getHarvestTool(state)
+  }
+
   override fun createNewTileEntity(worldIn: World?, meta: Int): TileEntity {
     val qb = factory()
     (worldIn ?: savedWorld)?.also { qb.world = it }
