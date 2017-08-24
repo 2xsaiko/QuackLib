@@ -2,6 +2,7 @@ package therealfarfetchd.quacklib.common.qblock
 
 import net.minecraft.block.Block
 import net.minecraft.block.ITileEntityProvider
+import net.minecraft.block.state.BlockFaceShape
 import net.minecraft.block.state.BlockStateContainer
 import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.EntityLivingBase
@@ -12,6 +13,7 @@ import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.*
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
+import net.minecraft.util.math.RayTraceResult
 import net.minecraft.world.Explosion
 import net.minecraft.world.IBlockAccess
 import net.minecraft.world.World
@@ -204,6 +206,10 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
 
   override fun isOpaqueCube(state: IBlockState?): Boolean = tempQB(null, null).isOpaque
 
+  override fun getBlockFaceShape(world: IBlockAccess, state: IBlockState?, pos: BlockPos, facing: EnumFacing): BlockFaceShape {
+    return world.getQBlock(pos)?.getBlockFaceShape(facing) ?: noqb(pos)
+  }
+
   override fun rotateBlock(world: World, pos: BlockPos, axis: EnumFacing): Boolean {
     return world.getQBlock(pos)?.rotateBlock(axis) ?: false
   }
@@ -218,6 +224,14 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
 
   override fun onNeighborChange(world: IBlockAccess, pos: BlockPos, neighbor: BlockPos) {
     world.getQBlock(pos)?.onNeighborTEChanged((neighbor - pos).getFacing())
+  }
+
+  override fun getPickBlock(state: IBlockState?, target: RayTraceResult?, world: World?, pos: BlockPos?, player: EntityPlayer?): ItemStack {
+    return super.getPickBlock(state, target, world, pos, player)
+  }
+
+  override fun getItem(world: World, pos: BlockPos, state: IBlockState?): ItemStack {
+    return world.getQBlock(pos)?.getItem() ?: noqb(pos)
   }
 
   protected fun <T> buildPart(world: World? = null, pos: BlockPos? = null, op: QBlock.() -> T): T {

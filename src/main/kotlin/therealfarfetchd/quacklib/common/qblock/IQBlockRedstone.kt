@@ -8,6 +8,6 @@ interface IQBlockRedstone {
 
   fun getOutput(side: EnumFacing, strong: Boolean): Int
 
-  fun updateInput(side: EnumFacing, str: Int, strong: Boolean)
+  fun updateInput(side: EnumFacing, str: Int, strong: Boolean) {}
 
 }

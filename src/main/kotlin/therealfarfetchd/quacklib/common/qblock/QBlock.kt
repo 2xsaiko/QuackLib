@@ -1,7 +1,9 @@
 package therealfarfetchd.quacklib.common.qblock
 
 import net.minecraft.block.material.Material
+
 import net.minecraft.block.properties.IProperty
+import net.minecraft.block.state.BlockFaceShape
 import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
@@ -181,6 +183,8 @@ abstract class QBlock {
    */
   open fun onActivated(player: EntityPlayer, hand: EnumHand, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean = false
 
+  open fun getBlockFaceShape(facing: EnumFacing): BlockFaceShape = BlockFaceShape.CENTER
+
   /**
    * Determines the strength of this QBlock (how long it will take to break)
    */
@@ -220,7 +224,9 @@ abstract class QBlock {
   /**
    * Returns the items this block drops.
    */
-  abstract fun getDroppedItems(): List<ItemStack>
+  open fun getDroppedItems(): List<ItemStack> = listOf(getItem())
+
+  abstract fun getItem(): ItemStack
 
   /**
    * Gets called to save TE data to disk or to send to the client.
@@ -261,5 +267,4 @@ abstract class QBlock {
   companion object {
     val FullAABB = AxisAlignedBB(0.0, 0.0, 0.0, 1.0, 1.0, 1.0)
   }
-
 }
