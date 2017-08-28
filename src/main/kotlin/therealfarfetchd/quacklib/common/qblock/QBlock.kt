@@ -238,6 +238,8 @@ abstract class QBlock {
    */
   open fun loadData(nbt: QNBTCompound, target: DataTarget) {}
 
+  open fun validate() {}
+
   /**
    * Schedules the block for saving to disk.
    */

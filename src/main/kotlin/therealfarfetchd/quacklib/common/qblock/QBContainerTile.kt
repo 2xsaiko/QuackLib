@@ -74,6 +74,11 @@ open class QBContainerTile() : TileEntity() {
     qb.loadData(QNBTCompound(subTag), DataTarget.Save)
   }
 
+  override fun validate() {
+    qb.validate()
+    super.validate()
+  }
+
   override fun getUpdatePacket(): SPacketUpdateTileEntity? = SPacketUpdateTileEntity(pos, 0, updateTag)
 
   override fun getUpdateTag(): NBTTagCompound {
