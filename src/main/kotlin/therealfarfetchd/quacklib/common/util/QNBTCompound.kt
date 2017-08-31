@@ -14,7 +14,7 @@ class QNBTCompound(val self: NBTTagCompound) {
   val empty: Boolean
     get() = self.hasNoTags()
 
-  fun exists(s: String): Boolean = self.hasKey(s) || self.hasUniqueId(s)
+  operator fun contains(s: String): Boolean = self.hasKey(s) || self.hasUniqueId(s)
 
   val bool = object : IView<String, Boolean> {
     override fun get(k: String): Boolean = self.getBoolean(k)
@@ -73,8 +73,8 @@ class QNBTCompound(val self: NBTTagCompound) {
 
   val nbt = object : IView<String, QNBTCompound> {
     override fun get(k: String): QNBTCompound {
-      if (exists(k)) return QNBTCompound(self.getCompoundTag(k))
-      else return QNBTCompound().also { set(k, it) }
+      return if (contains(k)) QNBTCompound(self.getCompoundTag(k))
+      else QNBTCompound().also { set(k, it) }
     }
 
     override fun set(k: String, v: QNBTCompound) = self.setTag(k, v.self)
