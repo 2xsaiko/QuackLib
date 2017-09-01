@@ -115,6 +115,10 @@ open class QBContainerTile() : TileEntity() {
     qb.onUnload()
   }
 
+  override fun hasFastRenderer(): Boolean {
+    return qb.hasFastRenderer
+  }
+
   override fun hasCapability(capability: Capability<*>, facing: EnumFacing?): Boolean {
     return super.hasCapability(capability, facing) || qb.getCapability(capability, facing) != null
   }

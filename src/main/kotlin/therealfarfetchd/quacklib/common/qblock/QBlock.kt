@@ -96,6 +96,11 @@ abstract class QBlock {
   var prePlaced: Boolean = false
 
   /**
+   * True if this block has a FastQBSR.
+   */
+  open val hasFastRenderer: Boolean = false
+
+  /**
    * Called when the block gets added to the world.
    */
   open fun onAdded() {}
