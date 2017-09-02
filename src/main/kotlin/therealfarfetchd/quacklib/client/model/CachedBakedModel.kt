@@ -1,11 +1,14 @@
 package therealfarfetchd.quacklib.client.model
 
 import net.minecraft.block.state.IBlockState
+import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.block.model.BakedQuad
 import net.minecraft.client.renderer.block.model.IBakedModel
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms
 import net.minecraft.client.renderer.block.model.ItemOverrideList
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.entity.EntityLivingBase
+import net.minecraft.init.Blocks
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraft.world.World
@@ -18,6 +21,8 @@ class CachedBakedModel(private val bakery: AbstractModelBakery) : IBakedModel {
     if (state == null) return emptyList()
     return bakery.bakeQuads(side, state as IExtendedBlockState)
   }
+
+  override fun getItemCameraTransforms(): ItemCameraTransforms = blockItemCameraTransforms
 
   override fun isBuiltInRenderer(): Boolean = false
 
@@ -40,6 +45,8 @@ class CachedBakedModel(private val bakery: AbstractModelBakery) : IBakedModel {
       return bakery.bakeItemQuads(side, stack!!)
     }
 
+    override fun getItemCameraTransforms(): ItemCameraTransforms = blockItemCameraTransforms
+
     override fun isBuiltInRenderer(): Boolean = false
 
     override fun isAmbientOcclusion(): Boolean = true
@@ -51,5 +58,13 @@ class CachedBakedModel(private val bakery: AbstractModelBakery) : IBakedModel {
 
   companion object {
     //    private var models: Map<IBlockState, >
+
+    fun clearCache() {
+
+    }
+
+    private val blockItemCameraTransforms by lazy {
+      Minecraft.getMinecraft().blockRendererDispatcher.blockModelShapes.getModelForState(Blocks.STONE.defaultState).itemCameraTransforms
+    }
   }
 }
