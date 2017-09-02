@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.block.model.ItemOverrideList
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.init.Blocks
+import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraft.world.World
@@ -19,7 +20,10 @@ class CachedBakedModel(private val bakery: AbstractModelBakery) : IBakedModel {
 
   override fun getQuads(state: IBlockState?, side: EnumFacing?, rand: Long): List<BakedQuad> {
     if (state == null) return emptyList()
-    return bakery.bakeQuads(side, state as IExtendedBlockState)
+    if (state !in models) {
+      models += state to bakery.bakeQuads(side, state as IExtendedBlockState)
+    }
+    return models[state]!!
   }
 
   override fun getItemCameraTransforms(): ItemCameraTransforms = blockItemCameraTransforms
@@ -42,7 +46,12 @@ class CachedBakedModel(private val bakery: AbstractModelBakery) : IBakedModel {
     override fun getParticleTexture(): TextureAtlasSprite = bakery.particleTexture
 
     override fun getQuads(state: IBlockState?, side: EnumFacing?, rand: Long): List<BakedQuad> {
-      return bakery.bakeItemQuads(side, stack!!)
+      val stack = this.stack ?: return emptyList()
+      val key = stack.item to stack.metadata
+      if (key !in itemModels) {
+        itemModels += key to bakery.bakeItemQuads(side, stack)
+      }
+      return itemModels[key]!!
     }
 
     override fun getItemCameraTransforms(): ItemCameraTransforms = blockItemCameraTransforms
@@ -57,10 +66,12 @@ class CachedBakedModel(private val bakery: AbstractModelBakery) : IBakedModel {
   }
 
   companion object {
-    //    private var models: Map<IBlockState, >
+    private var models: Map<IBlockState, List<BakedQuad>> = emptyMap()
+    private var itemModels: Map<Pair<Item, Int>, List<BakedQuad>> = emptyMap()
 
     fun clearCache() {
-
+      models = emptyMap()
+      itemModels = emptyMap()
     }
 
     private val blockItemCameraTransforms by lazy {

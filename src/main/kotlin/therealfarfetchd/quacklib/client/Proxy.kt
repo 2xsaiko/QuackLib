@@ -18,6 +18,7 @@ import therealfarfetchd.quacklib.client.gui.elements.Dummy
 import therealfarfetchd.quacklib.client.gui.elements.Frame
 import therealfarfetchd.quacklib.client.gui.elements.Label
 import therealfarfetchd.quacklib.client.model.BakedModelRegistry
+import therealfarfetchd.quacklib.client.model.CachedBakedModel
 import therealfarfetchd.quacklib.client.model.IIconRegister
 import therealfarfetchd.quacklib.client.qbr.QBContainerTileRenderer
 import therealfarfetchd.quacklib.common.Proxy
@@ -57,6 +58,7 @@ class Proxy : Proxy() {
 
   @SubscribeEvent
   fun bakeModels(e: ModelBakeEvent) {
+    CachedBakedModel.clearCache()
     for ((model, mrl) in BakedModelRegistry.models) {
       e.modelRegistry.putObject(mrl, model)
     }
@@ -71,5 +73,4 @@ class Proxy : Proxy() {
       }
     }
   }
-
 }
