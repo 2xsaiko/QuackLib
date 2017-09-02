@@ -45,6 +45,13 @@ data class Vec3(val x: Float, val y: Float, val z: Float) {
 data class Vec2(val x: Float, val y: Float) {
   operator fun plus(other: Vec2): Vec2 = Vec2(x + other.x, y + other.y)
   operator fun minus(other: Vec2): Vec2 = Vec2(x - other.x, y - other.y)
+  operator fun div(other: Vec2): Vec2 = Vec2(x / other.x, y / other.y)
+  operator fun times(other: Vec2): Vec2 = Vec2(x * other.x, y * other.y)
+
+  operator fun plus(other: Float): Vec2 = Vec2(x + other, y + other)
+  operator fun minus(other: Float): Vec2 = Vec2(x + other, y + other)
+  operator fun div(other: Float): Vec2 = Vec2(x / other, y / other)
+  operator fun times(other: Float): Vec2 = Vec2(x * other, y * other)
 
   fun rotate(a: Float, center: Vec2): Vec2 {
     return if (a == 0.0F || center == this) this.copy()

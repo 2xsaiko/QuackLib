@@ -8,7 +8,7 @@ import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad
 import therealfarfetchd.quacklib.common.util.Vec2
 import therealfarfetchd.quacklib.common.util.Vec3
 
-data class Quad(val texture: TextureAtlasSprite, val facingVec: Vec3, val vert1: Vec3, val vert2: Vec3, val vert3: Vec3, val vert4: Vec3, val tex1: Vec2, val tex2: Vec2, private val rotTex: Boolean) {
+data class Quad(val texture: TextureAtlasSprite, val facingVec: Vec3, val vert1: Vec3, val vert2: Vec3, val vert3: Vec3, val vert4: Vec3, val tex1: Vec2, val tex2: Vec2, val tex3: Vec2, val tex4: Vec2) {
   val facing: EnumFacing by lazy { EnumFacing.getFacingFromVector(facingVec.x, facingVec.y, facingVec.z) }
 
   fun bake(): BakedQuad {
@@ -39,22 +39,12 @@ data class Quad(val texture: TextureAtlasSprite, val facingVec: Vec3, val vert1:
   }
 
   private fun shuf(i: Int): Pair<Vec3, Vec2> {
-    if (rotTex) {
-      return when (i) {
-        0 -> vert1 to Vec2(tex1.x, tex2.y)
-        1 -> vert2 to tex2
-        2 -> vert3 to Vec2(tex2.x, tex1.y)
-        3 -> vert4 to tex1
-        else -> error("$i must be in 0..3!")
-      }
-    } else {
-      return when (i) {
-        0 -> vert1 to tex1
-        1 -> vert2 to Vec2(tex1.x, tex2.y)
-        2 -> vert3 to tex2
-        3 -> vert4 to Vec2(tex2.x, tex1.y)
-        else -> error("$i must be in 0..3!")
-      }
+    return when (i) {
+      0 -> vert1 to tex1
+      1 -> vert2 to tex2
+      2 -> vert3 to tex3
+      3 -> vert4 to tex4
+      else -> error("$i must be in 0..3!")
     }
   }
 
@@ -65,7 +55,7 @@ data class Quad(val texture: TextureAtlasSprite, val facingVec: Vec3, val vert1:
    */
 
   fun translate(vec: Vec3): Quad {
-    return Quad(texture, facingVec, vert1 + vec, vert2 + vec, vert3 + vec, vert4 + vec, tex1, tex2, rotTex)
+    return Quad(texture, facingVec, vert1 + vec, vert2 + vec, vert3 + vec, vert4 + vec, tex1, tex2, tex3, tex4)
   }
 
   /**
@@ -80,18 +70,33 @@ data class Quad(val texture: TextureAtlasSprite, val facingVec: Vec3, val vert1:
     return if (a == 0.0F) this.copy()
     else {
       val r = listOf(vert1, vert2, vert3, vert4, facingVec).map { it.rotate(a, axis, Vec3(0.5f, 0.5f, 0.5f)) }
-      Quad(texture, r[4], r[0], r[1], r[2], r[3], tex1, tex2, rotTex)
+      Quad(texture, r[4], r[0], r[1], r[2], r[3], tex1, tex2, tex3, tex4)
     }
   }
 
   /**
-   * Rotates the texture by 90° (or reverts the rotation).
+   * Rotates the texture by 90°.
    * Use this if you have a texture that is aligned horizontally, but the quad needs it to be vertical and vice-versa.
    *
    * @return The quad with a rotated texture
    */
 
-  val rotatedTexture: Quad by lazy { copy(rotTex = !rotTex) }
+  val rotatedTexture90: Quad by lazy { copy(tex1 = tex2, tex2 = tex3, tex3 = tex4, tex4 = tex1) }
+
+  /**
+   * Rotates a texture by 180°.
+   */
+  val rotatedTexture180: Quad by lazy { copy(tex1 = tex3, tex2 = tex4, tex3 = tex1, tex4 = tex2) }
+
+  /**
+   * Flips the texture on the x axis.
+   */
+  val mirrorTextureX: Quad by lazy { copy(tex1 = tex4, tex2 = tex3, tex3 = tex2, tex4 = tex1) }
+
+  /**
+   * Flips the texture on the y axis.
+   */
+  val mirrorTextureY: Quad by lazy { copy(tex1 = tex2, tex2 = tex1, tex3 = tex4, tex4 = tex3) }
 
   /**
    * Flips the textured side of this quad.
@@ -99,7 +104,7 @@ data class Quad(val texture: TextureAtlasSprite, val facingVec: Vec3, val vert1:
    * @return The quad with the flipped texture
    */
 
-  val flipTexturedSide: Quad by lazy { copy(facingVec = Vec3(-facingVec.x, -facingVec.y, -facingVec.z), vert1 = vert2, vert2 = vert1, vert3 = vert4, vert4 = vert3, tex1 = Vec2(tex1.x, tex2.y), tex2 = Vec2(tex2.x, tex1.y)) }
+  val flipTexturedSide: Quad by lazy { copy(facingVec = Vec3(-facingVec.x, -facingVec.y, -facingVec.z), vert1 = vert2, vert2 = vert1, vert3 = vert4, vert4 = vert3).mirrorTextureY }
 
   fun mirror(axis: EnumFacing.Axis): Quad {
     return (when (axis) {
@@ -123,5 +128,4 @@ data class Quad(val texture: TextureAtlasSprite, val facingVec: Vec3, val vert1:
       )
     }).flipTexturedSide
   }
-
 }
