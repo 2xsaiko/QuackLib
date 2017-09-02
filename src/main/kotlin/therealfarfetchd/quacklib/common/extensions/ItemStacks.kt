@@ -26,7 +26,9 @@ fun ItemStack.spawnAt(world: World, x: Double, y: Double, z: Double) {
 fun ItemStack.spawnAt(world: World, x: Double, y: Double, z: Double, velX: Double, velY: Double, velZ: Double) {
   val item = EntityItem(world, x, y, z, this)
   item.setDefaultPickupDelay()
-  item.setVelocity(velX, velY, velZ)
+  item.motionX = velX
+  item.motionY = velY
+  item.motionZ = velZ
   world.spawnEntity(item)
 }
 
