@@ -36,8 +36,6 @@ abstract class BlockWire(val width: Double, val height: Double) : QBlock(), IQBl
 
   var connections: Map<Pair<EnumFacing, EnumFacing>, EnumWireConnection> = emptyMap()
 
-  private var wireData: QNBTCompound = QNBTCompound()
-
   /**
    * Determine if this wire can connect to the passed BlockWire.
    */
@@ -149,14 +147,12 @@ abstract class BlockWire(val width: Double, val height: Double) : QBlock(), IQBl
   override fun saveData(nbt: QNBTCompound, target: DataTarget) {
     super.saveData(nbt, target)
     nbt.ubyte["F"] = facing.index
-    nbt.nbt["Data"] = wireData
     if (!prePlaced) nbt.bytes["C"] = serializeConnections().toByteArray()
   }
 
   override fun loadData(nbt: QNBTCompound, target: DataTarget) {
     super.loadData(nbt, target)
     facing = EnumFacing.getFront(nbt.ubyte["F"])
-    wireData = nbt.nbt["Data"]
     if (!prePlaced) deserializeConnections(nbt.bytes["C"].toList())
   }
 
