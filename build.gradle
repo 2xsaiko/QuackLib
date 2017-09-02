@@ -5,13 +5,13 @@ buildscript {
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.1.4"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.1.4-3"
     }
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'kotlin'
 
-version = "1.0.0"
+version = "1.1.0"
 group = "therealfarfetchd.quacklib"
 archivesBaseName = "quacklib"
 
@@ -24,7 +24,7 @@ compileKotlin {
 }
 
 minecraft {
-    version = "1.12.1-14.22.0.2452"
+    version = "1.12.1-14.22.0.2467"
     runDir = "run"
     mappings = "snapshot_20170624"
 }
