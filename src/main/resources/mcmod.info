@@ -10,6 +10,7 @@
     "authorList": ["the_real_farfetchd"],
     "credits": "20,000 Republic Dataries",
     "logoFile": "farfetchd.png",
+    "useDependencyInformation": true,
     "requiredMods": ["forge", "forgelin"]
   }]
 }

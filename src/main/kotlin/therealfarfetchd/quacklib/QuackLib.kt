@@ -12,7 +12,6 @@ import therealfarfetchd.quacklib.common.Proxy
 /**
  * Created by marco on 08.07.17.
  */
-
 const val ModID = "quacklib"
 const val ClientProxy = "therealfarfetchd.$ModID.client.Proxy"
 const val ServerProxy = "therealfarfetchd.$ModID.common.Proxy"
@@ -34,5 +33,4 @@ object QuackLib {
 
   @Mod.EventHandler
   fun postInit(e: FMLPostInitializationEvent) = proxy.postInit(e)
-
 }
