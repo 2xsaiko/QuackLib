@@ -20,10 +20,8 @@ class CachedBakedModel(private val bakery: AbstractModelBakery) : IBakedModel {
 
   override fun getQuads(state: IBlockState?, side: EnumFacing?, rand: Long): List<BakedQuad> {
     if (state == null) return emptyList()
-    if (state !in models) {
-      models += state to bakery.bakeQuads(side, state as IExtendedBlockState)
-    }
-    return models[state]!!
+    val key = state to side
+    return models[key] ?: bakery.bakeQuads(side, state as IExtendedBlockState).also { models += key to it }
   }
 
   override fun getItemCameraTransforms(): ItemCameraTransforms = blockItemCameraTransforms
@@ -47,11 +45,8 @@ class CachedBakedModel(private val bakery: AbstractModelBakery) : IBakedModel {
 
     override fun getQuads(state: IBlockState?, side: EnumFacing?, rand: Long): List<BakedQuad> {
       val stack = this.stack ?: return emptyList()
-      val key = stack.item to stack.metadata
-      if (key !in itemModels) {
-        itemModels += key to bakery.bakeItemQuads(side, stack)
-      }
-      return itemModels[key]!!
+      val key = Triple(stack.item, stack.metadata, side)
+      return itemModels[key] ?: bakery.bakeItemQuads(side, stack).also { itemModels += key to it }
     }
 
     override fun getItemCameraTransforms(): ItemCameraTransforms = blockItemCameraTransforms
@@ -66,8 +61,8 @@ class CachedBakedModel(private val bakery: AbstractModelBakery) : IBakedModel {
   }
 
   companion object {
-    private var models: Map<IBlockState, List<BakedQuad>> = emptyMap()
-    private var itemModels: Map<Pair<Item, Int>, List<BakedQuad>> = emptyMap()
+    private var models: Map<Pair<IBlockState, EnumFacing?>, List<BakedQuad>> = emptyMap()
+    private var itemModels: Map<Triple<Item, Int, EnumFacing?>, List<BakedQuad>> = emptyMap()
 
     fun clearCache() {
       models = emptyMap()
