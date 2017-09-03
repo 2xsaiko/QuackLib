@@ -9,7 +9,6 @@ import net.minecraft.client.renderer.block.model.ItemOverrideList
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.init.Blocks
-import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraft.world.World
@@ -19,9 +18,9 @@ class CachedBakedModel(private val bakery: AbstractModelBakery) : IBakedModel {
   override fun getParticleTexture(): TextureAtlasSprite = bakery.particleTexture
 
   override fun getQuads(state: IBlockState?, side: EnumFacing?, rand: Long): List<BakedQuad> {
-    if (state == null) return emptyList()
-    val key = state to side
-    return models[key] ?: bakery.bakeQuads(side, state as IExtendedBlockState).also { models += key to it }
+    if (state !is IExtendedBlockState) return emptyList()
+    val key = bakery.createKey(state, side)
+    return models[key] ?: bakery.bakeQuads(side, state).also { models += key to it }
   }
 
   override fun getItemCameraTransforms(): ItemCameraTransforms = blockItemCameraTransforms
@@ -45,7 +44,7 @@ class CachedBakedModel(private val bakery: AbstractModelBakery) : IBakedModel {
 
     override fun getQuads(state: IBlockState?, side: EnumFacing?, rand: Long): List<BakedQuad> {
       val stack = this.stack ?: return emptyList()
-      val key = Triple(stack.item, stack.metadata, side)
+      val key = bakery.createKey(stack, side)
       return itemModels[key] ?: bakery.bakeItemQuads(side, stack).also { itemModels += key to it }
     }
 
@@ -61,8 +60,8 @@ class CachedBakedModel(private val bakery: AbstractModelBakery) : IBakedModel {
   }
 
   companion object {
-    private var models: Map<Pair<IBlockState, EnumFacing?>, List<BakedQuad>> = emptyMap()
-    private var itemModels: Map<Triple<Item, Int, EnumFacing?>, List<BakedQuad>> = emptyMap()
+    private var models: Map<String, List<BakedQuad>> = emptyMap()
+    private var itemModels: Map<String, List<BakedQuad>> = emptyMap()
 
     fun clearCache() {
       models = emptyMap()

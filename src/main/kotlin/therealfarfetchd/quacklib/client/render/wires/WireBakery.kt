@@ -12,6 +12,7 @@ import therealfarfetchd.quacklib.client.model.AbstractModelBakery
 import therealfarfetchd.quacklib.client.model.IIconRegister
 import therealfarfetchd.quacklib.client.render.Quad
 import therealfarfetchd.quacklib.client.render.QuadFactory
+import therealfarfetchd.quacklib.common.extensions.get
 import therealfarfetchd.quacklib.common.extensions.mapIf
 import therealfarfetchd.quacklib.common.extensions.packInt
 import therealfarfetchd.quacklib.common.util.EnumEdge
@@ -21,7 +22,7 @@ import therealfarfetchd.quacklib.common.wires.EnumWireConnection
 import therealfarfetchd.quacklib.common.wires.EnumWireConnection.External
 import therealfarfetchd.quacklib.common.wires.EnumWireConnection.None
 
-class WireBakery(
+open class WireBakery(
   private val cableWidth: Float,
   private val cableHeight: Float,
   private val textureSize: Float,
@@ -247,4 +248,6 @@ class WireBakery(
   override fun registerIcons(textureMap: TextureMap) {
     textures = texLocations.map { it to textureMap.registerSprite(it) }.toMap()
   }
+
+  override fun createKey(state: IExtendedBlockState, face: EnumFacing?): String = super.createKey(state, face) + state[BlockWire.PropConnections].joinToString()
 }
