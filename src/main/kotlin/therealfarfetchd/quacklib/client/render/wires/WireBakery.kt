@@ -86,11 +86,16 @@ open class WireBakery(
     val c = state.getValue(BlockWire.PropConnections).toTypedArray()
     val side = state.getValue(BlockWire.PropFacing)
 
-    return mkQuads(side, *c).map(Quad::bake)
+    if (face !in listOf(null, side)) return emptyList()
+
+    return if (face == null) mkQuads(side, *c).map(Quad::bake)
+    else emptyList() // TODO render bottom of wire
   }
 
   override fun bakeItemQuads(face: EnumFacing?, stack: ItemStack): List<BakedQuad> {
     texture = textures[itemTexLocationRetriever(stack)]!!
+
+    if (face != null) return emptyList()
 
     return mkQuads(DOWN, External, External, External, External).map { it.translate(Vec3(0F, 0.275F, 0F)) }.map(Quad::bake)
   }
