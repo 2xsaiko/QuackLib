@@ -31,6 +31,7 @@ abstract class BlockWire(val width: Double, val height: Double) : QBlock(), IQBl
 
   val baseBounds = AxisAlignedBB(0.0, 0.0, 0.0, 1.0, height, 1.0)
   val partBounds = AxisAlignedBB((1 - width) / 2, 0.0, (1 - width) / 2, 1 - (1 - width) / 2, height, 1 - (1 - width) / 2)
+  val edgeBounds = AxisAlignedBB(-height, 0.0, (1 - width) / 2, 0.0, height, 1 - (1 - width) / 2)
 
   var facing: EnumFacing = EnumFacing.DOWN; protected set
 

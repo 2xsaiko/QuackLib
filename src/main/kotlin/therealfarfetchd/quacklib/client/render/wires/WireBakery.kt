@@ -17,6 +17,7 @@ import therealfarfetchd.quacklib.common.extensions.mapIf
 import therealfarfetchd.quacklib.common.extensions.packInt
 import therealfarfetchd.quacklib.common.util.EnumEdge
 import therealfarfetchd.quacklib.common.util.Vec2
+import therealfarfetchd.quacklib.common.util.Vec3
 import therealfarfetchd.quacklib.common.wires.BlockWire
 import therealfarfetchd.quacklib.common.wires.EnumWireConnection
 import therealfarfetchd.quacklib.common.wires.EnumWireConnection.External
@@ -91,7 +92,7 @@ open class WireBakery(
   override fun bakeItemQuads(face: EnumFacing?, stack: ItemStack): List<BakedQuad> {
     texture = textures[itemTexLocationRetriever(stack)]!!
 
-    return mkQuads(DOWN, External, External, External, External).map(Quad::bake)
+    return mkQuads(DOWN, External, External, External, External).map { it.translate(Vec3(0F, 0.275F, 0F)) }.map(Quad::bake)
   }
 
   fun mkQuads(side: EnumFacing, vararg c: EnumWireConnection): List<Quad> {
