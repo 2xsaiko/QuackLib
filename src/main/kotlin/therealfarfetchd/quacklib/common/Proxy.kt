@@ -2,6 +2,7 @@ package therealfarfetchd.quacklib.common
 
 import net.minecraft.item.Item
 import net.minecraftforge.common.MinecraftForge
+import net.minecraftforge.common.capabilities.CapabilityManager
 import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
@@ -13,6 +14,8 @@ import net.minecraftforge.fml.common.registry.GameRegistry
 import org.apache.logging.log4j.Level
 import therealfarfetchd.quacklib.ModID
 import therealfarfetchd.quacklib.QuackLib
+import therealfarfetchd.quacklib.common.api.block.capability.IConnectable
+import therealfarfetchd.quacklib.common.extensions.register
 import therealfarfetchd.quacklib.common.item.Wrench
 import therealfarfetchd.quacklib.common.qblock.QBContainer
 import therealfarfetchd.quacklib.common.qblock.QBContainerTile
@@ -36,6 +39,8 @@ open class Proxy {
       GameRegistry.registerTileEntity(QBContainerTileMultipart::class.java, "$ModID:qblock_container_mp")
       GameRegistry.registerTileEntity(QBContainerTileMultipart.Ticking::class.java, "$ModID:qblock_container_mp_t")
     }
+
+    CapabilityManager.INSTANCE.register(IConnectable::class)
   }
 
   open fun init(e: FMLInitializationEvent) {}

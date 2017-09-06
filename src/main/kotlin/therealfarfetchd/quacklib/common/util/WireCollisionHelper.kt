@@ -1,15 +1,25 @@
 package therealfarfetchd.quacklib.common.util
 
+import mcmultipart.api.slot.EnumFaceSlot
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
+import net.minecraft.world.World
+import therealfarfetchd.quacklib.common.extensions.getQBlock
 import therealfarfetchd.quacklib.common.extensions.plus
 import therealfarfetchd.quacklib.common.extensions.rotate
 import therealfarfetchd.quacklib.common.extensions.rotateY
 import therealfarfetchd.quacklib.common.wires.BlockWire
 
 object WireCollisionHelper {
-  fun collides(wire: BlockWire, side: EnumFacing): Boolean {
+  fun collides(world: World, pos: BlockPos, edge: EnumFaceLocation): Boolean {
+    if (edge.side == null) return true
+    val b1 = world.getQBlock(pos.offset(edge.base.opposite), EnumFaceSlot.fromFace(edge.side)) as? BlockWire<*>
+    val b2 = world.getQBlock(pos.offset(edge.side), EnumFaceSlot.fromFace(edge.base.opposite)) as? BlockWire<*>
+    return b1?.let { collides(it, edge.base) } ?: false || b2?.let { collides(it, edge.side.opposite) } ?: false
+  }
+
+  fun collides(wire: BlockWire<*>, side: EnumFacing): Boolean {
     val pos = wire.pos.offset(side)
     val world = wire.actualWorld
     val state = world.getBlockState(pos)

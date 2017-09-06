@@ -8,8 +8,11 @@ import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad
 import therealfarfetchd.quacklib.common.util.Vec2
 import therealfarfetchd.quacklib.common.util.Vec3
 
-data class Quad(val texture: TextureAtlasSprite, val facingVec: Vec3, val vert1: Vec3, val vert2: Vec3, val vert3: Vec3, val vert4: Vec3, val tex1: Vec2, val tex2: Vec2, val tex3: Vec2, val tex4: Vec2) {
-  val facing: EnumFacing by lazy { EnumFacing.getFacingFromVector(facingVec.x, facingVec.y, facingVec.z) }
+data class Quad(val texture: TextureAtlasSprite, val vert1: Vec3, val vert2: Vec3, val vert3: Vec3, val vert4: Vec3, val tex1: Vec2, val tex2: Vec2, val tex3: Vec2, val tex4: Vec2) {
+
+  val normal by lazy { (vert2 - vert1 crossProduct vert3 - vert1).normalize().copy() }
+
+  val facing: EnumFacing by lazy { EnumFacing.getFacingFromVector(normal.x, normal.y, normal.z) }
 
   fun bake(): BakedQuad {
     val vertices = (0..3).map { i ->
@@ -17,13 +20,9 @@ data class Quad(val texture: TextureAtlasSprite, val facingVec: Vec3, val vert1:
       xyz to Vec2(texture.getInterpolatedU(uv.x * 16.0), texture.getInterpolatedV(uv.y * 16.0))
     }
 
-    val diff1 = vertices[1].first - vertices[0].first
-    val diff2 = vertices[2].first - vertices[0].first
-    val normal = (diff1 crossProduct diff2).normalize().copy()
-
     val builder = UnpackedBakedQuad.Builder(DefaultVertexFormats.ITEM)
     builder.setApplyDiffuseLighting(true)
-    builder.setQuadOrientation(facing)
+    builder.setQuadOrientation(EnumFacing.getFacingFromVector(normal.x, normal.y, normal.z))
     builder.setQuadTint(-1)
     builder.setTexture(texture)
 
@@ -55,7 +54,7 @@ data class Quad(val texture: TextureAtlasSprite, val facingVec: Vec3, val vert1:
    */
 
   fun translate(vec: Vec3): Quad {
-    return Quad(texture, facingVec, vert1 + vec, vert2 + vec, vert3 + vec, vert4 + vec, tex1, tex2, tex3, tex4)
+    return Quad(texture, vert1 + vec, vert2 + vec, vert3 + vec, vert4 + vec, tex1, tex2, tex3, tex4)
   }
 
   /**
@@ -69,8 +68,8 @@ data class Quad(val texture: TextureAtlasSprite, val facingVec: Vec3, val vert1:
   fun rotate(axis: EnumFacing.Axis, a: Float): Quad {
     return if (a == 0.0F) this.copy()
     else {
-      val r = listOf(vert1, vert2, vert3, vert4, facingVec).map { it.rotate(a, axis, Vec3(0.5f, 0.5f, 0.5f)) }
-      Quad(texture, r[4], r[0], r[1], r[2], r[3], tex1, tex2, tex3, tex4)
+      val r = listOf(vert1, vert2, vert3, vert4).map { it.rotate(a, axis, Vec3(0.5f, 0.5f, 0.5f)) }
+      Quad(texture, r[0], r[1], r[2], r[3], tex1, tex2, tex3, tex4)
     }
   }
 
@@ -104,7 +103,7 @@ data class Quad(val texture: TextureAtlasSprite, val facingVec: Vec3, val vert1:
    * @return The quad with the flipped texture
    */
 
-  val flipTexturedSide: Quad by lazy { copy(facingVec = Vec3(-facingVec.x, -facingVec.y, -facingVec.z), vert1 = vert2, vert2 = vert1, vert3 = vert4, vert4 = vert3).mirrorTextureY }
+  val flipTexturedSide: Quad by lazy { copy(vert1 = vert2, vert2 = vert1, vert3 = vert4, vert4 = vert3).mirrorTextureY }
 
   fun mirror(axis: EnumFacing.Axis): Quad {
     return (when (axis) {

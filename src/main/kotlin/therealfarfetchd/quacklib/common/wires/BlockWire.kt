@@ -13,65 +13,47 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumFacing.*
+import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.IBlockAccess
-import net.minecraft.world.World
+import net.minecraftforge.common.capabilities.Capability
 import net.minecraftforge.common.property.IExtendedBlockState
 import net.minecraftforge.common.property.IUnlistedProperty
-import therealfarfetchd.quacklib.client.render.wires.EnumWireRender
 import therealfarfetchd.quacklib.common.DataTarget
 import therealfarfetchd.quacklib.common.Scheduler
-import therealfarfetchd.quacklib.common.extensions.*
+import therealfarfetchd.quacklib.common.api.block.capability.Capabilities
+import therealfarfetchd.quacklib.common.api.block.capability.WireConnectable
+import therealfarfetchd.quacklib.common.extensions.notifyNeighborsOfSides
+import therealfarfetchd.quacklib.common.extensions.rotate
 import therealfarfetchd.quacklib.common.qblock.IQBlockMultipart
 import therealfarfetchd.quacklib.common.qblock.QBlock
+import therealfarfetchd.quacklib.common.util.EnumFaceLocation
 import therealfarfetchd.quacklib.common.util.QNBTCompound
 
-abstract class BlockWire(val width: Double, val height: Double) : QBlock(), IQBlockMultipart {
+abstract class BlockWire<out T>(val width: Double, val height: Double) : QBlock(), IQBlockMultipart, BaseConnectable {
 
   val baseBounds = AxisAlignedBB(0.0, 0.0, 0.0, 1.0, height, 1.0)
   val partBounds = AxisAlignedBB((1 - width) / 2, 0.0, (1 - width) / 2, 1 - (1 - width) / 2, height, 1 - (1 - width) / 2)
   val edgeBounds = AxisAlignedBB(-height, 0.0, (1 - width) / 2, 0.0, height, 1 - (1 - width) / 2)
 
+  @Suppress("LeakingThis")
+  private val connectable = WireConnectable(this)
+
   var facing: EnumFacing = EnumFacing.DOWN; protected set
 
-  var connections: Map<Pair<EnumFacing, EnumFacing>, EnumWireConnection> = emptyMap()
+  override var connections: Map<EnumFaceLocation, EnumWireConnection> = emptyMap()
 
-  /**
-   * Determine if this wire can connect to the passed BlockWire.
-   */
-  abstract fun connectsTo(other: BlockWire): Boolean
+  abstract val dataType: ResourceLocation
 
-  private fun updateCableConnections() {
-    if (world.isServer) {
-      val oldconn = connections
-      connections = validSides[facing]!!.map { it to facing to getConnectionOnSide(it) }.toMap()
-      if (connections != oldconn) {
-        dataChanged()
-        clientDataChanged()
-      }
-    }
+  abstract val data: T
+
+  override fun updateCableConnections(): Boolean {
+    return if (super.updateCableConnections()) {
+      clientDataChanged()
+      true
+    } else false
   }
-
-  open fun getConnectionOnSide(f: EnumFacing): EnumWireConnection {
-    var block: QBlock? = actualWorld.getQBlock(pos, EnumFaceSlot.fromFace(f))
-    if (block is BlockWire && connectsTo(block) && block.connectsTo(this)) {
-      return EnumWireConnection.Internal
-    }
-
-    block = world.getQBlock(pos.offset(f), EnumFaceSlot.fromFace(facing))
-    if (block is BlockWire && connectsTo(block) && block.connectsTo(this)) {
-      return EnumWireConnection.External
-    }
-
-    block = world.getQBlock(pos.offset(f).offset(facing), EnumFaceSlot.fromFace(f.opposite))
-    if (block is BlockWire && connectsTo(block) && block.connectsTo(this)) {
-      return EnumWireConnection.Corner
-    }
-
-    return EnumWireConnection.None
-  }
-
 
   override fun onPlaced(placer: EntityLivingBase?, stack: ItemStack?, sidePlaced: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) {
     super.onPlaced(placer, stack, sidePlaced, hitX, hitY, hitZ)
@@ -87,31 +69,9 @@ abstract class BlockWire(val width: Double, val height: Double) : QBlock(), IQBl
     }
   }
 
-  private fun serializeConnections(): List<Byte> {
-    var list: List<Int> = emptyList()
-    for ((a, b) in connections.filterValues { it.renderType != EnumWireRender.Invisible }) {
-      list += a.first.index
-      list += a.second.index
-      list += b.identifierId
-    }
-    return list.nibbles()
-  }
-
-  private fun deserializeConnections(list: List<Byte>) {
-    var l = list.unpackNibbles()
-    connections = emptyMap()
-    while (l.size >= 3) {
-      val a1 = EnumFacing.getFront(l[0])
-      val a2 = EnumFacing.getFront(l[1])
-      val b = EnumWireConnection.byIdentifier(l[2])
-      connections += a1 to a2 to b
-      l = l.slice(3 until l.size)
-    }
-  }
-
   private fun mapConnection(sideIn: Int): EnumWireConnection {
     val el = lookupMap[facing]!![sideIn]
-    return connections[el to facing] ?: EnumWireConnection.None
+    return connections[EnumFaceLocation.fromFaces(el, facing)] ?: EnumWireConnection.None
   }
 
   override fun beforePlace(sidePlaced: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) {
@@ -173,6 +133,15 @@ abstract class BlockWire(val width: Double, val height: Double) : QBlock(), IQBl
     return super.applyExtendedProperties(state).withProperty(PropConnections, (0..3).map(this::mapConnection))
   }
 
+  @Suppress("UNCHECKED_CAST")
+  override fun <T> getCapability(capability: Capability<T>, side: EnumFacing?): T? {
+    if (capability == Capabilities.Connectable) return connectable as T
+    return super.getCapability(capability, side)
+  }
+
+  override val validEdges: Set<EnumFaceLocation>
+    get() = validSides[facing]!!.map { EnumFaceLocation.fromFaces(it, facing) }.toSet()
+
   override fun getPartSlot(): IPartSlot = EnumFaceSlot.fromFace(facing)
   override fun rotateBlock(axis: EnumFacing): Boolean = false
   override val properties: Set<IProperty<*>> = super.properties + PropFacing
@@ -187,9 +156,10 @@ abstract class BlockWire(val width: Double, val height: Double) : QBlock(), IQBl
     val PropConnections = object : IUnlistedProperty<List<EnumWireConnection>> {
       @Suppress("UNCHECKED_CAST")
       override fun getType(): Class<List<EnumWireConnection>> = List::class.java as Class<List<EnumWireConnection>> // really kotlin?
+
       override fun getName(): String = "connections"
       override fun valueToString(value: List<EnumWireConnection>): String = value.toString()
-      override fun isValid(value: List<EnumWireConnection>?): Boolean = true
+      override fun isValid(value: List<EnumWireConnection>?): Boolean = value != null
     }
 
     val validSides = VALUES
@@ -203,13 +173,5 @@ abstract class BlockWire(val width: Double, val height: Double) : QBlock(), IQBl
       WEST to listOf(DOWN, NORTH, UP, SOUTH),
       EAST to listOf(DOWN, NORTH, UP, SOUTH)
     )
-
-    fun collisionCheck(world: World, pos: BlockPos, bb: AxisAlignedBB): Boolean {
-      if (world.isAirBlock(pos)) return true
-      val state = world.getBlockState(pos)
-      val list = ArrayList<AxisAlignedBB>()
-      state.getActualState(world, pos).addCollisionBoxToList(world, pos, bb + pos, list, null, false)
-      return list.isEmpty()
-    }
   }
 }
