@@ -10,6 +10,9 @@ open class MultipartConnectable(private val components: Set<IConnectable>) : ICo
   override fun getType(facing: EnumFacing?): ResourceLocation? =
     components.mapNotNull { it.getType(facing) }.firstOrNull()
 
+  override fun getAdditionalData(facing: EnumFacing?, key: String): Any? =
+    components.mapNotNull { it.getAdditionalData(facing, key) }.firstOrNull()
+
   override fun allowCornerConnections(facing: EnumFacing?): Boolean =
     components.any { it.allowCornerConnections(facing) }
 }

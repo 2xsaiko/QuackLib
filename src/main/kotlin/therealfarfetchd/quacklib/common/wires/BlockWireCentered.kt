@@ -30,13 +30,16 @@ abstract class BlockWireCentered<out T>(val width: Double) : QBlock(), IQBlockMu
   val baseBounds = FullAABB.grow(width / 2 - 1)
 
   @Suppress("LeakingThis")
-  private val connectable = CenteredWireConnectable(this)
+  private val connectable =
+    EnumFacing.VALUES.map { it to CenteredWireConnectable(this, it) }.toMap()
 
   override var connections: Map<EnumFaceLocation, EnumWireConnection> = emptyMap()
 
   abstract val dataType: ResourceLocation
 
   abstract val data: T
+
+  open fun getAdditionalData(side: EnumFacing, facing: EnumFacing?, key: String): Any? = null
 
   override fun updateCableConnections(): Boolean {
     return if (super.updateCableConnections()) {
@@ -83,7 +86,7 @@ abstract class BlockWireCentered<out T>(val width: Double) : QBlock(), IQBlockMu
 
   @Suppress("UNCHECKED_CAST")
   override fun <T> getCapability(capability: Capability<T>, side: EnumFacing?): T? {
-    if (capability == Capabilities.Connectable) return connectable as T
+    if (capability == Capabilities.Connectable && side != null) return connectable[side] as T
     return super.getCapability(capability, side)
   }
 

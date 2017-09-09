@@ -72,6 +72,13 @@ abstract class QBlock {
   @Suppress("LeakingThis")
   open val isOpaque: Boolean = isFullBlock
 
+  open fun isSideOpaque(facing: EnumFacing): Boolean = isOpaque
+
+  /**
+   * TESR fix
+   */
+  open val useNeighborBrightness: Boolean = false
+
   /**
    * The tile entity this QBlock is in.
    */

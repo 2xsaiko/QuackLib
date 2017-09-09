@@ -15,9 +15,9 @@ import therealfarfetchd.quacklib.common.util.Vec2
 import therealfarfetchd.quacklib.common.util.Vec3
 
 abstract class SimpleModelBakery : AbstractModelBakery() {
-  private var face: EnumFacing? = null
+  protected var face: EnumFacing? = null
 
-  private var quads: List<Quad> = emptyList()
+  protected var quads: List<Quad> = emptyList()
 
   override fun bakeQuads(face: EnumFacing?, state: IExtendedBlockState): List<BakedQuad> {
     this.face = face

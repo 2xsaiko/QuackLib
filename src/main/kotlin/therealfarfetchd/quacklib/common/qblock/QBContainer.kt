@@ -120,6 +120,8 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
     return world.getQBlock(pos)?.soundType ?: SoundType.STONE
   }
 
+  override fun getUseNeighborBrightness(state: IBlockState?): Boolean = tempQB(null, null).useNeighborBrightness
+
   override fun createNewTileEntity(worldIn: World?, meta: Int): TileEntity {
     val qb = factory()
     (worldIn ?: savedWorld)?.also { qb.world = it }
@@ -218,6 +220,14 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
   override fun isFullCube(state: IBlockState?): Boolean = tempQB(null, null).isFullBlock
 
   override fun isOpaqueCube(state: IBlockState?): Boolean = tempQB(null, null).isOpaque
+
+  override fun doesSideBlockRendering(state: IBlockState?, world: IBlockAccess, pos: BlockPos, face: EnumFacing): Boolean {
+    return (world.getQBlock(pos) ?: world.getQBlock(pos.down()))?.isSideOpaque(face) ?: super.doesSideBlockRendering(state, world, pos, face)
+  }
+
+  override fun getLightValue(state: IBlockState?, world: IBlockAccess?, pos: BlockPos?): Int {
+    return super.getLightValue(state, world, pos)
+  }
 
   override fun getBlockFaceShape(world: IBlockAccess, state: IBlockState?, pos: BlockPos, facing: EnumFacing): BlockFaceShape {
     return world.getQBlock(pos)?.getBlockFaceShape(facing) ?: noqb(pos)

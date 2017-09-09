@@ -17,5 +17,10 @@ interface IConnectable {
    */
   fun getType(facing: EnumFacing?): ResourceLocation?
 
+  /**
+   * Allows you to return arbitrary data (used to display fluid pipe joints in Powerline, for example)
+   */
+  fun getAdditionalData(facing: EnumFacing?, key: String): Any? = null
+
   fun allowCornerConnections(facing: EnumFacing?): Boolean = false
 }
