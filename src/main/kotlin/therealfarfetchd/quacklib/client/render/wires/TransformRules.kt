@@ -50,20 +50,21 @@ enum class TransformRules(rules: String = "", val useAlt: Boolean = false, val u
    * + - Execute another rule. Arguments: rule: str(9) ->TransformRules
    */
 
-  val op: (Quad) -> Quad by lazy {
-    val spp = StringPackedProps(rules)
-    var op: (Quad) -> Quad = { it }
-    while (spp.hasNext) {
-      op = op compose parseCmd(spp)
-    }
-    op
-  }
+  val op: (Quad) -> Quad by lazy { parseCmd(StringPackedProps(rules)) }
 
   companion object {
     fun getRule(edge: EnumEdge): TransformRules = valueOf(edge.name)
     fun getRule(facing: EnumFacing): TransformRules = valueOf(facing.name2.capitalize())
 
-    fun parseCmd(spp: StringPackedProps): (Quad) -> Quad {
+    fun parseCmd(spp: StringPackedProps): (Quad)->Quad {
+      var op: (Quad) -> Quad = { it }
+      while (spp.hasNext) {
+        op = op compose parseCmd0(spp)
+      }
+      return op
+    }
+
+    private fun parseCmd0(spp: StringPackedProps): (Quad) -> Quad {
       if (!spp.hasNext) return { it }
       try {
         val command = spp.getChar()

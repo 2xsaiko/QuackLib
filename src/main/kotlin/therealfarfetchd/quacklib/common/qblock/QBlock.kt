@@ -1,5 +1,6 @@
 package therealfarfetchd.quacklib.common.qblock
 
+import net.minecraft.block.SoundType
 import net.minecraft.block.material.Material
 
 import net.minecraft.block.properties.IProperty
@@ -8,6 +9,7 @@ import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
+import net.minecraft.util.BlockRenderLayer
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand
 import net.minecraft.util.math.AxisAlignedBB
@@ -31,6 +33,11 @@ abstract class QBlock {
    * The block material. Must stay constant at all times.
    */
   abstract val material: Material
+
+  /**
+   * The sound type of the block.
+   */
+  open val soundType: SoundType = SoundType.STONE
 
   /**
    * How long it takes to break this block.
@@ -189,6 +196,16 @@ abstract class QBlock {
   open fun onActivated(player: EntityPlayer, hand: EnumHand, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean = false
 
   open fun getBlockFaceShape(facing: EnumFacing): BlockFaceShape = BlockFaceShape.CENTER
+
+  /**
+   * Returns true if the block can render in the specified layer. Must stay constant at all times
+   */
+  open fun canRenderInLayer(layer: BlockRenderLayer) = layer == renderLayer
+
+  /**
+   * Returns the layer the block renders in. Must stay constant at all times
+   */
+  open val renderLayer: BlockRenderLayer = BlockRenderLayer.SOLID
 
   /**
    * Determines the strength of this QBlock (how long it will take to break)

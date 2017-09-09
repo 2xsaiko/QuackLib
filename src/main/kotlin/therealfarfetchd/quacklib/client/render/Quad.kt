@@ -10,7 +10,7 @@ import therealfarfetchd.quacklib.common.util.Vec3
 
 data class Quad(val texture: TextureAtlasSprite, val vert1: Vec3, val vert2: Vec3, val vert3: Vec3, val vert4: Vec3, val tex1: Vec2, val tex2: Vec2, val tex3: Vec2, val tex4: Vec2) {
 
-  val normal by lazy { (vert2 - vert1 crossProduct vert3 - vert1).normalize().copy() }
+  val normal by lazy { ((vert2 - vert1) crossProduct (vert3 - vert1)).normalize() }
 
   val facing: EnumFacing by lazy { EnumFacing.getFacingFromVector(normal.x, normal.y, normal.z) }
 
@@ -22,7 +22,7 @@ data class Quad(val texture: TextureAtlasSprite, val vert1: Vec3, val vert2: Vec
 
     val builder = UnpackedBakedQuad.Builder(DefaultVertexFormats.ITEM)
     builder.setApplyDiffuseLighting(true)
-    builder.setQuadOrientation(EnumFacing.getFacingFromVector(normal.x, normal.y, normal.z))
+    builder.setQuadOrientation(facing)
     builder.setQuadTint(-1)
     builder.setTexture(texture)
 

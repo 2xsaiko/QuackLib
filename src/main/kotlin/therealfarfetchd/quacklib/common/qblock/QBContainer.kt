@@ -2,9 +2,11 @@ package therealfarfetchd.quacklib.common.qblock
 
 import net.minecraft.block.Block
 import net.minecraft.block.ITileEntityProvider
+import net.minecraft.block.SoundType
 import net.minecraft.block.state.BlockFaceShape
 import net.minecraft.block.state.BlockStateContainer
 import net.minecraft.block.state.IBlockState
+import net.minecraft.entity.Entity
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.Item
@@ -27,6 +29,7 @@ import therealfarfetchd.quacklib.common.extensions.getQBlock
 import therealfarfetchd.quacklib.common.extensions.minus
 import therealfarfetchd.quacklib.common.extensions.plus
 import therealfarfetchd.quacklib.common.util.ClientServerSeparateData
+import therealfarfetchd.quacklib.common.util.DummyUnlistedProperty
 import therealfarfetchd.quacklib.common.util.QNBTCompound
 import java.util.*
 
@@ -61,7 +64,13 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
 
   override fun createBlockState(): BlockStateContainer {
     val qb = factory()
-    return ExtendedBlockState(this, qb.properties.toTypedArray(), qb.unlistedProperties.toTypedArray())
+    var unlistedProps = qb.unlistedProperties
+    if (unlistedProps.isEmpty()) unlistedProps += DummyUnlistedProperty
+    return ExtendedBlockState(this, qb.properties.toTypedArray(), unlistedProps.toTypedArray())
+  }
+
+  override fun canRenderInLayer(state: IBlockState?, layer: BlockRenderLayer?): Boolean {
+    return tempQB(null, null).canRenderInLayer(layer!!)
   }
 
   override fun getActualState(state: IBlockState, world: IBlockAccess, pos: BlockPos): IBlockState {
@@ -105,6 +114,10 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
 
   override fun getHarvestTool(state: IBlockState?): String? {
     return super.getHarvestTool(state)
+  }
+
+  override fun getSoundType(state: IBlockState?, world: World, pos: BlockPos, entity: Entity?): SoundType {
+    return world.getQBlock(pos)?.soundType ?: SoundType.STONE
   }
 
   override fun createNewTileEntity(worldIn: World?, meta: Int): TileEntity {
