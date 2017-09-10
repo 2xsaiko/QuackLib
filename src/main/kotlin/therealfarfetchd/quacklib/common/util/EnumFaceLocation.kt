@@ -34,6 +34,9 @@ enum class EnumFaceLocation(val base: EnumFacing, val side: EnumFacing?) {
   EastNorth(EnumFacing.EAST, EnumFacing.NORTH),
   EastSouth(EnumFacing.EAST, EnumFacing.SOUTH);
 
+  operator fun component1(): EnumFacing = base
+  operator fun component2(): EnumFacing? = side
+
   companion object {
     val Values: List<EnumFaceLocation> = values().toList()
     private var Lookup: Map<Pair<EnumFacing, EnumFacing?>, EnumFaceLocation> = emptyMap()

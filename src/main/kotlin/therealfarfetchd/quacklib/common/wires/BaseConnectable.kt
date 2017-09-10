@@ -36,6 +36,11 @@ interface BaseConnectable {
     return changed
   }
 
+  /**
+   * @return the set of connected data containers (i.e PowerConductor, FluidContainer, BusContainer).
+   */
+  fun resolveNetwork(): Set<Any?> = TODO("not implemented")
+
   private fun checkBlock(pos: BlockPos, e: EnumFaceLocation, f1: EnumFacing, f2: EnumFacing?, corner: Boolean = false): Boolean {
     if (corner && WireCollisionHelper.collides(b.world, b.pos.offset(e.base), e)) return false
     val cap: IConnectable = b.actualWorld.getTileEntity(pos)?.getCapability(Capabilities.Connectable, f1.opposite) ?: return false
