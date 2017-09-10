@@ -15,26 +15,20 @@ import therealfarfetchd.quacklib.common.util.Vec2
 import therealfarfetchd.quacklib.common.util.Vec3
 
 abstract class SimpleModelBakery : AbstractModelBakery() {
-  protected var face: EnumFacing? = null
-
-  protected var quads: List<Quad> = emptyList()
 
   override fun bakeQuads(face: EnumFacing?, state: IExtendedBlockState): List<BakedQuad> {
-    this.face = face
-    this.quads = emptyList()
-    addShapes(state)
-
-    return filterCategories().map(Quad::bake)
+    val quads: MutableList<Quad> = ArrayList()
+    addShapes(state, box(face, quads))
+    return filterCategories(face, quads).map(Quad::bake)
   }
 
   override fun bakeItemQuads(face: EnumFacing?, stack: ItemStack): List<BakedQuad> {
-    this.face = face
-    this.quads = emptyList()
-    addShapes(stack)
-    return filterCategories().map(Quad::bake)
+    val quads: MutableList<Quad> = ArrayList()
+    addShapes(stack, box(face, quads))
+    return filterCategories(face, quads).map(Quad::bake)
   }
 
-  private fun filterCategories(): List<Quad> {
+  private fun filterCategories(face: EnumFacing?, quads: List<Quad>): List<Quad> {
     return quads.map { q ->
       q to if (q.facing == EnumFacing.UP && q.vert1.y == 1f && q.vert2.y == 1f && q.vert3.y == 1f && q.vert4.y == 1f) EnumFacing.UP
       else if (q.facing == EnumFacing.DOWN && q.vert1.y == 0f && q.vert2.y == 0f && q.vert3.y == 0f && q.vert4.y == 0f) EnumFacing.DOWN
@@ -46,10 +40,10 @@ abstract class SimpleModelBakery : AbstractModelBakery() {
     }.filter { it.second == face }.map { it.first }
   }
 
-  abstract fun addShapes(state: IExtendedBlockState)
-  abstract fun addShapes(stack: ItemStack)
+  abstract fun addShapes(state: IExtendedBlockState, box: (BoxTemplate.() -> Unit) -> Unit)
+  abstract fun addShapes(stack: ItemStack, box: (BoxTemplate.() -> Unit) -> Unit)
 
-  protected fun box(op: BoxTemplate.() -> Unit) {
+  protected fun box(face: EnumFacing?, quads: MutableList<Quad>): (BoxTemplate.() -> Unit) -> Unit = { op ->
     val t = BoxTemplate()
     op(t)
     quads += t.createQuads(face)
