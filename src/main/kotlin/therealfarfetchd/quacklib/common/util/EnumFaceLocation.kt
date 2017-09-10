@@ -38,6 +38,7 @@ enum class EnumFaceLocation(val base: EnumFacing, val side: EnumFacing?) {
     val Values: List<EnumFaceLocation> = values().toList()
     private var Lookup: Map<Pair<EnumFacing, EnumFacing?>, EnumFaceLocation> = emptyMap()
 
+    @JvmStatic
     fun fromFaces(base: EnumFacing, side: EnumFacing?): EnumFaceLocation {
       if (Lookup.isEmpty()) {
         for (slot in Values) {

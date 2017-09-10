@@ -32,15 +32,7 @@ minecraft {
 repositories {
     jcenter()
     maven {
-        url "http://maven.amadornes.com/"
-    }
-    maven {
-        name 'DVS1 Maven FS'
-        url 'http://dvs1.progwml6.com/files/maven'
-    }
-    maven {
-        name = "Covers1624 Repo"
-        url = "http://chickenbones.net/maven"
+        url "https://modmaven.k-4u.nl/"
     }
     maven {
         url "http://maven.shadowfacts.net/"
