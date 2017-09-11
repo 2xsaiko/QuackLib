@@ -1,5 +1,6 @@
 package therealfarfetchd.quacklib.common.wires
 
+import mcmultipart.api.container.IMultipartContainer
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
@@ -13,6 +14,7 @@ import therealfarfetchd.quacklib.common.qblock.IQBlockMultipart
 import therealfarfetchd.quacklib.common.qblock.QBlock
 import therealfarfetchd.quacklib.common.util.EnumFaceLocation
 import therealfarfetchd.quacklib.common.util.WireCollisionHelper
+import therealfarfetchd.quacklib.common.wires.EnumWireConnection.*
 
 interface BaseConnectable {
 
@@ -23,10 +25,10 @@ interface BaseConnectable {
     if (b.world.isServer) {
       val oldconn = connections
       connections = validEdges.map { edge ->
-        edge to (EnumWireConnection.Internal.takeIf { edge.side != null && checkBlock(b.pos, edge, edge.side, edge.base) } ?:
-                 EnumWireConnection.External.takeIf { checkBlock(b.pos.offset(edge.base), edge, edge.base, edge.side) } ?:
-                 EnumWireConnection.Corner.takeIf { edge.side != null && checkBlock(b.pos.offset(edge.base).offset(edge.side), edge, edge.side.opposite, edge.base.opposite, true) } ?:
-                 EnumWireConnection.None)
+        edge to (Internal.takeIf { edge.side != null && checkBlock(b.pos, edge, edge.side, edge.base, it) } ?:
+                 External.takeIf { checkBlock(b.pos.offset(edge.base), edge, edge.base, edge.side, it) } ?:
+                 Corner.takeIf { edge.side != null && checkBlock(b.pos.offset(edge.base).offset(edge.side), edge, edge.side.opposite, edge.base.opposite, it) } ?:
+                 None)
       }.toMap()
       if (connections != oldconn) {
         b.dataChanged()
@@ -36,18 +38,29 @@ interface BaseConnectable {
     return changed
   }
 
-  /**
-   * @return the set of connected data containers (i.e PowerConductor, FluidContainer, BusContainer).
-   */
-  fun resolveNetwork(): Set<Any?> = TODO("not implemented")
+  fun getNeighbor(l: EnumFaceLocation): Any? {
+    return when (connections[l]) {
+      Internal -> if (l.side != null) getBlock(b.pos, l.side, l.base) else null
+      External -> getBlock(b.pos.offset(l.base), l.base, l.side)
+      Corner -> if (l.side != null) getBlock(b.pos.offset(l.base).offset(l.side), l.side.opposite, l.base.opposite) else null
+      else -> null
+    }
+  }
 
-  private fun checkBlock(pos: BlockPos, e: EnumFaceLocation, f1: EnumFacing, f2: EnumFacing?, corner: Boolean = false): Boolean {
-    if (corner && WireCollisionHelper.collides(b.world, b.pos.offset(e.base), e)) return false
+  private fun checkBlock(pos: BlockPos, e: EnumFaceLocation, f1: EnumFacing, f2: EnumFacing?, c: EnumWireConnection): Boolean {
+    if (c == Corner && WireCollisionHelper.collides(b.world, b.pos.offset(e.base), e)) return false
+    if (c == Internal && b.actualWorld.getTileEntity(b.pos) !is IMultipartContainer) return false
     val cap: IConnectable = b.actualWorld.getTileEntity(pos)?.getCapability(Capabilities.Connectable, f1.opposite) ?: return false
     val localCap: IConnectable = b.getCapability(Capabilities.Connectable, e.base) ?: return false
     cap.getEdge(f2) ?: return false
     localCap.getEdge(e.side) ?: return false
-    return cap.getType(f2) == localCap.getType(e.side) && (!corner || (cap.allowCornerConnections(f2) || localCap.allowCornerConnections(e.side)))
+    return cap.getType(f2) == localCap.getType(e.side) && (c != Corner || (cap.allowCornerConnections(f2) || localCap.allowCornerConnections(e.side)))
+  }
+
+  private fun getBlock(pos: BlockPos, f1: EnumFacing, f2: EnumFacing?): Any? {
+    val cap: IConnectable = b.actualWorld.getTileEntity(pos)?.getCapability(Capabilities.Connectable, f1.opposite) ?: return false
+    cap.getEdge(f2) ?: return null
+    return cap.getEdge(f2)
   }
 
   fun serializeConnections(): List<Byte> {
