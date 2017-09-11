@@ -6,7 +6,7 @@ import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
 @Suppress("WHEN_ENUM_CAN_BE_NULL_IN_JAVA")
-public class ClientServerSeparateData<T>(op: (client: Boolean) -> T) : ReadWriteProperty<Any?, T> {
+class ClientServerSeparateData<T>(op: (client: Boolean) -> T) : ReadWriteProperty<Any?, T> {
   var cdata: T = op(true)
   var sdata: T = op(false)
 

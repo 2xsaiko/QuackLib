@@ -31,7 +31,7 @@ import therealfarfetchd.quacklib.common.qblock.QBlock
 import therealfarfetchd.quacklib.common.util.EnumFaceLocation
 import therealfarfetchd.quacklib.common.util.QNBTCompound
 
-abstract class BlockWire<out T>(val width: Double, val height: Double) : QBlock(), IQBlockMultipart, BaseConnectable {
+abstract class BlockWire<out T>(width: Double, height: Double) : QBlock(), IQBlockMultipart, BaseConnectable {
 
   val baseBounds = AxisAlignedBB(0.0, 0.0, 0.0, 1.0, height, 1.0)
   val partBounds = AxisAlignedBB((1 - width) / 2, 0.0, (1 - width) / 2, 1 - (1 - width) / 2, height, 1 - (1 - width) / 2)

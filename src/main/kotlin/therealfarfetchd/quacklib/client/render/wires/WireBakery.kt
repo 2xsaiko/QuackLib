@@ -26,7 +26,7 @@ import therealfarfetchd.quacklib.common.wires.EnumWireConnection.None
 open class WireBakery(
   private val cableWidth: Float,
   private val cableHeight: Float,
-  private val textureSize: Float,
+  textureSize: Float,
   private val texLocations: List<ResourceLocation>,
   private val texLocationRetriever: (IExtendedBlockState) -> ResourceLocation,
   private val itemTexLocationRetriever: (ItemStack) -> ResourceLocation

@@ -1,0 +1,6 @@
+#!/bin/sh
+
+cd "$(dirname $0)"
+
+test -f "$1.json" && exit 1
+echo '{"parent":"item/generated","textures":{"layer0":"quacklib:items/component/'"$1"'"}}' > "$1.json"

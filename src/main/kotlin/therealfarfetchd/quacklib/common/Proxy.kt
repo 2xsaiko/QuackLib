@@ -16,11 +16,13 @@ import therealfarfetchd.quacklib.ModID
 import therealfarfetchd.quacklib.QuackLib
 import therealfarfetchd.quacklib.common.api.block.capability.IConnectable
 import therealfarfetchd.quacklib.common.extensions.register
+import therealfarfetchd.quacklib.common.feature.DefaultFeatures
+import therealfarfetchd.quacklib.common.feature.FeatureManager
+import therealfarfetchd.quacklib.common.item.ItemComponent
 import therealfarfetchd.quacklib.common.item.Wrench
 import therealfarfetchd.quacklib.common.qblock.QBContainer
 import therealfarfetchd.quacklib.common.qblock.QBContainerTile
 import therealfarfetchd.quacklib.common.qblock.QBContainerTileMultipart
-import therealfarfetchd.quacklib.common.util.QNBTCompound
 
 /**
  * Created by marco on 16.07.17.
@@ -31,11 +33,14 @@ open class Proxy {
     MinecraftForge.EVENT_BUS.register(this)
     if (QuackLib.debug) QuackLib.Logger.log(Level.INFO, "Running in a dev environment; enabling debug features!")
 
+    if (Loader.isModLoaded("mcmultipart")) FeatureManager.require(DefaultFeatures.MultipartCompat, "mcmultipart")
+    if (Loader.isModLoaded("teckle")) FeatureManager.require(DefaultFeatures.TeckleCompat, "teckle")
+
     // register tile entities that come with the library
     GameRegistry.registerTileEntity(QBContainerTile::class.java, "$ModID:qblock_container")
     GameRegistry.registerTileEntity(QBContainerTile.Ticking::class.java, "$ModID:qblock_container_t")
 
-    if (Loader.isModLoaded("mcmultipart")) {
+    if (FeatureManager.isRequired(DefaultFeatures.MultipartCompat)) {
       GameRegistry.registerTileEntity(QBContainerTileMultipart::class.java, "$ModID:qblock_container_mp")
       GameRegistry.registerTileEntity(QBContainerTileMultipart.Ticking::class.java, "$ModID:qblock_container_mp_t")
     }
@@ -45,11 +50,18 @@ open class Proxy {
 
   open fun init(e: FMLInitializationEvent) {}
 
-  open fun postInit(e: FMLPostInitializationEvent) {}
+  open fun postInit(e: FMLPostInitializationEvent) {
+    FeatureManager.printFeatureList()
+    FeatureManager.checkFeatures()
+  }
 
   @SubscribeEvent
   fun registerItems(e: RegistryEvent.Register<Item>) {
     e.registry.register(Wrench)
+    if (FeatureManager.isRequired(DefaultFeatures.ComponentItem)) {
+      e.registry.register(ItemComponent)
+      ItemComponent
+    }
   }
 
   @SubscribeEvent
