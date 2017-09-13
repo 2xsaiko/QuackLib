@@ -1,12 +1,17 @@
-package therealfarfetchd.quacklib.common.feature
+package therealfarfetchd.quacklib.common.autoconf
 
 import net.minecraftforge.fml.common.Loader
 import therealfarfetchd.quacklib.QuackLib
 
 object FeatureManager {
 
-  var enabled: Map<Feature, FeatureInfo> = emptyMap(); private set
+  private var locked = false
+
+  private var enabled: Map<Feature, FeatureInfo> = emptyMap()
   var available: Set<Feature> = emptySet(); private set
+
+  val enabledFeatures: Set<Feature>
+    get() = enabled.keys
 
   init {
     DefaultFeatures
@@ -21,21 +26,9 @@ object FeatureManager {
   }
 
   fun require(feature: Feature, modid: String) {
-    val di = enabled[feature] ?: FeatureInfo(feature).also { enabled += feature to it }
+    val di = enableFeature(feature)
     di.explicitEnabled = true
     di.requiredByMods += modid
-    feature.dependsOn.forEach { requireAsDependency(feature, it) }
-
-    if (feature is VirtualFeature) {
-      val provide = available.filterNot { it.isInput }.filter { it.provides.contains(feature) }
-      val en = enabled.keys.filter { it.provides.contains(feature) }
-      if (en.isNotEmpty()) {
-        en.forEach { requireAsDependency(feature, it) }
-      } else {
-        val f = provide.firstOrNull() ?: error("Nothing provides ${feature.name}!")
-        requireAsDependency(feature, f)
-      }
-    }
   }
 
   fun require(feature: String) {
@@ -54,11 +47,35 @@ object FeatureManager {
   }
 
   private fun requireAsDependency(parent: Feature, feature: Feature) {
-    val di = enabled[feature] ?: FeatureInfo(feature).also {
-      enabled += feature to it
-      feature.dependsOn.forEach { requireAsDependency(feature, it) }
-    }
+    val di = enableFeature(feature)
     di.requiredByFeatures += parent
+  }
+
+  private fun enableFeature(feature: Feature): FeatureInfo {
+    if (locked) {
+      error("Tried to enable feature after feature manager was already locked! Please do this either in preinitialization or initialization.")
+    }
+
+    if (feature !in available) error("Unregistered feature '${feature.name}'")
+    if (feature in enabled) return enabled.getValue(feature)
+    val info = FeatureInfo(feature)
+    enabled += feature to info
+
+    feature.dependsOn.forEach { requireAsDependency(feature, it) }
+
+    if (feature is VirtualFeature) {
+      val provide = available.filter { it.provides.contains(feature) }
+      val en = enabled.keys.filter { it.provides.contains(feature) }
+      if (en.isNotEmpty()) {
+        en.forEach { requireAsDependency(feature, it) }
+      } else {
+        val f = provide.maxBy { it.priority } ?: error("Nothing provides ${feature.name}!")
+        requireAsDependency(feature, f)
+      }
+    }
+
+    feature.onActivate()
+    return info
   }
 
   fun isRequired(feature: Feature): Boolean = feature in enabled
@@ -74,15 +91,13 @@ object FeatureManager {
         if (i.requiredByMods.isNotEmpty()) strs += "     Required by: " + i.requiredByMods.joinToString()
         strs.forEach(QuackLib.Logger::info)
       }
+      QuackLib.Logger.info("=========================")
     }
   }
 
   fun checkFeatures() {
     var errors: List<String> = emptyList()
     enabled.forEach { f, i ->
-      if (!i.explicitEnabled && f.isInput) {
-        errors += "Feature '${f.name}' must be explicitly enabled!"
-      }
       val ec = f.conflicts.filter { it in enabled.keys }
       if (ec.isNotEmpty()) {
         errors += "Enabled features ${ec.joinToString(prefix = "'", postfix = "'") { it.name }}' conflict with ${f.name}!"
@@ -92,6 +107,10 @@ object FeatureManager {
       errors.forEach(QuackLib.Logger::fatal)
       error("Errors occurred in feature manager. Cannot continue.")
     }
+  }
+
+  fun lockFeatures() {
+    locked = true
   }
 
   fun registerFeature(feature: Feature) {

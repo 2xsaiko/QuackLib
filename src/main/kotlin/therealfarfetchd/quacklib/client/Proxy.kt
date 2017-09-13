@@ -21,10 +21,11 @@ import therealfarfetchd.quacklib.client.model.CachedBakedModel
 import therealfarfetchd.quacklib.client.model.IIconRegister
 import therealfarfetchd.quacklib.client.qbr.QBContainerTileRenderer
 import therealfarfetchd.quacklib.common.Proxy
-import therealfarfetchd.quacklib.common.feature.DefaultFeatures
-import therealfarfetchd.quacklib.common.feature.FeatureManager
+import therealfarfetchd.quacklib.common.autoconf.DefaultFeatures
+import therealfarfetchd.quacklib.common.autoconf.FeatureManager
+import therealfarfetchd.quacklib.common.block.BlockNikoliteOre
 import therealfarfetchd.quacklib.common.item.ItemComponent
-import therealfarfetchd.quacklib.common.item.Wrench
+import therealfarfetchd.quacklib.common.item.ItemWrench
 import therealfarfetchd.quacklib.common.qblock.QBContainerTile
 import therealfarfetchd.quacklib.common.qblock.QBContainerTileMultipart
 
@@ -37,7 +38,7 @@ class Proxy : Proxy() {
     super.preInit(e)
 
     ClientRegistry.bindTileEntitySpecialRenderer(QBContainerTile::class.java, QBContainerTileRenderer)
-    if (FeatureManager.isRequired(DefaultFeatures.MultipartCompat))
+    if (FeatureManager.isRequired(DefaultFeatures.MCMultipartCompat))
       ClientRegistry.bindTileEntitySpecialRenderer(QBContainerTileMultipart::class.java, QBContainerTileRenderer)
   }
 
@@ -55,7 +56,8 @@ class Proxy : Proxy() {
 
   @SubscribeEvent
   fun registerModels(e: ModelRegistryEvent) {
-    ModelLoader.setCustomModelResourceLocation(Wrench, 0, ModelResourceLocation(Wrench.registryName, "inventory"))
+    ModelLoader.setCustomModelResourceLocation(ItemWrench, 0, ModelResourceLocation(ItemWrench.registryName, "inventory"))
+    ModelLoader.setCustomModelResourceLocation(BlockNikoliteOre.Item, 0, ModelResourceLocation(BlockNikoliteOre.Item.registryName, "inventory"))
 
     for (i in ItemComponent.getValidMetadata()) {
       ModelLoader.setCustomModelResourceLocation(ItemComponent, i, ModelResourceLocation("${ItemComponent.registryName}/$i", "inventory"))

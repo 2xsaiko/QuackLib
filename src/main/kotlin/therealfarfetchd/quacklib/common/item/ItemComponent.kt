@@ -7,9 +7,9 @@ import net.minecraft.util.NonNullList
 import net.minecraft.util.ResourceLocation
 import therealfarfetchd.quacklib.ModID
 import therealfarfetchd.quacklib.common.api.QCreativeTab
+import therealfarfetchd.quacklib.common.autoconf.FeatureManager
+import therealfarfetchd.quacklib.common.autoconf.ItemFeature
 import therealfarfetchd.quacklib.common.extensions.makeStack
-import therealfarfetchd.quacklib.common.feature.FeatureManager
-import therealfarfetchd.quacklib.common.feature.ItemFeature
 
 object ItemComponent : Item() {
   init {
@@ -28,5 +28,5 @@ object ItemComponent : Item() {
     }
   }
 
-  fun getValidMetadata(): List<Int> = FeatureManager.enabled.keys.mapNotNull { it as? ItemFeature }.map { it.meta }.toSet().sorted()
+  fun getValidMetadata(): List<Int> = FeatureManager.enabledFeatures.mapNotNull { it as? ItemFeature }.map { it.meta }.toSet().sorted()
 }

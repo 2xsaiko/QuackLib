@@ -1,10 +1,12 @@
-package therealfarfetchd.quacklib.common.feature
+package therealfarfetchd.quacklib.common.autoconf
 
 open class FeatureProperties {
   var depends: Set<Feature> = emptySet()
   var provides: Set<VirtualFeature> = emptySet()
   var conflicts: Set<Feature> = emptySet()
-  var manualOnly: Boolean = false
+  var manualReg: Boolean = false
+  var priority: Int = 0
+  var action: () -> Unit= {}
 
   fun depends(vararg set: Feature) {
     depends += set
@@ -16,5 +18,9 @@ open class FeatureProperties {
 
   fun conflicts(vararg set: Feature) {
     conflicts += set
+  }
+
+  fun action(op: () -> Unit) {
+    action = op
   }
 }

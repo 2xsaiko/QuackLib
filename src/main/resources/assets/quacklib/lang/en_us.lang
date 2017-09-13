@@ -1,7 +1,5 @@
 item.quacklib:wrench.name=Wrench
 
-itemGroup.quacklib=QuackLib
-
 item.quacklib:component.0.name=White Lumar
 item.quacklib:component.1.name=Orange Lumar
 item.quacklib:component.2.name=Magenta Lumar
@@ -30,3 +28,7 @@ item.quacklib:component.24.name=Fine Copper Wire
 item.quacklib:component.25.name=Fine Iron Wire
 item.quacklib:component.26.name=Copper Coil
 item.quacklib:component.27.name=Motor
+
+tile.quacklib:nikolite_ore.name=Nikolite Ore
+
+itemGroup.quacklib=QuackLib

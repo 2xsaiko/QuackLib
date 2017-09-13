@@ -1,0 +1,15 @@
+{
+  "defaults": {
+    "model": "cube_all",
+    "textures": {
+      "all": "quacklib:blocks/nikolite_ore"
+    }
+  },
+  "forge_marker": 1,
+  "variants": {
+    "normal": [{}],
+    "inventory": {
+      "transform": "forge:default-block"
+    }
+  }
+}

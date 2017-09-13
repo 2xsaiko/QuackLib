@@ -1,5 +1,6 @@
 package therealfarfetchd.quacklib.common
 
+import net.minecraft.block.Block
 import net.minecraft.item.Item
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.common.capabilities.CapabilityManager
@@ -15,14 +16,14 @@ import org.apache.logging.log4j.Level
 import therealfarfetchd.quacklib.ModID
 import therealfarfetchd.quacklib.QuackLib
 import therealfarfetchd.quacklib.common.api.block.capability.IConnectable
+import therealfarfetchd.quacklib.common.autoconf.DefaultFeatures
+import therealfarfetchd.quacklib.common.autoconf.FeatureManager
+import therealfarfetchd.quacklib.common.block.BlockNikoliteOre
 import therealfarfetchd.quacklib.common.extensions.register
-import therealfarfetchd.quacklib.common.feature.DefaultFeatures
-import therealfarfetchd.quacklib.common.feature.FeatureManager
 import therealfarfetchd.quacklib.common.item.ItemComponent
-import therealfarfetchd.quacklib.common.item.Wrench
+import therealfarfetchd.quacklib.common.item.ItemWrench
 import therealfarfetchd.quacklib.common.qblock.QBContainer
 import therealfarfetchd.quacklib.common.qblock.QBContainerTile
-import therealfarfetchd.quacklib.common.qblock.QBContainerTileMultipart
 
 /**
  * Created by marco on 16.07.17.
@@ -33,17 +34,12 @@ open class Proxy {
     MinecraftForge.EVENT_BUS.register(this)
     if (QuackLib.debug) QuackLib.Logger.log(Level.INFO, "Running in a dev environment; enabling debug features!")
 
-    if (Loader.isModLoaded("mcmultipart")) FeatureManager.require(DefaultFeatures.MultipartCompat, "mcmultipart")
-    if (Loader.isModLoaded("teckle")) FeatureManager.require(DefaultFeatures.TeckleCompat, "teckle")
+    if (Loader.isModLoaded("mcmultipart")) FeatureManager.registerFeature(DefaultFeatures.MultipartMod)
+    if (Loader.isModLoaded("teckle")) FeatureManager.registerFeature(DefaultFeatures.TeckleMod)
 
     // register tile entities that come with the library
     GameRegistry.registerTileEntity(QBContainerTile::class.java, "$ModID:qblock_container")
     GameRegistry.registerTileEntity(QBContainerTile.Ticking::class.java, "$ModID:qblock_container_t")
-
-    if (FeatureManager.isRequired(DefaultFeatures.MultipartCompat)) {
-      GameRegistry.registerTileEntity(QBContainerTileMultipart::class.java, "$ModID:qblock_container_mp")
-      GameRegistry.registerTileEntity(QBContainerTileMultipart.Ticking::class.java, "$ModID:qblock_container_mp_t")
-    }
 
     CapabilityManager.INSTANCE.register(IConnectable::class)
   }
@@ -53,14 +49,24 @@ open class Proxy {
   open fun postInit(e: FMLPostInitializationEvent) {
     FeatureManager.printFeatureList()
     FeatureManager.checkFeatures()
+    FeatureManager.lockFeatures()
   }
 
   @SubscribeEvent
   fun registerItems(e: RegistryEvent.Register<Item>) {
-    e.registry.register(Wrench)
+    e.registry.register(ItemWrench)
     if (FeatureManager.isRequired(DefaultFeatures.ComponentItem)) {
       e.registry.register(ItemComponent)
-      ItemComponent
+    }
+    if (FeatureManager.isRequired(DefaultFeatures.NikoliteOre)) {
+      e.registry.register(BlockNikoliteOre.Item)
+    }
+  }
+
+  @SubscribeEvent
+  fun registerBlocks(e: RegistryEvent.Register<Block>) {
+    if (FeatureManager.isRequired(DefaultFeatures.NikoliteOre)) {
+      e.registry.register(BlockNikoliteOre)
     }
   }
 

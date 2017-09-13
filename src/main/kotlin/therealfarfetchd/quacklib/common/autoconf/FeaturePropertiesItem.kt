@@ -1,4 +1,4 @@
-package therealfarfetchd.quacklib.common.feature
+package therealfarfetchd.quacklib.common.autoconf
 
 class FeaturePropertiesItem : FeatureProperties() {
   var oreDict: Set<String> = emptySet()

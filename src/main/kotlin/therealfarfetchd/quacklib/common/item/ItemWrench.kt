@@ -13,7 +13,7 @@ import therealfarfetchd.quacklib.common.api.IBlockWrenchable
 /**
  * Created by marco on 11.07.17.
  */
-object Wrench : Item() {
+object ItemWrench : Item() {
 
   init {
     registryName = ResourceLocation(ModID, "wrench")
