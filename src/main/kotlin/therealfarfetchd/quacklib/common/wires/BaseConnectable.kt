@@ -27,7 +27,7 @@ interface BaseConnectable {
       connections = validEdges.map { edge ->
         edge to (Internal.takeIf { edge.side != null && checkBlock(b.pos, edge, edge.side, edge.base, it) } ?:
                  External.takeIf { checkBlock(b.pos.offset(edge.base), edge, edge.base, edge.side, it) } ?:
-                 Corner.takeIf { edge.side != null && checkBlock(b.pos.offset(edge.base).offset(edge.side), edge, edge.side.opposite, edge.base.opposite, it) } ?:
+                 Corner.takeIf { edge.side != null && checkBlock(b.pos.offset(edge.base).offset(edge.side), edge, edge.side, edge.base.opposite, it) } ?:
                  None)
       }.toMap()
       if (connections != oldconn) {
@@ -42,7 +42,7 @@ interface BaseConnectable {
     return when (connections[l]) {
       Internal -> if (l.side != null) getBlock(b.pos, l.side, l.base) else null
       External -> getBlock(b.pos.offset(l.base), l.base, l.side)
-      Corner -> if (l.side != null) getBlock(b.pos.offset(l.base).offset(l.side), l.side.opposite, l.base.opposite) else null
+      Corner -> if (l.side != null) getBlock(b.pos.offset(l.base).offset(l.side), l.side, l.base.opposite) else null
       else -> null
     }
   }

@@ -13,35 +13,88 @@ object FeatureManager {
   val enabledFeatures: Set<Feature>
     get() = enabled.keys
 
-  init {
-    DefaultFeatures
+  private var stack: List<Map<Feature, FeatureInfo>> = emptyList()
+
+  fun depend(feature: Feature) {
+    depend(feature, Loader.instance().activeModContainer()?.modId ?: "@unknown@")
   }
 
-  fun require(feature: Feature) {
-    require(feature, Loader.instance().activeModContainer()?.modId ?: "@unknown@")
+  fun depend(vararg feature: Feature) {
+    feature.forEach(this::depend)
   }
 
-  fun require(vararg feature: Feature) {
-    feature.forEach(this::require)
-  }
-
-  fun require(feature: Feature, modid: String) {
+  fun depend(feature: Feature, modid: String) {
     val di = enableFeature(feature)
     di.explicitEnabled = true
     di.requiredByMods += modid
   }
 
-  fun require(feature: String) {
-    require(lookupFeature(feature))
+  fun depend(feature: String) {
+    depend(lookupFeature(feature))
   }
 
-  fun require(feature: String, modid: String) {
-    require(lookupFeature(feature), modid)
+  fun depend(feature: String, modid: String) {
+    depend(lookupFeature(feature), modid)
+  }
+
+  fun dependSoft(feature: Feature): Boolean {
+    return dependSoft(feature, Loader.instance().activeModContainer()?.modId ?: "@unknown@")
+  }
+
+  fun dependSoft(vararg feature: Feature): Boolean {
+    return feature.all(this::dependSoft)
+  }
+
+  fun dependSoft(feature: Feature, modid: String): Boolean {
+    push()
+    return try {
+      depend(feature, modid)
+      drop()
+      true
+    } catch (e: IllegalStateException) {
+      if (QuackLib.debug) QuackLib.Logger.warn(e.localizedMessage)
+      pop()
+      false
+    }
+  }
+
+  fun dependSoft(feature: String): Boolean {
+    return try {
+      dependSoft(lookupFeature(feature))
+    } catch (e: IllegalStateException) {
+      false
+    }
+  }
+
+  fun dependSoft(feature: String, modid: String): Boolean {
+    return try {
+      dependSoft(lookupFeature(feature), modid)
+    } catch (e: IllegalStateException) {
+      false
+    }
+  }
+
+  fun push() {
+    stack += enabled
+  }
+
+  fun pop() {
+    enabled = stack.last()
+    drop()
+  }
+
+  fun drop() {
+    stack = stack.dropLast(1)
+  }
+
+  fun reset(condition: Boolean): Boolean {
+    if (condition) drop() else pop()
+    return condition
   }
 
   fun lookupFeature(feature: String): Feature {
     val matching = available.filter { it.name == feature }
-    if (matching.isEmpty()) error("Nothing provides $feature!")
+    if (matching.isEmpty()) error("No feature $feature available!")
     if (matching.size > 1) error("Ambiguous feature: $feature!")
     return matching.first()
   }
@@ -83,13 +136,17 @@ object FeatureManager {
   fun printFeatureList() {
     QuackLib.Logger.info("${available.size} features available, ${enabled.size} enabled.")
     if (enabled.isNotEmpty()) {
-      QuackLib.Logger.info("List of enabled features:")
       QuackLib.Logger.info("=========================")
-      enabled.forEach { f, i ->
-        var strs = listOf("[${if (i.explicitEnabled) 'e' else ' '}] '${f.name}':")
-        if (i.requiredByFeatures.isNotEmpty()) strs += "     Required by: " + i.requiredByFeatures.joinToString { it.name }
-        if (i.requiredByMods.isNotEmpty()) strs += "     Required by: " + i.requiredByMods.joinToString()
-        strs.forEach(QuackLib.Logger::info)
+      available.forEach { f ->
+        val i = enabled[f]
+        var str = " ["
+        str += if (i != null) "o" + if (i.explicitEnabled) "X" else " " else "  "
+        str += "] '${f.name}'"
+        if (i != null) {
+          str += ", required by "
+          str += (i.requiredByMods.map { "Mod($it)" } + i.requiredByFeatures.map { it.name }).joinToString()
+        }
+        QuackLib.Logger.info(str)
       }
       QuackLib.Logger.info("=========================")
     }
@@ -97,7 +154,7 @@ object FeatureManager {
 
   fun checkFeatures() {
     var errors: List<String> = emptyList()
-    enabled.forEach { f, i ->
+    enabled.forEach { f, _ ->
       val ec = f.conflicts.filter { it in enabled.keys }
       if (ec.isNotEmpty()) {
         errors += "Enabled features ${ec.joinToString(prefix = "'", postfix = "'") { it.name }}' conflict with ${f.name}!"

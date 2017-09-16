@@ -10,16 +10,12 @@ import net.minecraft.client.Minecraft
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.item.ItemStack
-import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.EnumFacing
-import net.minecraft.util.ITickable
-import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.RayTraceResult
 import net.minecraft.world.IBlockAccess
 import net.minecraft.world.World
-import therealfarfetchd.quacklib.common.DataTarget
 import therealfarfetchd.quacklib.common.extensions.getQBlock
 import therealfarfetchd.quacklib.common.extensions.plus
 
@@ -27,7 +23,7 @@ import therealfarfetchd.quacklib.common.extensions.plus
  * Created by marco on 09.07.17.
  */
 @Suppress("OverridingDeprecatedMember", "DEPRECATION")
-open class QBContainerMultipart(rl: ResourceLocation, factory: () -> QBlock) : QBContainer(rl, factory), IMultipart {
+open class QBContainerMultipart(factory: () -> QBlock) : QBContainer(factory), IMultipart {
 
   init {
     check(factory() is IQBlockMultipart) { "Illegal type: factory() must be QBlock with IQBlockMultipart" }
@@ -103,19 +99,6 @@ open class QBContainerMultipart(rl: ResourceLocation, factory: () -> QBlock) : Q
 
   override fun getLightOpacity(state: IBlockState?): Int = this.lightOpacity
   override fun getLightValue(state: IBlockState?): Int = this.lightValue
-
-  override fun createNewTileEntity(worldIn: World?, meta: Int): TileEntity {
-    val qb = factory()
-    (worldIn ?: savedWorld)?.also { qb.world = it }
-    savedPos?.also { qb.pos = it }
-    if (savedNbt != null) {
-      qb.prePlaced = true
-      qb.loadData(savedNbt!!, DataTarget.Save)
-      qb.prePlaced = false
-    }
-    if (qb is ITickable) return QBContainerTileMultipart.Ticking(qb)
-    else return QBContainerTileMultipart(qb)
-  }
 
   private val QBlock.asmp: IQBlockMultipart
     get() = this as IQBlockMultipart

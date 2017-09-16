@@ -1,6 +1,5 @@
 package therealfarfetchd.quacklib.common.item
 
-import net.minecraft.creativetab.CreativeTabs
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.init.SoundEvents
 import net.minecraft.item.Item
@@ -9,16 +8,16 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import therealfarfetchd.quacklib.ModID
 import therealfarfetchd.quacklib.common.api.IBlockWrenchable
+import therealfarfetchd.quacklib.common.util.ItemDef
 
 /**
  * Created by marco on 11.07.17.
  */
+@ItemDef
 object ItemWrench : Item() {
 
   init {
     registryName = ResourceLocation(ModID, "wrench")
-    unlocalizedName = "$ModID:wrench"
-    creativeTab = CreativeTabs.TOOLS
     maxStackSize = 1
   }
 
@@ -28,8 +27,8 @@ object ItemWrench : Item() {
     val block = world.getBlockState(pos).block
 
     val result =
-        if (block is IBlockWrenchable) block.rotateBlock(world, pos, facing, player, hitX, hitY, hitZ)
-        else block.rotateBlock(world, pos, facing)
+      if (block is IBlockWrenchable) block.rotateBlock(world, pos, facing, player, hitX, hitY, hitZ)
+      else block.rotateBlock(world, pos, facing)
 
     if (result) {
       playWrenchSound(world, pos)

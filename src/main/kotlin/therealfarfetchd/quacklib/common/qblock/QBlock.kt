@@ -2,7 +2,6 @@ package therealfarfetchd.quacklib.common.qblock
 
 import net.minecraft.block.SoundType
 import net.minecraft.block.material.Material
-
 import net.minecraft.block.properties.IProperty
 import net.minecraft.block.state.BlockFaceShape
 import net.minecraft.block.state.IBlockState
@@ -12,6 +11,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.util.BlockRenderLayer
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand
+import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.IBlockAccess
@@ -33,6 +33,11 @@ abstract class QBlock {
    * The block material. Must stay constant at all times.
    */
   abstract val material: Material
+
+  /**
+   * The resource location this block is registered as.
+   */
+  abstract val blockType: ResourceLocation
 
   /**
    * The sound type of the block.

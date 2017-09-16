@@ -35,7 +35,7 @@ interface IQBlockMultipart {
   val occlusionBoxes: List<AxisAlignedBB>
     get() = listOf(partPlacementBoundingBox).filterNotNull()
 
-  fun onPartChanged(part: IPartInfo): Unit {
+  fun onPartChanged(part: IPartInfo) {
     with(qb) {
       if (!canStay()) dismantle()
     }

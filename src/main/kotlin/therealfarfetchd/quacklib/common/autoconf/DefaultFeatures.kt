@@ -4,9 +4,12 @@ import net.minecraftforge.fml.common.registry.GameRegistry
 import therealfarfetchd.quacklib.ModID
 import therealfarfetchd.quacklib.common.block.BlockNikoliteOre
 import therealfarfetchd.quacklib.common.qblock.QBContainerTileMultipart
+import therealfarfetchd.quacklib.common.util.AutoLoad
+import therealfarfetchd.quacklib.common.util.shutupForge
 import therealfarfetchd.quacklib.common.world.QWorldGenerator
 
 @Suppress("MemberVisibilityCanPrivate")
+@AutoLoad
 object DefaultFeatures {
   val VirtualAlloyFurnace = VirtualFeature("alloy furnace")
   val VirtualSilicon = VirtualFeature("silicon")
@@ -18,6 +21,7 @@ object DefaultFeatures {
   val VirtualBrass = VirtualFeature("brass ingot")
   val VirtualNikolite = VirtualFeature("nikolite")
   val VirtualNikoliteOre = VirtualFeature("nikolite ore")
+  val VirtualBlutricity = VirtualFeature("blutricity")
   val TeckleCompat = VirtualFeature("teckle compat")
   val MCMultipartCompat = VirtualFeature("mcmultipart compat")
 
@@ -31,9 +35,12 @@ object DefaultFeatures {
     depends(Nikolite, OreGeneration); provides(VirtualNikoliteOre)
 
     action {
-      QWorldGenerator.registerOreGenerator(BlockNikoliteOre.defaultState, 0..16, 8, 8)
+      shutupForge {
+        QWorldGenerator.registerOreGenerator(BlockNikoliteOre.defaultState, 0..16, 8, 8)
+      }
     }
   }
+
   val AlloyFurnace = Feature("alloy furnace") { provides(VirtualAlloyFurnace) }
   val Drawplate = Feature("drawplate")
 
@@ -86,8 +93,8 @@ object DefaultFeatures {
 
   val MultipartMod = Feature("mcmultipart mod") {
     provides(MCMultipartCompat)
-    manualReg = true
     priority = 1000
+    manualReg = true
 
     action {
       GameRegistry.registerTileEntity(QBContainerTileMultipart::class.java, "$ModID:qblock_container_mp")

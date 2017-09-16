@@ -12,7 +12,10 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.tileentity.TileEntity
-import net.minecraft.util.*
+import net.minecraft.util.BlockRenderLayer
+import net.minecraft.util.EnumFacing
+import net.minecraft.util.EnumHand
+import net.minecraft.util.NonNullList
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.RayTraceResult
@@ -37,7 +40,7 @@ import java.util.*
  * Created by marco on 08.07.17.
  */
 @Suppress("OverridingDeprecatedMember", "DEPRECATION")
-open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(factory.also { tempFactory = it }().material), ITileEntityProvider {
+open class QBContainer(factory: () -> QBlock) : Block(factory.also { tempFactory = it }().material), ITileEntityProvider {
 
   private var _factory: (() -> QBlock)? = null
   internal val factory: () -> QBlock
@@ -47,9 +50,6 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
 
   init {
     _factory = tempFactory
-
-    registryName = rl
-    unlocalizedName = rl.toString()
 
     val factory1 = factory()
 
@@ -131,8 +131,7 @@ open class QBContainer(rl: ResourceLocation, factory: () -> QBlock) : Block(fact
       qb.loadData(savedNbt!!, DataTarget.Save)
       qb.prePlaced = false
     }
-    if (qb is ITickable) return QBContainerTile.Ticking(qb)
-    else return QBContainerTile(qb)
+    return WrapperImplManager.createTileEntity(qb::class).invoke(qb)
   }
 
   override fun canPlaceBlockAt(world: World, pos: BlockPos): Boolean {

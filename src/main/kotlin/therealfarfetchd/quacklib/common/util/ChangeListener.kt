@@ -35,15 +35,17 @@ class ChangeListener(vararg val values: KProperty0<*>) {
   }
 
   private fun tryCopy(a: Any?): Any? {
-    if (a is Array<*>) return a.copyOf()
-    else if (a is BooleanArray) return a.copyOf()
-    else if (a is ByteArray) return a.copyOf()
-    else if (a is ShortArray) return a.copyOf()
-    else if (a is IntArray) return a.copyOf()
-    else if (a is LongArray) return a.copyOf()
-    else if (a is FloatArray) return a.copyOf()
-    else if (a is DoubleArray) return a.copyOf()
-    else return a
+    return when (a) {
+      is Array<*> -> a.copyOf()
+      is BooleanArray -> a.copyOf()
+      is ByteArray -> a.copyOf()
+      is ShortArray -> a.copyOf()
+      is IntArray -> a.copyOf()
+      is LongArray -> a.copyOf()
+      is FloatArray -> a.copyOf()
+      is DoubleArray -> a.copyOf()
+      else -> a
+    }
   }
 
 }
