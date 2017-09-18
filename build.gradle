@@ -37,11 +37,15 @@ repositories {
     maven {
         url "http://maven.shadowfacts.net/"
     }
+    maven {
+        url 'https://repo.elytradev.com/'
+    }
 }
 
 dependencies {
     deobfCompile "MCMultiPart2:MCMultiPart-exp:2.2.2_38"
     deobfCompile "mezz.jei:jei_1.12:4.7.1.71"
+    compile 'com.elytradev:mirage:2.0.1-SNAPSHOT'
     compile group: "net.shadowfacts", name: "Forgelin", version: "1.5.1"
 }
 

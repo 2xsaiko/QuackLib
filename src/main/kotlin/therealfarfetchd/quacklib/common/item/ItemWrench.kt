@@ -8,7 +8,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import therealfarfetchd.quacklib.ModID
 import therealfarfetchd.quacklib.common.api.IBlockWrenchable
-import therealfarfetchd.quacklib.common.util.ItemDef
+import therealfarfetchd.quacklib.common.api.util.ItemDef
 
 /**
  * Created by marco on 11.07.17.

@@ -1,0 +1,44 @@
+package therealfarfetchd.quacklib.common.api.qblock
+
+import mcmultipart.api.container.IPartInfo
+import mcmultipart.api.slot.IPartSlot
+import mcmultipart.util.MCMPWorldWrapper
+import net.minecraft.util.EnumFacing
+import net.minecraft.util.math.AxisAlignedBB
+import net.minecraft.world.World
+
+/**
+ * Created by marco on 09.07.17.
+ */
+interface IQBlockMultipart {
+
+  private val qb: QBlock
+    get() = this as QBlock
+
+  val actualWorld: World
+    get() {
+      val world = qb.world
+      if (world is MCMPWorldWrapper) return world.actualWorld
+      return world
+    }
+
+  fun getPartSlot(): IPartSlot
+
+  /**
+   * Gets called before the block is placed in the world - useful for setting state based on the parameters
+   */
+  fun beforePlace(sidePlaced: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) {}
+
+  val partPlacementBoundingBox: AxisAlignedBB?
+    get() = qb.collisionBox
+
+  val occlusionBoxes: List<AxisAlignedBB>
+    get() = listOf(partPlacementBoundingBox).filterNotNull()
+
+  fun onPartChanged(part: IPartInfo) {
+    with(qb) {
+      if (!canStay()) dismantle()
+    }
+  }
+
+}

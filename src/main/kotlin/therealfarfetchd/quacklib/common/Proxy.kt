@@ -8,6 +8,7 @@ import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.common.capabilities.CapabilityManager
 import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.fml.common.Loader
+import net.minecraftforge.fml.common.discovery.ASMDataTable
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
@@ -18,24 +19,28 @@ import net.minecraftforge.oredict.OreDictionary
 import org.apache.logging.log4j.Level
 import therealfarfetchd.quacklib.ModID
 import therealfarfetchd.quacklib.QuackLib
+import therealfarfetchd.quacklib.common.api.autoconf.DefaultFeatures
+import therealfarfetchd.quacklib.common.api.autoconf.FeatureManager
+import therealfarfetchd.quacklib.common.api.autoconf.ItemFeature
 import therealfarfetchd.quacklib.common.api.block.capability.IConnectable
-import therealfarfetchd.quacklib.common.autoconf.DefaultFeatures
-import therealfarfetchd.quacklib.common.autoconf.FeatureManager
-import therealfarfetchd.quacklib.common.autoconf.ItemFeature
+import therealfarfetchd.quacklib.common.api.extensions.makeStack
+import therealfarfetchd.quacklib.common.api.extensions.register
+import therealfarfetchd.quacklib.common.api.item.ItemBlockMultipartEx
+import therealfarfetchd.quacklib.common.api.qblock.*
+import therealfarfetchd.quacklib.common.api.util.AutoLoad
+import therealfarfetchd.quacklib.common.api.util.IBlockDefinition
+import therealfarfetchd.quacklib.common.api.util.IItemDefinition
+import therealfarfetchd.quacklib.common.api.util.Scheduler
+import therealfarfetchd.quacklib.common.block.BlockAlloyFurnace
 import therealfarfetchd.quacklib.common.block.BlockNikoliteOre
-import therealfarfetchd.quacklib.common.extensions.makeStack
-import therealfarfetchd.quacklib.common.extensions.register
-import therealfarfetchd.quacklib.common.item.ItemBlockMultipartEx
 import therealfarfetchd.quacklib.common.item.ItemComponent
-import therealfarfetchd.quacklib.common.qblock.*
-import therealfarfetchd.quacklib.common.util.AutoLoad
-import therealfarfetchd.quacklib.common.util.IBlockDefinition
-import therealfarfetchd.quacklib.common.util.IItemDefinition
 
 /**
  * Created by marco on 16.07.17.
  */
 open class Proxy {
+
+  private lateinit var asmData: ASMDataTable
 
   open fun preInit(e: FMLPreInitializationEvent) {
     MinecraftForge.EVENT_BUS.register(this)
@@ -44,28 +49,37 @@ open class Proxy {
     if (QuackLib.debug) QuackLib.Logger.log(Level.INFO, "Running in a dev environment; enabling debug features!")
 
     e.asmData.getAll(AutoLoad::class.java.name).forEach { Class.forName(it.className) }
+    asmData = e.asmData
 
     WrapperImplManager.registerModifier(ITickable::class)
     WrapperImplManager.registerModifier(IQBlockMultipart::class)
+    WrapperImplManager.registerModifier(IQBlockInventory::class)
     WrapperImplManager.registerWrapper(ITickable::class) {
       te(QBContainerTile::Ticking)
     }
     WrapperImplManager.registerWrapper(IQBlockMultipart::class) {
+      container(::QBContainerMultipart)
       te(::QBContainerTileMultipart)
-      container { QBContainerMultipart(it) }
       item { _, block -> ItemBlockMultipartEx(block, block as IMultipart) }
     }
     WrapperImplManager.registerWrapper(IQBlockMultipart::class, ITickable::class) {
       inherit(IQBlockMultipart::class)
       te(QBContainerTileMultipart::Ticking)
     }
-
-    IBlockDefinition.populateBlockDefs(e.asmData)
-    IItemDefinition.populateItemDefs(e.asmData)
+    WrapperImplManager.registerWrapper(IQBlockInventory::class) {
+      container(::QBContainerInventory)
+      te(::QBContainerTileInventory)
+    }
+    WrapperImplManager.registerWrapper(IQBlockInventory::class, ITickable::class) {
+      inherit(IQBlockInventory::class)
+      te(QBContainerTileInventory::Ticking)
+    }
 
     // register tile entities that come with the library
     GameRegistry.registerTileEntity(QBContainerTile::class.java, "$ModID:qblock_container")
     GameRegistry.registerTileEntity(QBContainerTile.Ticking::class.java, "$ModID:qblock_container_t")
+    GameRegistry.registerTileEntity(QBContainerTileInventory::class.java, "$ModID:qblock_container_inv")
+    GameRegistry.registerTileEntity(QBContainerTileInventory.Ticking::class.java, "$ModID:qblock_container_inv_t")
 
     CapabilityManager.INSTANCE.register(IConnectable::class)
   }
@@ -92,14 +106,23 @@ open class Proxy {
     if (FeatureManager.isRequired(DefaultFeatures.NikoliteOre)) {
       e.registry.register(BlockNikoliteOre.Item)
     }
+    if (FeatureManager.isRequired(DefaultFeatures.AlloyFurnace)) {
+      e.registry.register(BlockAlloyFurnace.Item)
+    }
     e.registry.registerAll(*IBlockDefinition.definitions.mapNotNull { it.item }.toTypedArray())
     e.registry.registerAll(*IItemDefinition.definitions.map { it.item }.toTypedArray())
   }
 
   @SubscribeEvent
   fun registerBlocks(e: RegistryEvent.Register<Block>) {
+    IBlockDefinition.populateBlockDefs(asmData)
+    IItemDefinition.populateItemDefs(asmData)
+
     if (FeatureManager.isRequired(DefaultFeatures.NikoliteOre)) {
       e.registry.register(BlockNikoliteOre)
+    }
+    if (FeatureManager.isRequired(DefaultFeatures.AlloyFurnace)) {
+      e.registry.register(BlockAlloyFurnace.Block)
     }
     e.registry.registerAll(*IBlockDefinition.definitions.map { it.block }.toTypedArray())
   }

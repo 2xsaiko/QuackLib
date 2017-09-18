@@ -2,7 +2,7 @@ package therealfarfetchd.quacklib.common.api.block.capability
 
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.ResourceLocation
-import therealfarfetchd.quacklib.common.wires.BlockWireCentered
+import therealfarfetchd.quacklib.common.api.wires.BlockWireCentered
 
 class CenteredWireConnectable<out T>(val wire: BlockWireCentered<T>, val side: EnumFacing) : IConnectable {
   override fun getEdge(facing: EnumFacing?): T? = if (facing == null) wire.data else null

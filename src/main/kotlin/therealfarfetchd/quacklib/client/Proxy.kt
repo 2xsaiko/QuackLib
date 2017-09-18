@@ -11,26 +11,28 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import org.apache.logging.log4j.Level
 import therealfarfetchd.quacklib.QuackLib
-import therealfarfetchd.quacklib.client.gui.GuiElementRegistry
-import therealfarfetchd.quacklib.client.gui.GuiLogicRegistry
-import therealfarfetchd.quacklib.client.gui.NullGuiLogic
-import therealfarfetchd.quacklib.client.gui.elements.Button
-import therealfarfetchd.quacklib.client.gui.elements.Dummy
-import therealfarfetchd.quacklib.client.gui.elements.Frame
-import therealfarfetchd.quacklib.client.gui.elements.Label
-import therealfarfetchd.quacklib.client.model.BakedModelRegistry
-import therealfarfetchd.quacklib.client.model.CachedBakedModel
-import therealfarfetchd.quacklib.client.model.IIconRegister
-import therealfarfetchd.quacklib.client.qbr.QBContainerTileRenderer
+import therealfarfetchd.quacklib.client.api.gui.GuiElementRegistry
+import therealfarfetchd.quacklib.client.api.gui.GuiLogicRegistry
+import therealfarfetchd.quacklib.client.api.gui.NullGuiLogic
+import therealfarfetchd.quacklib.client.api.gui.elements.Button
+import therealfarfetchd.quacklib.client.api.gui.elements.Dummy
+import therealfarfetchd.quacklib.client.api.gui.elements.Frame
+import therealfarfetchd.quacklib.client.api.gui.elements.Label
+import therealfarfetchd.quacklib.client.api.model.BakedModelRegistry
+import therealfarfetchd.quacklib.client.api.model.CachedBakedModel
+import therealfarfetchd.quacklib.client.api.model.IIconRegister
+import therealfarfetchd.quacklib.client.api.qbr.QBContainerTileRenderer
 import therealfarfetchd.quacklib.common.Proxy
-import therealfarfetchd.quacklib.common.autoconf.DefaultFeatures
-import therealfarfetchd.quacklib.common.autoconf.FeatureManager
+import therealfarfetchd.quacklib.common.api.autoconf.DefaultFeatures
+import therealfarfetchd.quacklib.common.api.autoconf.FeatureManager
+import therealfarfetchd.quacklib.common.api.qblock.QBContainerTile
+import therealfarfetchd.quacklib.common.api.qblock.QBContainerTileInventory
+import therealfarfetchd.quacklib.common.api.qblock.QBContainerTileMultipart
+import therealfarfetchd.quacklib.common.api.util.IBlockDefinition
+import therealfarfetchd.quacklib.common.api.util.IItemDefinition
+import therealfarfetchd.quacklib.common.block.BlockAlloyFurnace
 import therealfarfetchd.quacklib.common.block.BlockNikoliteOre
 import therealfarfetchd.quacklib.common.item.ItemComponent
-import therealfarfetchd.quacklib.common.qblock.QBContainerTile
-import therealfarfetchd.quacklib.common.qblock.QBContainerTileMultipart
-import therealfarfetchd.quacklib.common.util.IBlockDefinition
-import therealfarfetchd.quacklib.common.util.IItemDefinition
 
 /**
  * Created by marco on 16.07.17.
@@ -41,6 +43,7 @@ class Proxy : Proxy() {
     super.preInit(e)
 
     ClientRegistry.bindTileEntitySpecialRenderer(QBContainerTile::class.java, QBContainerTileRenderer)
+    ClientRegistry.bindTileEntitySpecialRenderer(QBContainerTileInventory::class.java, QBContainerTileRenderer)
     if (FeatureManager.isRequired(DefaultFeatures.MCMultipartCompat))
       ClientRegistry.bindTileEntitySpecialRenderer(QBContainerTileMultipart::class.java, QBContainerTileRenderer)
   }
@@ -75,6 +78,10 @@ class Proxy : Proxy() {
       for (i in ItemComponent.getValidMetadata()) {
         ModelLoader.setCustomModelResourceLocation(ItemComponent, i, ModelResourceLocation("${ItemComponent.registryName}/$i", "inventory"))
       }
+    }
+
+    if (FeatureManager.isRequired(DefaultFeatures.AlloyFurnace)) {
+      ModelLoader.setCustomModelResourceLocation(BlockAlloyFurnace.Item, 0, ModelResourceLocation(BlockAlloyFurnace.Item.registryName, "inventory"))
     }
   }
 

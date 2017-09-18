@@ -12,7 +12,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import therealfarfetchd.quacklib.ModID
 import therealfarfetchd.quacklib.common.api.QCreativeTab
-import therealfarfetchd.quacklib.common.extensions.makeStack
+import therealfarfetchd.quacklib.common.api.extensions.makeStack
 import therealfarfetchd.quacklib.common.item.ItemComponent
 import java.util.*
 

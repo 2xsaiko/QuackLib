@@ -1,7 +1,7 @@
 package therealfarfetchd.quacklib.common.api;
 
 import net.minecraft.util.EnumFacing;
-import therealfarfetchd.quacklib.common.util.EnumFaceLocation;
+import therealfarfetchd.quacklib.common.api.util.EnumFaceLocation;
 
 @FunctionalInterface
 public interface INeighborSupport<T> {

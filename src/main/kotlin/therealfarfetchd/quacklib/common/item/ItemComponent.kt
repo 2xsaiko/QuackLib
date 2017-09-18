@@ -7,9 +7,9 @@ import net.minecraft.util.NonNullList
 import net.minecraft.util.ResourceLocation
 import therealfarfetchd.quacklib.ModID
 import therealfarfetchd.quacklib.common.api.QCreativeTab
-import therealfarfetchd.quacklib.common.autoconf.FeatureManager
-import therealfarfetchd.quacklib.common.autoconf.ItemFeature
-import therealfarfetchd.quacklib.common.extensions.makeStack
+import therealfarfetchd.quacklib.common.api.autoconf.FeatureManager
+import therealfarfetchd.quacklib.common.api.autoconf.ItemFeature
+import therealfarfetchd.quacklib.common.api.extensions.makeStack
 
 object ItemComponent : Item() {
   init {
