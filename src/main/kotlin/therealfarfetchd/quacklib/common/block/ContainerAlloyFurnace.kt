@@ -20,7 +20,7 @@ class ContainerAlloyFurnace(val playerInv: InventoryPlayer, val inventory: IQBlo
         this.addSlotToContainer(Slot(inventory, 2 + j + i * 3, 44 + j * 18, 15 + i * 18))
       }
     }
-    this.addSlotToContainer(SlotFurnaceFuel(inventory, 0, 18, 51))
+    this.addSlotToContainer(SlotFurnaceFuel(inventory, 0, 18, 33))
     this.addSlotToContainer(SlotFurnaceOutput(playerInv.player, inventory, 1, 146, 33))
 
     // Player inventory
@@ -83,50 +83,35 @@ class ContainerAlloyFurnace(val playerInv: InventoryPlayer, val inventory: IQBlo
    */
   override fun transferStackInSlot(playerIn: EntityPlayer, index: Int): ItemStack {
     var itemstack = ItemStack.EMPTY
-    //    val slot = this.inventorySlots[index]
-    //
-    //    if (slot != null && slot.hasStack) {
-    //      val itemstack1 = slot.stack
-    //      itemstack = itemstack1.copy()
-    //
-    //      if (index == 2) {
-    //        if (!this.mergeItemStack(itemstack1, 3, 39, true)) {
-    //          return ItemStack.EMPTY
-    //        }
-    //
-    //        slot.onSlotChange(itemstack1, itemstack)
-    //      } else if (index != 1 && index != 0) {
-    //        if (!FurnaceRecipes.instance().getSmeltingResult(itemstack1).isEmpty) {
-    //          if (!this.mergeItemStack(itemstack1, 0, 1, false)) {
-    //            return ItemStack.EMPTY
-    //          }
-    //        } else if (TileEntityFurnace.isItemFuel(itemstack1)) {
-    //          if (!this.mergeItemStack(itemstack1, 1, 2, false)) {
-    //            return ItemStack.EMPTY
-    //          }
-    //        } else if (index in 3..29) {
-    //          if (!this.mergeItemStack(itemstack1, 30, 39, false)) {
-    //            return ItemStack.EMPTY
-    //          }
-    //        } else if (index in 30..38 && !this.mergeItemStack(itemstack1, 3, 30, false)) {
-    //          return ItemStack.EMPTY
-    //        }
-    //      } else if (!this.mergeItemStack(itemstack1, 3, 39, false)) {
-    //        return ItemStack.EMPTY
-    //      }
-    //
-    //      if (itemstack1.isEmpty) {
-    //        slot.putStack(ItemStack.EMPTY)
-    //      } else {
-    //        slot.onSlotChanged()
-    //      }
-    //
-    //      if (itemstack1.count == itemstack.count) {
-    //        return ItemStack.EMPTY
-    //      }
-    //
-    //      slot.onTake(playerIn, itemstack1)
-    //    }
+    val slot = this.inventorySlots[index] ?: return itemstack
+    val stack = slot.stack
+    if (!stack.isEmpty) {
+      itemstack = stack.copy()
+
+      if (index < 11) {
+        if (!this.mergeItemStack(stack, 11, 46, true)) {
+          return ItemStack.EMPTY
+        }
+      } else {
+        if (!this.mergeItemStack(stack, 0, 1, false)) {
+          if (!this.mergeItemStack(stack, 2, 11, false)) {
+            return ItemStack.EMPTY
+          }
+        }
+      }
+
+      if (stack.isEmpty) {
+        slot.putStack(ItemStack.EMPTY)
+      } else {
+        slot.onSlotChanged()
+      }
+
+      if (stack.count == itemstack.count) {
+        return ItemStack.EMPTY
+      }
+
+      slot.onTake(playerIn, stack)
+    }
 
     return itemstack
   }

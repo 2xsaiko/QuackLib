@@ -19,6 +19,8 @@ import net.minecraft.world.World
 import net.minecraftforge.common.capabilities.Capability
 import net.minecraftforge.common.property.IExtendedBlockState
 import net.minecraftforge.common.property.IUnlistedProperty
+import therealfarfetchd.quacklib.QuackLib
+import therealfarfetchd.quacklib.common.QGuiHandler
 import therealfarfetchd.quacklib.common.api.extensions.isServer
 import therealfarfetchd.quacklib.common.api.extensions.spawnAt
 import therealfarfetchd.quacklib.common.api.util.DataTarget
@@ -205,7 +207,15 @@ abstract class QBlock {
   /**
    * Gets called when the block is clicked on. Returns true if the player should swing their hand.
    */
-  open fun onActivated(player: EntityPlayer, hand: EnumHand, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean = false
+  open fun onActivated(player: EntityPlayer, hand: EnumHand, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean = openGui(player)
+
+  fun openGui(player: EntityPlayer): Boolean {
+    if (!QGuiHandler.hasEntry(blockType)) return false
+    player.openGui(QuackLib, getBlockLocation(), world, pos.x, pos.y, pos.z)
+    return true
+  }
+
+  fun getBlockLocation(): Int = if (this is IQBlockMultipart) "$blockType@${getPartSlot().javaClass}:${getPartSlot()}".hashCode() else 0
 
   open fun getBlockFaceShape(facing: EnumFacing): BlockFaceShape = BlockFaceShape.CENTER
 

@@ -84,5 +84,4 @@ object GuiApi {
   private fun handleObject(je: JsonObject): Map<String, Any?> {
     return je.entrySet().map { it.key to javaRepr(it.value) }.toMap()
   }
-
 }

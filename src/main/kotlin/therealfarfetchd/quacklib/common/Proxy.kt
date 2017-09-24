@@ -14,6 +14,7 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
+import net.minecraftforge.fml.common.network.NetworkRegistry
 import net.minecraftforge.fml.common.registry.GameRegistry
 import net.minecraftforge.oredict.OreDictionary
 import org.apache.logging.log4j.Level
@@ -82,6 +83,7 @@ open class Proxy {
     GameRegistry.registerTileEntity(QBContainerTileInventory.Ticking::class.java, "$ModID:qblock_container_inv_t")
 
     CapabilityManager.INSTANCE.register(IConnectable::class)
+    NetworkRegistry.INSTANCE.registerGuiHandler(QuackLib, QGuiHandler)
   }
 
   open fun init(e: FMLInitializationEvent) {}
