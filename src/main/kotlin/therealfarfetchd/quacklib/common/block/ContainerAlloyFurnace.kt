@@ -15,11 +15,11 @@ class ContainerAlloyFurnace(val playerInv: InventoryPlayer, val inventory: IQBlo
   var currentItemBurnTime: Int = 0; private set
 
   init {
-    this.addSlotToContainer(SlotFurnaceFuel(inventory, 0, 17, 33))
-    this.addSlotToContainer(SlotFurnaceOutput(playerInv.player, inventory, 1, 134, 33))
+    this.addSlotToContainer(SlotFurnaceFuel(inventory, 0, 17, 34))
+    this.addSlotToContainer(SlotOutput(playerInv.player, inventory, 1, 134, 34))
     for (i in 0 until 3) {
       for (j in 0 until 3) {
-        this.addSlotToContainer(Slot(inventory, 2 + j + i * 3, 44 + j * 18, 15 + i * 18))
+        this.addSlotToContainer(Slot(inventory, 2 + j + i * 3, 44 + j * 18, 16 + i * 18))
       }
     }
 
@@ -123,4 +123,14 @@ class ContainerAlloyFurnace(val playerInv: InventoryPlayer, val inventory: IQBlo
   }
 
   override fun canInteractWith(playerIn: EntityPlayer): Boolean = inventory.isUsableByPlayer(playerIn)
+
+  private class SlotOutput(
+    player: EntityPlayer,
+    inventoryIn: IInventory,
+    slotIndex: Int,
+    xPosition: Int,
+    yPosition: Int
+  ) : SlotFurnaceOutput(player, inventoryIn, slotIndex, xPosition, yPosition) {
+    override fun onCrafting(stack: ItemStack?) {}
+  }
 }

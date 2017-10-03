@@ -81,7 +81,7 @@ class BlockAlloyFurnace : QBlock(), IQBlockInventory, ITickable {
 
     val recipe = AlloyFurnaceRecipes.findRecipe(inputSlots)
       ?.let { it.first to it.second.makeStack() }
-      ?.takeIf { resultSlot.isItemEqual(it.second) }
+      ?.takeIf { resultSlot.isEmpty || resultSlot.isItemEqual(it.second) }
     val hasRecipe = recipe != null
 
     if (burnTime < currentItemBurnTime) {
