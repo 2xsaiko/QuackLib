@@ -16,7 +16,7 @@ const val ModID = "quacklib"
 const val ClientProxy = "therealfarfetchd.$ModID.client.Proxy"
 const val ServerProxy = "therealfarfetchd.$ModID.common.Proxy"
 
-@Mod(modid = ModID, acceptedMinecraftVersions = "1.12,1.12.1", modLanguageAdapter = "net.shadowfacts.forgelin.KotlinAdapter")
+@Mod(modid = ModID, acceptedMinecraftVersions = "1.12,1.12.1,1.12.2", modLanguageAdapter = "net.shadowfacts.forgelin.KotlinAdapter")
 object QuackLib {
   val debug = Launch.blackboard["fml.deobfuscatedEnvironment"] as Boolean
 

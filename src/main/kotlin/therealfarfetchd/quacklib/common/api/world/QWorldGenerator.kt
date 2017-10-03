@@ -36,7 +36,7 @@ object QWorldGenerator : IWorldGenerator {
         val z = chunkZ * 16 + rnd.nextInt(16)
         val y = rnd.nextInt(height.count()) + height.first
         val blockPos = BlockPos(x, y, z)
-        if (QuackLib.debug) QuackLib.Logger.info("Generated $ore at $blockPos.")
+        // if (QuackLib.debug) QuackLib.Logger.info("Generated $ore at $blockPos.")
         gen.generate(world, rnd, blockPos)
       }
     }

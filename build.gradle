@@ -24,7 +24,7 @@ compileKotlin {
 }
 
 minecraft {
-    version = "1.12.1-14.22.0.2467"
+    version = "1.12.2-14.23.0.2501"
     runDir = "run"
     mappings = "snapshot_20170624"
 }
