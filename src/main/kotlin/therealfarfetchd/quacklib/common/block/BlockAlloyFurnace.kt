@@ -16,9 +16,12 @@ import net.minecraft.tileentity.TileEntityFurnace
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.ITickable
 import net.minecraft.util.ResourceLocation
+import net.minecraftforge.common.capabilities.Capability
+import net.minecraftforge.items.CapabilityItemHandler
 import therealfarfetchd.quacklib.ModID
 import therealfarfetchd.quacklib.common.api.extensions.isClient
 import therealfarfetchd.quacklib.common.api.extensions.makeStack
+import therealfarfetchd.quacklib.common.api.extensions.spawnAt
 import therealfarfetchd.quacklib.common.api.qblock.IQBlockInventory
 import therealfarfetchd.quacklib.common.api.qblock.QBlock
 import therealfarfetchd.quacklib.common.api.qblock.WrapperImplManager
@@ -77,6 +80,8 @@ class BlockAlloyFurnace : QBlock(), IQBlockInventory, ITickable {
     if (world.isClient) return
 
     val recipe = AlloyFurnaceRecipes.findRecipe(inputSlots)
+      ?.let { it.first to it.second.makeStack() }
+      ?.takeIf { resultSlot.isItemEqual(it.second) }
     val hasRecipe = recipe != null
 
     if (burnTime < currentItemBurnTime) {
@@ -87,11 +92,11 @@ class BlockAlloyFurnace : QBlock(), IQBlockInventory, ITickable {
       if (hasRecipe) takeFuel()
     }
 
-    if (hasRecipe && burnTime < currentItemBurnTime) {
+    if (hasRecipe && currentItemBurnTime != 0) {
       if (cookTime < totalCookTime) {
         cookTime++
       } else {
-        craftRecipe(recipe!!)
+        if (totalCookTime != 0) craftRecipe(recipe!!)
         cookTime = 0
         totalCookTime = 200
       }
@@ -99,6 +104,7 @@ class BlockAlloyFurnace : QBlock(), IQBlockInventory, ITickable {
       cookTime = 0
       totalCookTime = 0
     }
+
 
     if (worldCL.valuesChanged()) dataChanged()
     if (displayCL.valuesChanged()) {
@@ -109,8 +115,8 @@ class BlockAlloyFurnace : QBlock(), IQBlockInventory, ITickable {
     }
   }
 
-  fun craftRecipe(r: Pair<List<ItemTemplate>, ItemTemplate>) {
-    val outStack = r.second.makeStack()
+  private fun craftRecipe(r: Pair<List<ItemTemplate>, ItemStack>) {
+    val outStack = r.second
 
     if (resultSlot.isEmpty || resultSlot.isItemEqual(outStack)) {
       for (item in r.first) {
@@ -148,9 +154,9 @@ class BlockAlloyFurnace : QBlock(), IQBlockInventory, ITickable {
     }
   }
 
-  fun getBurnTime(stack: ItemStack) = TileEntityFurnace.getItemBurnTime(stack)
+  private fun getBurnTime(stack: ItemStack) = TileEntityFurnace.getItemBurnTime(stack)
 
-  fun takeFuel(): Boolean {
+  private fun takeFuel(): Boolean {
     val burnTime = getBurnTime(fuelSlot)
     return if (burnTime > 0) {
       fuelSlot.count--
@@ -172,6 +178,7 @@ class BlockAlloyFurnace : QBlock(), IQBlockInventory, ITickable {
     super.saveData(nbt, target)
     nbt.ubyte["F"] = facing.horizontalIndex
     nbt.ushort["IT"] = currentItemBurnTime
+    customName?.also { nbt.string["CN"] = it }
     if (target != DataTarget.Client) {
       nbt.ushort["BT"] = burnTime
       nbt.ushort["CT"] = cookTime
@@ -179,23 +186,36 @@ class BlockAlloyFurnace : QBlock(), IQBlockInventory, ITickable {
       for ((i, item) in stacks.withIndex())
         item.writeToNBT(nbt.nbt["I$i"].self)
     }
-    customName?.also { nbt.string["CN"] = it }
   }
 
   override fun loadData(nbt: QNBTCompound, target: DataTarget) {
     super.loadData(nbt, target)
     facing = EnumFacing.getHorizontal(nbt.ubyte["F"])
-    burnTime = nbt.ushort["BT"]
-    cookTime = nbt.ushort["CT"]
-    totalCookTime = nbt.ushort["TCT"]
     currentItemBurnTime = nbt.ushort["IT"]
-    for (i in stacks.indices)
-      stacks[i] = ItemStack(nbt.nbt["I$i"].self)
     if ("CN" in nbt) customName = nbt.string["CN"]
+    if (target != DataTarget.Client) {
+      burnTime = nbt.ushort["BT"]
+      cookTime = nbt.ushort["CT"]
+      totalCookTime = nbt.ushort["TCT"]
+      for (i in stacks.indices)
+        stacks[i] = ItemStack(nbt.nbt["I$i"].self)
+    }
   }
 
   override fun applyProperties(state: IBlockState): IBlockState {
     return super.applyProperties(state).withProperty(PropFacing, facing).withProperty(PropLit, currentItemBurnTime != 0)
+  }
+
+  override fun getSlotsForFace(side: EnumFacing): IntArray {
+    return when (side) {
+      EnumFacing.DOWN -> intArrayOf(0) // fuel slot
+      EnumFacing.UP -> (2..10).toList().toIntArray() // input slots
+      EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.WEST, EnumFacing.EAST -> intArrayOf(1) // output slot
+    }
+  }
+
+  override fun onBreakBlock() {
+    for (stack in stacks) stack.spawnAt(world, pos)
   }
 
   override val properties: Set<IProperty<*>> = super.properties + PropFacing + PropLit
@@ -206,6 +226,14 @@ class BlockAlloyFurnace : QBlock(), IQBlockInventory, ITickable {
   override fun getFieldCount(): Int = 4
 
   override fun getItem(): ItemStack = Item.makeStack()
+
+  @Suppress("UNCHECKED_CAST")
+  override fun <T> getCapability(capability: Capability<T>, side: EnumFacing?): T? {
+    return when (capability) {
+      CapabilityItemHandler.ITEM_HANDLER_CAPABILITY -> if (side != null) handler(side) as T else null
+      else -> super.getCapability(capability, side)
+    }
+  }
 
   companion object {
     val PropFacing = PropertyEnum.create("facing", EnumFacing::class.java, *EnumFacing.HORIZONTALS)

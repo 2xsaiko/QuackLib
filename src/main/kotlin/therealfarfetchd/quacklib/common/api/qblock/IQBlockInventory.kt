@@ -3,15 +3,16 @@ package therealfarfetchd.quacklib.common.api.qblock
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.entity.player.InventoryPlayer
 import net.minecraft.inventory.Container
-import net.minecraft.inventory.IInventory
+import net.minecraft.inventory.ISidedInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.text.ITextComponent
 import net.minecraft.util.text.TextComponentString
 import net.minecraft.util.text.TextComponentTranslation
 import net.minecraft.world.IInteractionObject
+import net.minecraftforge.items.wrapper.SidedInvWrapper
 
-interface IQBlockInventory : IInventory, IInteractionObject {
+interface IQBlockInventory : ISidedInventory, IInteractionObject {
   val inventorySize: Int
 
   override fun getInventoryStackLimit(): Int = 64
@@ -52,13 +53,13 @@ interface IQBlockInventory : IInventory, IInteractionObject {
     return ret
   }
 
-  fun canInsertItem(index: Int, stack: ItemStack, side: EnumFacing): Boolean {
+  override fun canInsertItem(index: Int, stack: ItemStack, side: EnumFacing): Boolean {
     if (index !in getSlotsForFace(side)) return false
     if (!isItemValidForSlot(index, stack)) return false
     return true
   }
 
-  fun canExtractItem(index: Int, stack: ItemStack, side: EnumFacing): Boolean {
+  override fun canExtractItem(index: Int, stack: ItemStack, side: EnumFacing): Boolean {
     if (index !in getSlotsForFace(side)) return false
     if (!isItemValidForSlot(index, stack)) return false
     return true
@@ -76,7 +77,9 @@ interface IQBlockInventory : IInventory, IInteractionObject {
   override fun setField(id: Int, value: Int) {}
   override fun getField(id: Int): Int = 0
   override fun isUsableByPlayer(player: EntityPlayer): Boolean = true
-  fun getSlotsForFace(side: EnumFacing): Set<Int> = (0 until inventorySize).toSet()
+  override fun getSlotsForFace(side: EnumFacing): IntArray = (0 until inventorySize).toList().toIntArray()
 
   override fun markDirty() {}
+
+  fun handler(side: EnumFacing) = SidedInvWrapper(this, side)
 }

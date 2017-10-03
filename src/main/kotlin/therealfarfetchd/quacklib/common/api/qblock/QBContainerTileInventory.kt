@@ -105,7 +105,7 @@ open class QBContainerTileInventory() : QBContainerTile(), ILockableContainer, I
   }
 
   override fun getSlotsForFace(side: EnumFacing): IntArray {
-    return qbinv.getSlotsForFace(side).toIntArray()
+    return qbinv.getSlotsForFace(side)
   }
 
   override fun canInsertItem(index: Int, itemStackIn: ItemStack, direction: EnumFacing): Boolean {

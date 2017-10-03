@@ -42,7 +42,8 @@ object AlloyFurnaceRecipes {
       for (input in recipe.first) {
         var count = input.makeStack().count
         for (s in st) {
-          if (count == 0) continue
+          if (count == 0) break
+          if (!input.isSameItem(s)) continue
           val take = minOf(s.count, count)
           count -= take
           s.count -= take

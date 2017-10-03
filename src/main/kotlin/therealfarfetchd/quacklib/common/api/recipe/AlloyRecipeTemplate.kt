@@ -40,16 +40,18 @@ data class ItemStackTemplate(val item: Item, val count: Int, val meta: Int) : It
 }
 
 data class OreDictTemplate(val item: String, val count: Int) : ItemTemplate {
+  private val stack by lazy {
+    if (!isValid()) error("Invalid item!")
+    OreDictionary.getOres(item)[0].copy().also { it.count = count }
+  }
+
   override fun isValid(): Boolean {
     return count > 0 && OreDictionary.doesOreNameExist(item)
   }
 
   override fun isSameItem(stack: ItemStack): Boolean {
-    return OreDictionary.itemMatches(stack, makeStack(), true)
+    return OreDictionary.containsMatch(true, OreDictionary.getOres(item), stack)
   }
 
-  override fun makeStack(): ItemStack {
-    if (!isValid()) error("Invalid item!")
-    return OreDictionary.getOres(item)[0].copy().also { it.count = count }
-  }
+  override fun makeStack(): ItemStack = stack.copy()
 }
