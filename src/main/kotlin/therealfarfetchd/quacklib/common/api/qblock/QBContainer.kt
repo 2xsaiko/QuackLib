@@ -256,6 +256,10 @@ open class QBContainer(factory: () -> QBlock) : Block(factory.also { tempFactory
     return world.getQBlock(pos)?.getItem() ?: noqb(pos)
   }
 
+  override fun isTopSolid(state: IBlockState?): Boolean {
+    return tempQB(null, null).isTopSolid
+  }
+
   protected fun <T> buildPart(world: World? = null, pos: BlockPos? = null, op: QBlock.() -> T): T {
     world?.also { savedWorld = it }
     pos?.also { savedPos = it }

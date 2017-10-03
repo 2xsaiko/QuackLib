@@ -80,6 +80,13 @@ abstract class QBlock {
   open fun isSideOpaque(facing: EnumFacing): Boolean = isOpaque
 
   /**
+   * Don't know why this is an extra thing, but it's used to determine if some vanilla stuff like levers can be placed on the top.
+   * Must stay constant at all times.
+   */
+  open val isTopSolid: Boolean
+    get() = material.isOpaque && isOpaque && isFullBlock
+
+  /**
    * TESR fix
    */
   open val useNeighborBrightness: Boolean = false
