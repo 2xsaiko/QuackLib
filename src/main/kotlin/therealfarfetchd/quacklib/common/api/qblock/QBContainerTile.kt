@@ -61,23 +61,23 @@ open class QBContainerTile() : TileEntity(), IColoredLight {
 
   override fun writeToNBT(compound: NBTTagCompound): NBTTagCompound {
     val subTag = NBTTagCompound()
-    compound.setByte("Bits", packByte(*bits))
-    compound.setString("BlockType", getBlockType().registryName.toString())
+    compound.setByte("B", packByte(*bits))
+    compound.setString("T", getBlockType().registryName.toString())
     qb.saveData(QNBTCompound(subTag), DataTarget.Save)
-    compound.setTag("QBlockData", subTag)
+    compound.setTag("D", subTag)
     return super.writeToNBT(compound)
   }
 
   override fun readFromNBT(compound: NBTTagCompound) {
     super.readFromNBT(compound)
-    unpack(compound.getByte("Bits")).copyTo(bits)
+    unpack(compound.getByte("B")).copyTo(bits)
     if (_qb == null) {
-      val rl = ResourceLocation(compound.getString("BlockType"))
+      val rl = ResourceLocation(compound.getString("T"))
       val block = Block.REGISTRY.getObject(rl)
       if (block is QBContainer) qb = block.factory()
       else throw IllegalStateException("Block is not a QBContainer! (got block $rl ($block) which is ${block::class}")
     }
-    val subTag = compound.getCompoundTag("QBlockData")
+    val subTag = compound.getCompoundTag("D")
     qb.pos = getPos()
     qb.loadData(QNBTCompound(subTag), DataTarget.Save)
   }
