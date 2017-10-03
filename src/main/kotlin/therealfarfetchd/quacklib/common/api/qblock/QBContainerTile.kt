@@ -70,6 +70,12 @@ open class QBContainerTile() : TileEntity(), IColoredLight {
 
   override fun readFromNBT(compound: NBTTagCompound) {
     super.readFromNBT(compound)
+
+    // backward compat
+    if (compound.hasKey("Bits")) compound.setTag("B", compound.getTag("Bits"))
+    if (compound.hasKey("BlockType")) compound.setTag("T", compound.getTag("BlockType"))
+    if (compound.hasKey("QBlockData")) compound.setTag("B", compound.getTag("QBlockData"))
+
     unpack(compound.getByte("B")).copyTo(bits)
     if (_qb == null) {
       val rl = ResourceLocation(compound.getString("T"))
