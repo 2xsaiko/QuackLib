@@ -1,12 +1,17 @@
 package therealfarfetchd.quacklib.common.api.autoconf
 
+import net.minecraft.util.ResourceLocation
 import net.minecraftforge.fml.common.registry.GameRegistry
 import therealfarfetchd.quacklib.ModID
+import therealfarfetchd.quacklib.client.gui.GuiAlloyFurnace
+import therealfarfetchd.quacklib.common.QGuiHandler
+import therealfarfetchd.quacklib.common.api.qblock.IQBlockInventory
 import therealfarfetchd.quacklib.common.api.qblock.QBContainerTileMultipart
 import therealfarfetchd.quacklib.common.api.util.AutoLoad
 import therealfarfetchd.quacklib.common.api.util.shutupForge
 import therealfarfetchd.quacklib.common.api.world.QWorldGenerator
 import therealfarfetchd.quacklib.common.block.BlockNikoliteOre
+import therealfarfetchd.quacklib.common.block.ContainerAlloyFurnace
 
 @Suppress("MemberVisibilityCanPrivate")
 @AutoLoad
@@ -41,7 +46,15 @@ object DefaultFeatures {
     }
   }
 
-  val AlloyFurnace = Feature("alloy furnace") { provides(VirtualAlloyFurnace) }
+  val AlloyFurnace = Feature("alloy furnace") {
+    provides(VirtualAlloyFurnace)
+
+    action {
+      QGuiHandler.registerClientGui(ResourceLocation(ModID, "alloy_furnace")) { _, qb, player -> GuiAlloyFurnace(player.inventory, qb as IQBlockInventory) }
+      QGuiHandler.registerServerGui(ResourceLocation(ModID, "alloy_furnace")) { _, qb, player -> ContainerAlloyFurnace(player.inventory, qb as IQBlockInventory) }
+    }
+  }
+
   val Drawplate = Feature("drawplate")
 
   val ComponentItem = Feature("component item")
@@ -68,15 +81,15 @@ object DefaultFeatures {
       LumarPink, LumarGray, LumarSilver, LumarCyan, LumarPurple, LumarBlue, LumarBrown, LumarGreen, LumarRed, LumarBlack)
   }
 
-  val Silicon = ItemFeature(16) { depends(VirtualAlloyFurnace); provides (VirtualSilicon) }
+  val Silicon = ItemFeature(16) { depends(VirtualAlloyFurnace); provides(VirtualSilicon) }
   val SiliconWafer = ItemFeature(17) { depends(VirtualSilicon); provides(VirtualSiliconWafer) }
-  val SiliconWaferRed = ItemFeature(18) { depends(VirtualAlloyFurnace); depends(VirtualSiliconWafer); provides(VirtualSiliconWaferRed) }
-  val SiliconWaferBlue = ItemFeature(19) { depends(VirtualAlloyFurnace); depends(VirtualSiliconWafer); depends(VirtualNikolite); provides(VirtualSiliconWaferBlue) }
+  val SiliconWaferRed = ItemFeature(18) { depends(VirtualAlloyFurnace, VirtualSiliconWafer); provides(VirtualSiliconWaferRed) }
+  val SiliconWaferBlue = ItemFeature(19) { depends(VirtualAlloyFurnace, VirtualSiliconWafer, VirtualNikolite); provides(VirtualSiliconWaferBlue) }
 
   val RedAlloy = ItemFeature(20) { depends(VirtualAlloyFurnace); provides(VirtualRedAlloy); oreDict("ingotRedAlloy") }
   val BlueAlloy = ItemFeature(21) { depends(VirtualAlloyFurnace); provides(VirtualBlueAlloy); depends(VirtualNikolite); oreDict("ingotBlueAlloy") }
   val Brass = ItemFeature(22) { depends(VirtualAlloyFurnace); provides(VirtualBrass); oreDict("ingotBrass") }
-  val Nikolite = ItemFeature(23) { depends(NikoliteOre); provides(VirtualNikolite); oreDict("dustNikolite", "dyeBlue") }
+  val Nikolite = ItemFeature(23) { depends(NikoliteOre); provides(VirtualNikolite); oreDict("dustNikolite", "dyeCyan") }
 
   val CopperWire = ItemFeature(24) { depends(Drawplate) }
   val IronWire = ItemFeature(25) { depends(Drawplate) }

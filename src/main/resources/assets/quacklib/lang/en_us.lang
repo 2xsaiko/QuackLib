@@ -30,5 +30,8 @@ item.quacklib:component.26.name=Copper Coil
 item.quacklib:component.27.name=Motor
 
 tile.quacklib:nikolite_ore.name=Nikolite Ore
+tile.quacklib:alloy_furnace.name=Alloy Furnace
+
+quacklib:container.alloy_furnace=Alloy Furnace
 
 itemGroup.quacklib=QuackLib

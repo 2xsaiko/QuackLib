@@ -22,15 +22,17 @@ class ChangeListener(vararg val values: KProperty0<*>) {
     return (this.keys + other.keys).all { key ->
       val tv = this[key]
       val ov = other[key]
-      if (tv is Array<*> && ov is Array<*>) tv contentDeepEquals ov
-      else if (tv is BooleanArray && ov is BooleanArray) tv.toTypedArray() contentDeepEquals ov.toTypedArray()
-      else if (tv is ByteArray && ov is ByteArray) tv.toTypedArray() contentDeepEquals ov.toTypedArray()
-      else if (tv is ShortArray && ov is ShortArray) tv.toTypedArray() contentDeepEquals ov.toTypedArray()
-      else if (tv is IntArray && ov is IntArray) tv.toTypedArray() contentDeepEquals ov.toTypedArray()
-      else if (tv is LongArray && ov is LongArray) tv.toTypedArray() contentDeepEquals ov.toTypedArray()
-      else if (tv is FloatArray && ov is FloatArray) tv.toTypedArray() contentDeepEquals ov.toTypedArray()
-      else if (tv is DoubleArray && ov is DoubleArray) tv.toTypedArray() contentDeepEquals ov.toTypedArray()
-      else tv == ov
+      when {
+        tv is Array<*> && ov is Array<*> -> tv contentDeepEquals ov
+        tv is BooleanArray && ov is BooleanArray -> tv.toTypedArray() contentDeepEquals ov.toTypedArray()
+        tv is ByteArray && ov is ByteArray -> tv.toTypedArray() contentDeepEquals ov.toTypedArray()
+        tv is ShortArray && ov is ShortArray -> tv.toTypedArray() contentDeepEquals ov.toTypedArray()
+        tv is IntArray && ov is IntArray -> tv.toTypedArray() contentDeepEquals ov.toTypedArray()
+        tv is LongArray && ov is LongArray -> tv.toTypedArray() contentDeepEquals ov.toTypedArray()
+        tv is FloatArray && ov is FloatArray -> tv.toTypedArray() contentDeepEquals ov.toTypedArray()
+        tv is DoubleArray && ov is DoubleArray -> tv.toTypedArray() contentDeepEquals ov.toTypedArray()
+        else -> tv == ov
+      }
     }
   }
 
