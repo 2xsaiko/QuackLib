@@ -9,10 +9,10 @@ import net.minecraftforge.fml.relauncher.SideOnly
 import therealfarfetchd.quacklib.common.api.qblock.IQBlockInventory
 
 class ContainerAlloyFurnace(val playerInv: InventoryPlayer, val inventory: IQBlockInventory) : Container() {
-  private var cookTime: Int = 0
-  private var totalCookTime: Int = 0
-  private var furnaceBurnTime: Int = 0
-  private var currentItemBurnTime: Int = 0
+  var cookTime: Int = 0; private set
+  var totalCookTime: Int = 0; private set
+  var burnTime: Int = 0; private set
+  var currentItemBurnTime: Int = 0; private set
 
   init {
     for (i in 0 until 3) {
@@ -20,8 +20,8 @@ class ContainerAlloyFurnace(val playerInv: InventoryPlayer, val inventory: IQBlo
         this.addSlotToContainer(Slot(inventory, 2 + j + i * 3, 44 + j * 18, 15 + i * 18))
       }
     }
-    this.addSlotToContainer(SlotFurnaceFuel(inventory, 0, 18, 33))
-    this.addSlotToContainer(SlotFurnaceOutput(playerInv.player, inventory, 1, 146, 33))
+    this.addSlotToContainer(SlotFurnaceFuel(inventory, 0, 17, 33))
+    this.addSlotToContainer(SlotFurnaceOutput(playerInv.player, inventory, 1, 134, 33))
 
     // Player inventory
     for (i in 0 until 3) {
@@ -49,11 +49,7 @@ class ContainerAlloyFurnace(val playerInv: InventoryPlayer, val inventory: IQBlo
     for (i in this.listeners.indices) {
       val icontainerlistener = this.listeners[i]
 
-      if (this.cookTime != inventory.getField(2)) {
-        icontainerlistener.sendWindowProperty(this, 2, inventory.getField(2))
-      }
-
-      if (this.furnaceBurnTime != inventory.getField(0)) {
+      if (this.burnTime != inventory.getField(0)) {
         icontainerlistener.sendWindowProperty(this, 0, inventory.getField(0))
       }
 
@@ -61,20 +57,30 @@ class ContainerAlloyFurnace(val playerInv: InventoryPlayer, val inventory: IQBlo
         icontainerlistener.sendWindowProperty(this, 1, inventory.getField(1))
       }
 
+      if (this.cookTime != inventory.getField(2)) {
+        icontainerlistener.sendWindowProperty(this, 2, inventory.getField(2))
+      }
+
       if (this.totalCookTime != inventory.getField(3)) {
         icontainerlistener.sendWindowProperty(this, 3, inventory.getField(3))
       }
     }
 
-    this.cookTime = inventory.getField(2)
-    this.furnaceBurnTime = inventory.getField(0)
+    this.burnTime = inventory.getField(0)
     this.currentItemBurnTime = inventory.getField(1)
+    this.cookTime = inventory.getField(2)
     this.totalCookTime = inventory.getField(3)
   }
 
   @SideOnly(Side.CLIENT)
   override fun updateProgressBar(id: Int, data: Int) {
     inventory.setField(id, data)
+    when (id) {
+      0 -> burnTime = data
+      1 -> currentItemBurnTime = data
+      2 -> cookTime = data
+      3 -> totalCookTime = data
+    }
   }
 
   /**

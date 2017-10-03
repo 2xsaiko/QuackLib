@@ -89,7 +89,7 @@ object DefaultFeatures {
   val RedAlloy = ItemFeature(20) { depends(VirtualAlloyFurnace); provides(VirtualRedAlloy); oreDict("ingotRedAlloy") }
   val BlueAlloy = ItemFeature(21) { depends(VirtualAlloyFurnace); provides(VirtualBlueAlloy); depends(VirtualNikolite); oreDict("ingotBlueAlloy") }
   val Brass = ItemFeature(22) { depends(VirtualAlloyFurnace); provides(VirtualBrass); oreDict("ingotBrass") }
-  val Nikolite = ItemFeature(23) { depends(NikoliteOre); provides(VirtualNikolite); oreDict("dustNikolite", "dyeBlue") }
+  val Nikolite = ItemFeature(23) { depends(NikoliteOre); provides(VirtualNikolite); oreDict("dustNikolite", "dyeCyan") }
 
   val CopperWire = ItemFeature(24) { depends(Drawplate) }
   val IronWire = ItemFeature(25) { depends(Drawplate) }

@@ -15,7 +15,7 @@ interface IQBlockInventory : IInventory, IInteractionObject {
   val inventorySize: Int
 
   override fun getInventoryStackLimit(): Int = 64
-  override fun getFieldCount(): Int
+  override fun getFieldCount(): Int = 0
   override fun hasCustomName(): Boolean = customName != null
   override fun getSizeInventory(): Int = inventorySize
   override fun getGuiID(): String = (this as QBlock).blockType.toString()
