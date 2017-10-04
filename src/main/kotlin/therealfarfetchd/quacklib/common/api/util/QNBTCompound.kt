@@ -16,6 +16,8 @@ class QNBTCompound(val self: NBTTagCompound) {
 
   operator fun contains(s: String): Boolean = self.hasKey(s) || self.hasUniqueId(s)
 
+  val keys: Set<String> = self.keySet
+
   val bool = object : IView<String, Boolean> {
     override fun get(k: String): Boolean = self.getBoolean(k)
     override fun set(k: String, v: Boolean) = self.setBoolean(k, v)

@@ -218,13 +218,14 @@ abstract class QBlock {
 
   fun openGui(player: EntityPlayer): Boolean {
     if (!QGuiHandler.hasEntry(blockType)) return false
+    // TODO: stash extra data in y pos's upper 24 bits?
     player.openGui(QuackLib, getBlockLocation(), world, pos.x, pos.y, pos.z)
     return true
   }
 
   fun getBlockLocation(): Int = if (this is IQBlockMultipart) "$blockType@${getPartSlot().javaClass}:${getPartSlot()}".hashCode() else 0
 
-  open fun getBlockFaceShape(facing: EnumFacing): BlockFaceShape = BlockFaceShape.CENTER
+  open fun getBlockFaceShape(facing: EnumFacing): BlockFaceShape = if (isSideOpaque(facing)) BlockFaceShape.SOLID else BlockFaceShape.CENTER
 
   /**
    * Returns true if the block can render in the specified layer. Must stay constant at all times

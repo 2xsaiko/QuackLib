@@ -54,3 +54,45 @@ fun <K, V> Map<K?, V>.filterKeysNotNull(): Map<K, V> {
 fun <K, V> Map<K, V?>.filterValuesNotNull(): Map<K, V> {
   return filterValues { it != null } as Map<K, V>
 }
+
+inline fun <T, R> Array<T>.mapWithCopy(op: (T) -> R): List<Pair<T, R>> = map { it to op(it) }
+
+inline fun <T, R> Collection<T>.mapWithCopy(op: (T) -> R): List<Pair<T, R>> = map { it to op(it) }
+
+inline fun <A, B, R> Array<Pair<A, B>>.mapFirst(op: (A) -> R): List<Pair<R, B>> = map { op(it.first) to it.second }
+
+inline fun <A, B, R> Collection<Pair<A, B>>.mapFirst(op: (A) -> R): List<Pair<R, B>> = map { op(it.first) to it.second }
+
+inline fun <A, B, R> Array<Pair<A, B>>.mapSecond(op: (B) -> R): List<Pair<A, R>> = map { it.first to op(it.second) }
+
+inline fun <A, B, R> Collection<Pair<A, B>>.mapSecond(op: (B) -> R): List<Pair<A, R>> = map { it.first to op(it.second) }
+
+@Suppress("UNCHECKED_CAST")
+fun <A, B, R> Collection<Pair<A, B>>.mapFirstNotNull(op: (A) -> R?): List<Pair<R, B>> {
+  return mapFirst(op).filterNot { it.first == null } as List<Pair<R, B>>
+}
+
+@Suppress("UNCHECKED_CAST")
+fun <A, B, R> Array<Pair<A, B>>.mapFirstNotNull(op: (A) -> R?): List<Pair<R, B>> {
+  return mapFirst(op).filterNot { it.first == null } as List<Pair<R, B>>
+}
+
+fun <A, B> Collection<Pair<A?, B>>.mapFirstNotNull(): List<Pair<A, B>> = mapFirstNotNull { it }
+
+fun <A, B> Array<Pair<A?, B>>.mapFirstNotNull(): List<Pair<A, B>> = mapFirstNotNull { it }
+
+@Suppress("UNCHECKED_CAST")
+inline fun <A, B, R> Collection<Pair<A, B>>.mapSecondNotNull(op: (B) -> R?): List<Pair<A, R>> {
+  return mapSecond(op).filterNot { it.second == null } as List<Pair<A, R>>
+}
+
+@Suppress("UNCHECKED_CAST")
+inline fun <A, B, R> Array<Pair<A, B>>.mapSecondNotNull(op: (B) -> R?): List<Pair<A, R>> {
+  return mapSecond(op).filterNot { it.second == null } as List<Pair<A, R>>
+}
+
+fun <A, B> Collection<Pair<A, B?>>.mapSecondNotNull(): List<Pair<A, B>> = mapSecondNotNull { it }
+
+fun <A, B> Array<Pair<A, B?>>.mapSecondNotNull(): List<Pair<A, B>> = mapSecondNotNull { it }
+
+fun <A, B> Pair<A, B>.swap(): Pair<B, A> = second to first

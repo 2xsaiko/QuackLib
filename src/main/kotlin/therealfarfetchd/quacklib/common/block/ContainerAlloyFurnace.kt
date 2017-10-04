@@ -8,7 +8,7 @@ import net.minecraftforge.fml.relauncher.Side
 import net.minecraftforge.fml.relauncher.SideOnly
 import therealfarfetchd.quacklib.common.api.qblock.IQBlockInventory
 
-class ContainerAlloyFurnace(val playerInv: InventoryPlayer, val inventory: IQBlockInventory) : Container() {
+class ContainerAlloyFurnace(playerInv: InventoryPlayer, val inventory: IQBlockInventory) : Container() {
   var cookTime: Int = 0; private set
   var totalCookTime: Int = 0; private set
   var burnTime: Int = 0; private set
@@ -124,7 +124,7 @@ class ContainerAlloyFurnace(val playerInv: InventoryPlayer, val inventory: IQBlo
 
   override fun canInteractWith(playerIn: EntityPlayer): Boolean = inventory.isUsableByPlayer(playerIn)
 
-  private class SlotOutput(
+  class SlotOutput(
     player: EntityPlayer,
     inventoryIn: IInventory,
     slotIndex: Int,

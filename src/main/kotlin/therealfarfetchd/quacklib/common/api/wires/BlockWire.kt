@@ -1,6 +1,5 @@
 package therealfarfetchd.quacklib.common.api.wires
 
-import mcmultipart.api.container.IPartInfo
 import mcmultipart.api.slot.EnumFaceSlot
 import mcmultipart.api.slot.IPartSlot
 import net.minecraft.block.material.Material
@@ -22,16 +21,14 @@ import net.minecraftforge.common.property.IExtendedBlockState
 import net.minecraftforge.common.property.IUnlistedProperty
 import therealfarfetchd.quacklib.common.api.block.capability.Capabilities
 import therealfarfetchd.quacklib.common.api.block.capability.WireConnectable
-import therealfarfetchd.quacklib.common.api.extensions.notifyNeighborsOfSides
 import therealfarfetchd.quacklib.common.api.extensions.rotate
 import therealfarfetchd.quacklib.common.api.qblock.IQBlockMultipart
-import therealfarfetchd.quacklib.common.api.qblock.QBlock
+import therealfarfetchd.quacklib.common.api.qblock.QBlockConnectable
 import therealfarfetchd.quacklib.common.api.util.DataTarget
 import therealfarfetchd.quacklib.common.api.util.EnumFaceLocation
 import therealfarfetchd.quacklib.common.api.util.QNBTCompound
-import therealfarfetchd.quacklib.common.api.util.Scheduler
 
-abstract class BlockWire<out T>(width: Double, height: Double) : QBlock(), IQBlockMultipart, BaseConnectable {
+abstract class BlockWire<out T>(width: Double, height: Double) : QBlockConnectable(), IQBlockMultipart {
 
   val baseBounds = AxisAlignedBB(0.0, 0.0, 0.0, 1.0, height, 1.0)
   val partBounds = AxisAlignedBB((1 - width) / 2, 0.0, (1 - width) / 2, 1 - (1 - width) / 2, height, 1 - (1 - width) / 2)
@@ -41,8 +38,6 @@ abstract class BlockWire<out T>(width: Double, height: Double) : QBlock(), IQBlo
   private val connectable = WireConnectable(this)
 
   var facing: EnumFacing = EnumFacing.DOWN; protected set
-
-  override var connections: Map<EnumFaceLocation, EnumWireConnection> = emptyMap()
 
   abstract val dataType: ResourceLocation
 
@@ -58,15 +53,6 @@ abstract class BlockWire<out T>(width: Double, height: Double) : QBlock(), IQBlo
   override fun onPlaced(placer: EntityLivingBase?, stack: ItemStack?, sidePlaced: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) {
     super.onPlaced(placer, stack, sidePlaced, hitX, hitY, hitZ)
     facing = sidePlaced
-    updateCableConnections()
-    container.notifyNeighborsOfSides(*validSides[facing]!!.toTypedArray())
-  }
-
-  override fun onBreakBlock() {
-    super.onBreakBlock()
-    Scheduler.schedule(0) {
-      container.notifyNeighborsOfSides(*validSides[facing]!!.toTypedArray())
-    }
   }
 
   private fun mapConnection(sideIn: Int): EnumWireConnection {
@@ -76,21 +62,6 @@ abstract class BlockWire<out T>(width: Double, height: Double) : QBlock(), IQBlo
 
   override fun beforePlace(sidePlaced: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) {
     facing = sidePlaced
-  }
-
-  override fun onNeighborChanged(side: EnumFacing) {
-    super.onNeighborChanged(side)
-    updateCableConnections()
-  }
-
-  override fun onNeighborTEChanged(side: EnumFacing) {
-    super.onNeighborTEChanged(side)
-    updateCableConnections()
-  }
-
-  override fun onPartChanged(part: IPartInfo) {
-    super.onPartChanged(part)
-    updateCableConnections()
   }
 
   override fun canStay(): Boolean {
@@ -108,13 +79,11 @@ abstract class BlockWire<out T>(width: Double, height: Double) : QBlock(), IQBlo
   override fun saveData(nbt: QNBTCompound, target: DataTarget) {
     super.saveData(nbt, target)
     nbt.ubyte["F"] = facing.index
-    if (!prePlaced) nbt.bytes["C"] = serializeConnections().toByteArray()
   }
 
   override fun loadData(nbt: QNBTCompound, target: DataTarget) {
     super.loadData(nbt, target)
     facing = EnumFacing.getFront(nbt.ubyte["F"])
-    if (!prePlaced) deserializeConnections(nbt.bytes["C"].toList())
   }
 
   override fun canHarvestBlock(player: EntityPlayer, world: IBlockAccess, pos: BlockPos): Boolean = true
@@ -152,7 +121,7 @@ abstract class BlockWire<out T>(width: Double, height: Double) : QBlock(), IQBlo
   override val material: Material = Material.IRON
 
   companion object {
-    val PropFacing = PropertyEnum.create("facing", EnumFacing::class.java)!!
+    val PropFacing: PropertyEnum<EnumFacing> = PropertyEnum.create("facing", EnumFacing::class.java)
     val PropConnections = object : IUnlistedProperty<List<EnumWireConnection>> {
       @Suppress("UNCHECKED_CAST")
       override fun getType(): Class<List<EnumWireConnection>> = List::class.java as Class<List<EnumWireConnection>> // really kotlin?

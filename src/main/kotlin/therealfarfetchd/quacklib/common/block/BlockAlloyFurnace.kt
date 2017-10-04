@@ -177,12 +177,12 @@ class BlockAlloyFurnace : QBlock(), IQBlockInventory, ITickable {
   override fun saveData(nbt: QNBTCompound, target: DataTarget) {
     super.saveData(nbt, target)
     nbt.ubyte["F"] = facing.horizontalIndex
-    nbt.ushort["IT"] = currentItemBurnTime
+    nbt.ushort["MB"] = currentItemBurnTime
     customName?.also { nbt.string["CN"] = it }
     if (target != DataTarget.Client) {
-      nbt.ushort["BT"] = burnTime
-      nbt.ushort["CT"] = cookTime
-      nbt.ushort["TCT"] = totalCookTime
+      nbt.ushort["B"] = burnTime
+      nbt.ushort["C"] = cookTime
+      nbt.ushort["MC"] = totalCookTime
       for ((i, item) in stacks.withIndex())
         item.writeToNBT(nbt.nbt["I$i"].self)
     }
@@ -191,19 +191,21 @@ class BlockAlloyFurnace : QBlock(), IQBlockInventory, ITickable {
   override fun loadData(nbt: QNBTCompound, target: DataTarget) {
     super.loadData(nbt, target)
     facing = EnumFacing.getHorizontal(nbt.ubyte["F"])
-    currentItemBurnTime = nbt.ushort["IT"]
+    currentItemBurnTime = nbt.ushort["MB"]
     if ("CN" in nbt) customName = nbt.string["CN"]
     if (target != DataTarget.Client) {
-      burnTime = nbt.ushort["BT"]
-      cookTime = nbt.ushort["CT"]
-      totalCookTime = nbt.ushort["TCT"]
+      burnTime = nbt.ushort["B"]
+      cookTime = nbt.ushort["C"]
+      totalCookTime = nbt.ushort["MC"]
       for (i in stacks.indices)
         stacks[i] = ItemStack(nbt.nbt["I$i"].self)
     }
   }
 
   override fun applyProperties(state: IBlockState): IBlockState {
-    return super.applyProperties(state).withProperty(PropFacing, facing).withProperty(PropLit, currentItemBurnTime != 0)
+    return super.applyProperties(state)
+      .withProperty(PropFacing, facing)
+      .withProperty(PropLit, currentItemBurnTime != 0)
   }
 
   override fun getSlotsForFace(side: EnumFacing): IntArray {
@@ -218,15 +220,6 @@ class BlockAlloyFurnace : QBlock(), IQBlockInventory, ITickable {
     for (stack in stacks) stack.spawnAt(world, pos)
   }
 
-  override val properties: Set<IProperty<*>> = super.properties + PropFacing + PropLit
-  override val material: Material = Material.ROCK
-  override val blockType: ResourceLocation = ResourceLocation(ModID, "alloy_furnace")
-  override val inventorySize: Int = 11
-
-  override fun getFieldCount(): Int = 4
-
-  override fun getItem(): ItemStack = Item.makeStack()
-
   @Suppress("UNCHECKED_CAST")
   override fun <T> getCapability(capability: Capability<T>, side: EnumFacing?): T? {
     return when (capability) {
@@ -234,6 +227,14 @@ class BlockAlloyFurnace : QBlock(), IQBlockInventory, ITickable {
       else -> super.getCapability(capability, side)
     }
   }
+
+  override fun getItem(): ItemStack = Item.makeStack()
+  override fun getFieldCount(): Int = 4
+
+  override val properties: Set<IProperty<*>> = super.properties + PropFacing + PropLit
+  override val material: Material = Material.ROCK
+  override val blockType: ResourceLocation = ResourceLocation(ModID, "alloy_furnace")
+  override val inventorySize: Int = 11
 
   companion object {
     val PropFacing = PropertyEnum.create("facing", EnumFacing::class.java, *EnumFacing.HORIZONTALS)

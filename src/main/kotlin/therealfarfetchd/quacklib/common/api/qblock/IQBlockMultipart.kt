@@ -6,6 +6,7 @@ import mcmultipart.util.MCMPWorldWrapper
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.world.World
+import therealfarfetchd.quacklib.common.api.wires.BaseConnectable
 
 /**
  * Created by marco on 09.07.17.
@@ -38,6 +39,7 @@ interface IQBlockMultipart {
   fun onPartChanged(part: IPartInfo) {
     with(qb) {
       if (!canStay()) dismantle()
+      else if (this is BaseConnectable) updateCableConnections()
     }
   }
 
