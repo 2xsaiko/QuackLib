@@ -13,12 +13,10 @@ import net.minecraft.world.IInteractionObject
 import net.minecraftforge.items.wrapper.SidedInvWrapper
 
 interface IQBlockInventory : ISidedInventory, IInteractionObject {
-  val inventorySize: Int
-
   override fun getInventoryStackLimit(): Int = 64
   override fun getFieldCount(): Int = 0
   override fun hasCustomName(): Boolean = customName != null
-  override fun getSizeInventory(): Int = inventorySize
+  override fun getSizeInventory(): Int
   override fun getGuiID(): String = (this as QBlock).blockType.toString()
 
   override fun getName(): String {
@@ -66,10 +64,10 @@ interface IQBlockInventory : ISidedInventory, IInteractionObject {
   }
 
   override fun clear() {
-    for (i in 0 until inventorySize) setStack(i, ItemStack.EMPTY)
+    for (i in 0 until sizeInventory) setStack(i, ItemStack.EMPTY)
   }
 
-  override fun isEmpty(): Boolean = (0 until inventorySize).map(this::getStack).all { it.isEmpty }
+  override fun isEmpty(): Boolean = (0 until sizeInventory).map(this::getStack).all { it.isEmpty }
 
   override fun createContainer(inventory: InventoryPlayer, player: EntityPlayer): Container
   override fun openInventory(player: EntityPlayer) {}
@@ -77,7 +75,7 @@ interface IQBlockInventory : ISidedInventory, IInteractionObject {
   override fun setField(id: Int, value: Int) {}
   override fun getField(id: Int): Int = 0
   override fun isUsableByPlayer(player: EntityPlayer): Boolean = true
-  override fun getSlotsForFace(side: EnumFacing): IntArray = (0 until inventorySize).toList().toIntArray()
+  override fun getSlotsForFace(side: EnumFacing): IntArray = (0 until sizeInventory).toList().toIntArray()
 
   override fun markDirty() {}
 

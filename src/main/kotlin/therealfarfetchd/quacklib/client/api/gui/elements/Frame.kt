@@ -26,14 +26,14 @@ class Frame : GuiElement() {
     enableTexture2D()
     val width1 = width
     val height1 = height
-    drawScaledCustomSizeModalRect(-4, -4, 0F, 0F, 4, 4, 4, 4, 128F, 128F)
-    drawScaledCustomSizeModalRect(width1, -4, 4F, 0F, 4, 4, 4, 4, 128F, 128F)
-    drawScaledCustomSizeModalRect(-4, height1, 0F, 4F, 4, 4, 4, 4, 128F, 128F)
-    drawScaledCustomSizeModalRect(width1, height1, 4F, 4F, 4, 4, 4, 4, 128F, 128F)
-    drawScaledCustomSizeModalRect(0, -4, 3F, 0F, 1, 4, width1, 4, 128F, 128F)
-    drawScaledCustomSizeModalRect(width1, 0, 4F, 3F, 4, 1, 4, height1, 128F, 128F)
-    drawScaledCustomSizeModalRect(0, height1, 3F, 4F, 1, 4, width1, 4, 128F, 128F)
-    drawScaledCustomSizeModalRect(-4, 0, 0F, 3F, 4, 1, 4, height1, 128F, 128F)
-    drawScaledCustomSizeModalRect(0, 0, 3F, 3F, 1, 1, width1, height1, 128F, 128F)
+    drawScaledCustomSizeModalRect(-4, -4, 0F, 0F, 4, 4, 4, 4, 256F, 256F)
+    drawScaledCustomSizeModalRect(width1, -4, 4F, 0F, 4, 4, 4, 4, 256F, 256F)
+    drawScaledCustomSizeModalRect(-4, height1, 0F, 4F, 4, 4, 4, 4, 256F, 256F)
+    drawScaledCustomSizeModalRect(width1, height1, 4F, 4F, 4, 4, 4, 4, 256F, 256F)
+    drawScaledCustomSizeModalRect(0, -4, 3F, 0F, 1, 4, width1, 4, 256F, 256F)
+    drawScaledCustomSizeModalRect(width1, 0, 4F, 3F, 4, 1, 4, height1, 256F, 256F)
+    drawScaledCustomSizeModalRect(0, height1, 3F, 4F, 1, 4, width1, 4, 256F, 256F)
+    drawScaledCustomSizeModalRect(-4, 0, 0F, 3F, 4, 1, 4, height1, 256F, 256F)
+    drawScaledCustomSizeModalRect(0, 0, 3F, 3F, 1, 1, width1, height1, 256F, 256F)
   }
 }

@@ -5,15 +5,25 @@ import kotlin.reflect.KProperty0
 /**
  * Created by marco on 13.07.17.
  */
-class ChangeListener(vararg val values: KProperty0<*>) {
+class ChangeListener(vararg values: KProperty0<*>) {
 
-  private var map: Map<KProperty0<*>, Any?> = mkMap()
+  private var properties: Set<KProperty0<*>> = values.toSet()
 
-  private fun mkMap(): Map<KProperty0<*>, Any?> = values.associate { it to tryCopy(it.get()) }
+  private var map: Map<KProperty0<*>, Any?> = emptyMap()
+
+  private fun mkMap(): Map<KProperty0<*>, Any?> = map + properties.associate { it to tryCopy(it.get()) }
+
+  fun addProperties(vararg values: KProperty0<*>) {
+    properties += values
+  }
+
+  fun removeProperties(vararg values: KProperty0<*>) {
+    properties -= values
+  }
 
   fun valuesChanged(update: Boolean = true): Boolean {
     val new = mkMap()
-    val result = map contentDeepEquals new
+    val result = map contentDeepEquals new.filterKeys { it in map }
     if (update) map = new
     return !result
   }

@@ -85,7 +85,7 @@ open class QBContainerTileInventory() : QBContainerTile(), ILockableContainer, I
   }
 
   override fun getSizeInventory(): Int {
-    return qbinv.inventorySize
+    return qbinv.sizeInventory
   }
 
   override fun isEmpty(): Boolean {

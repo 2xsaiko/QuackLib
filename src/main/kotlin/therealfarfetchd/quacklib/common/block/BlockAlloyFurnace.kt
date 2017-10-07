@@ -230,11 +230,11 @@ class BlockAlloyFurnace : QBlock(), IQBlockInventory, ITickable {
 
   override fun getItem(): ItemStack = Item.makeStack()
   override fun getFieldCount(): Int = 4
+  override fun getSizeInventory(): Int = 11
 
   override val properties: Set<IProperty<*>> = super.properties + PropFacing + PropLit
   override val material: Material = Material.ROCK
   override val blockType: ResourceLocation = ResourceLocation(ModID, "alloy_furnace")
-  override val inventorySize: Int = 11
 
   companion object {
     val PropFacing = PropertyEnum.create("facing", EnumFacing::class.java, *EnumFacing.HORIZONTALS)

@@ -4,6 +4,8 @@ import net.minecraft.client.renderer.block.model.BakedQuad
 import therealfarfetchd.quacklib.client.api.render.Quad
 import therealfarfetchd.quacklib.common.api.qblock.QBlock
 
+typealias BoxBuilder = (BoxTemplate.() -> Unit) -> Unit
+
 abstract class DynamicModelBakery<in T : QBlock> : SimpleModelBakery() {
 
   fun bakeDynamicQuads(block: T): List<BakedQuad> {
@@ -12,6 +14,6 @@ abstract class DynamicModelBakery<in T : QBlock> : SimpleModelBakery() {
     return quads.map(Quad::bake)
   }
 
-  abstract fun addShapesDynamic(block: T, box: (BoxTemplate.() -> Unit) -> Unit)
+  abstract fun addShapesDynamic(block: T, box: BoxBuilder)
 
 }

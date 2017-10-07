@@ -77,9 +77,9 @@ fun <A, B, R> Array<Pair<A, B>>.mapFirstNotNull(op: (A) -> R?): List<Pair<R, B>>
   return mapFirst(op).filterNot { it.first == null } as List<Pair<R, B>>
 }
 
-fun <A, B> Collection<Pair<A?, B>>.mapFirstNotNull(): List<Pair<A, B>> = mapFirstNotNull { it }
+fun <A, B> Collection<Pair<A?, B>>.filterFirstNotNull(): List<Pair<A, B>> = mapFirstNotNull { it }
 
-fun <A, B> Array<Pair<A?, B>>.mapFirstNotNull(): List<Pair<A, B>> = mapFirstNotNull { it }
+fun <A, B> Array<Pair<A?, B>>.filterFirstNotNull(): List<Pair<A, B>> = mapFirstNotNull { it }
 
 @Suppress("UNCHECKED_CAST")
 inline fun <A, B, R> Collection<Pair<A, B>>.mapSecondNotNull(op: (B) -> R?): List<Pair<A, R>> {
@@ -91,8 +91,10 @@ inline fun <A, B, R> Array<Pair<A, B>>.mapSecondNotNull(op: (B) -> R?): List<Pai
   return mapSecond(op).filterNot { it.second == null } as List<Pair<A, R>>
 }
 
-fun <A, B> Collection<Pair<A, B?>>.mapSecondNotNull(): List<Pair<A, B>> = mapSecondNotNull { it }
+fun <A, B> Collection<Pair<A, B?>>.filterSecondNotNull(): List<Pair<A, B>> = mapSecondNotNull { it }
 
-fun <A, B> Array<Pair<A, B?>>.mapSecondNotNull(): List<Pair<A, B>> = mapSecondNotNull { it }
+fun <A, B> Array<Pair<A, B?>>.filterSecondNotNull(): List<Pair<A, B>> = mapSecondNotNull { it }
 
 fun <A, B> Pair<A, B>.swap(): Pair<B, A> = second to first
+
+fun <A, B> Map<A, B>.asReversed(): Map<B, A> = toList().map { it.swap() }.toMap()
