@@ -60,7 +60,7 @@ object WrapperImplManager {
 
   fun <T : QBlock> container(kClass: KClass<T>): Lazy<Block> = lazy { getContainer(kClass) }
 
-  fun <T : QBlock> getItem(kClass: KClass<T>): Item {
+  fun <T : QBlock> getItem(kClass: KClass<T>, op: Item.() -> Unit = {}): Item {
     val kClass1 = kClass as KClass<QBlock>
     return if (kClass in itemsMap) itemsMap[kClass]!!
     else {
@@ -70,12 +70,13 @@ object WrapperImplManager {
         item.registryName = qb.blockType
       }
       item.unlocalizedName = qb.blockType.toString()
+      op(item)
       itemsMap += kClass1 to item
       item
     }
   }
 
-  fun <T : QBlock> item(kClass: KClass<T>): Lazy<Item> = lazy { getItem(kClass) }
+  fun <T : QBlock> item(kClass: KClass<T>, op: Item.() -> Unit = {}): Lazy<Item> = lazy { getItem(kClass, op) }
 
   fun <T : QBlock> createTileEntity(kClass: KClass<T>): (QBlock) -> TileEntity {
     return getTemplate(kClass).teOp

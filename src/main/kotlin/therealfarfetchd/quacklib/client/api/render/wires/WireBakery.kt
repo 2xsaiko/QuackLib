@@ -83,7 +83,7 @@ open class WireBakery(
   override fun bakeQuads(face: EnumFacing?, state: IExtendedBlockState): List<BakedQuad> {
     texture = textures[texLocationRetriever(state)]!!
 
-    val c = state.getValue(BlockWire.PropConnections).toTypedArray()
+    val c = (state.getValue(BlockWire.PropConnections) ?: emptyList()).toTypedArray()
     val side = state.getValue(BlockWire.PropFacing)
 
     if (face !in listOf(null, side)) return emptyList()
@@ -129,15 +129,15 @@ open class WireBakery(
     val crossing = c.withIndex()
       .map { it.value to c[(it.index + 1) % c.size] }
       .any { it.first.renderType != EnumWireRender.Invisible && it.second.renderType != EnumWireRender.Invisible }
-    if (!crossing && c.any { it.renderType != EnumWireRender.Invisible }) {
+    return if (!crossing && c.any { it.renderType != EnumWireRender.Invisible }) {
       val up = c.withIndex().filter { it.value.renderType != EnumWireRender.Invisible }.map { TransformRules.getRule(EnumEdge.fromFaces(side, BlockWire.lookupMap[side]!![it.index])) }.first()
-      return listOf(
+      listOf(
         QuadFactory.makeQuadw(armLength, cableHeight, armLength, cableWidth, 0F, cableWidth, UP,
           centerTopUv, cableWidth, cableWidth, texture, scaleFactor).mapIf(up.useAlt) { it.mirrorTextureY }
       ).map(up.op)
     } else {
       val up = TransformRules.getRule(side)
-      return listOf(
+      listOf(
         QuadFactory.makeQuadw(armLength, cableHeight, armLength, cableWidth, 0F, cableWidth, UP,
           if (crossing) centerTopCUv else centerTopUv, cableWidth, cableWidth, texture, scaleFactor)
       ).map(up.op)
@@ -255,5 +255,5 @@ open class WireBakery(
     textures = texLocations.map { it to textureMap.registerSprite(it) }.toMap()
   }
 
-  override fun createKey(state: IExtendedBlockState, face: EnumFacing?): String = super.createKey(state, face) + state[BlockWire.PropConnections].joinToString()
+  override fun createKey(state: IExtendedBlockState, face: EnumFacing?): String = super.createKey(state, face) + (state[BlockWire.PropConnections] ?: emptyList()).joinToString()
 }

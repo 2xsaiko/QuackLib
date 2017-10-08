@@ -20,6 +20,7 @@ import net.minecraftforge.oredict.OreDictionary
 import org.apache.logging.log4j.Level
 import therealfarfetchd.quacklib.ModID
 import therealfarfetchd.quacklib.QuackLib
+import therealfarfetchd.quacklib.common.api.QCreativeTab
 import therealfarfetchd.quacklib.common.api.autoconf.DefaultFeatures
 import therealfarfetchd.quacklib.common.api.autoconf.FeatureManager
 import therealfarfetchd.quacklib.common.api.autoconf.ItemFeature
@@ -124,6 +125,7 @@ open class Proxy {
       e.registry.register(BlockNikoliteOre)
     }
     if (FeatureManager.isRequired(DefaultFeatures.AlloyFurnace)) {
+      BlockAlloyFurnace.Block.setCreativeTab(QCreativeTab)
       e.registry.register(BlockAlloyFurnace.Block)
     }
     e.registry.registerAll(*IBlockDefinition.definitions.map { it.block }.toTypedArray())

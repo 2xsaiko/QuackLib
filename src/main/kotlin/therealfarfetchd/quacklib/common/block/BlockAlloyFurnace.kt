@@ -240,7 +240,7 @@ class BlockAlloyFurnace : QBlock(), IQBlockInventory, ITickable {
     val PropFacing = PropertyEnum.create("facing", EnumFacing::class.java, *EnumFacing.HORIZONTALS)
     val PropLit = PropertyBool.create("lit")
 
-    val Block = WrapperImplManager.getContainer(BlockAlloyFurnace::class)
-    val Item = WrapperImplManager.getItem(BlockAlloyFurnace::class)
+    val Block by WrapperImplManager.container(BlockAlloyFurnace::class)
+    val Item by WrapperImplManager.item(BlockAlloyFurnace::class)
   }
 }
