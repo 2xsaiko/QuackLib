@@ -51,8 +51,8 @@ abstract class BlockWire<out T>(width: Double, height: Double) : QBlockConnectab
   }
 
   override fun onPlaced(placer: EntityLivingBase?, stack: ItemStack?, sidePlaced: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) {
-    super.onPlaced(placer, stack, sidePlaced, hitX, hitY, hitZ)
     facing = sidePlaced
+    super.onPlaced(placer, stack, sidePlaced, hitX, hitY, hitZ)
   }
 
   private fun mapConnection(sideIn: Int): EnumWireConnection {
