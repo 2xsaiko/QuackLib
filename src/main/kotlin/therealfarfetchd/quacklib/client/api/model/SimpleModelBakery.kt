@@ -10,6 +10,7 @@ import therealfarfetchd.quacklib.client.api.render.Quad
 import therealfarfetchd.quacklib.client.api.render.QuadFactory
 import therealfarfetchd.quacklib.client.api.render.wires.TransformRules
 import therealfarfetchd.quacklib.common.api.extensions.mapIf
+import therealfarfetchd.quacklib.common.api.extensions.mapWithCopy
 import therealfarfetchd.quacklib.common.api.util.StringPackedProps
 import therealfarfetchd.quacklib.common.api.util.Vec2
 import therealfarfetchd.quacklib.common.api.util.Vec3
@@ -17,37 +18,33 @@ import therealfarfetchd.quacklib.common.api.util.Vec3
 abstract class SimpleModelBakery : AbstractModelBakery() {
 
   override fun bakeQuads(face: EnumFacing?, state: IExtendedBlockState): List<BakedQuad> {
-    val quads: MutableList<Quad> = ArrayList()
-    addShapes(state, box(face, quads))
-    return filterCategories(face, quads).map(Quad::bake)
+    val builder = ModelBuilder(face)
+    addShapes(state, builder)
+    return filterCategories(face, builder.quads).map(Quad::bake)
   }
 
   override fun bakeItemQuads(face: EnumFacing?, stack: ItemStack): List<BakedQuad> {
-    val quads: MutableList<Quad> = ArrayList()
-    addShapes(stack, box(face, quads))
-    return filterCategories(face, quads).map(Quad::bake)
+    val builder = ModelBuilder(face)
+    addShapes(stack, builder)
+    return filterCategories(face, builder.quads).map(Quad::bake)
   }
 
   private fun filterCategories(face: EnumFacing?, quads: List<Quad>): List<Quad> {
-    return quads.map { q ->
-      q to if (q.facing == EnumFacing.UP && q.vert1.y == 1f && q.vert2.y == 1f && q.vert3.y == 1f && q.vert4.y == 1f) EnumFacing.UP
-      else if (q.facing == EnumFacing.DOWN && q.vert1.y == 0f && q.vert2.y == 0f && q.vert3.y == 0f && q.vert4.y == 0f) EnumFacing.DOWN
-      else if (q.facing == EnumFacing.NORTH && q.vert1.z == 0f && q.vert2.z == 0f && q.vert3.z == 0f && q.vert4.z == 0f) EnumFacing.NORTH
-      else if (q.facing == EnumFacing.SOUTH && q.vert1.z == 1f && q.vert2.z == 1f && q.vert3.z == 1f && q.vert4.z == 1f) EnumFacing.SOUTH
-      else if (q.facing == EnumFacing.WEST && q.vert1.x == 0f && q.vert2.x == 0f && q.vert3.x == 0f && q.vert4.x == 0f) EnumFacing.WEST
-      else if (q.facing == EnumFacing.EAST && q.vert1.x == 1f && q.vert2.x == 1f && q.vert3.x == 1f && q.vert4.x == 1f) EnumFacing.EAST
-      else null
+    return quads.mapWithCopy { q ->
+      when {
+        q.facing == EnumFacing.UP && q.vert1.y == 1f && q.vert2.y == 1f && q.vert3.y == 1f && q.vert4.y == 1f -> EnumFacing.UP
+        q.facing == EnumFacing.DOWN && q.vert1.y == 0f && q.vert2.y == 0f && q.vert3.y == 0f && q.vert4.y == 0f -> EnumFacing.DOWN
+        q.facing == EnumFacing.NORTH && q.vert1.z == 0f && q.vert2.z == 0f && q.vert3.z == 0f && q.vert4.z == 0f -> EnumFacing.NORTH
+        q.facing == EnumFacing.SOUTH && q.vert1.z == 1f && q.vert2.z == 1f && q.vert3.z == 1f && q.vert4.z == 1f -> EnumFacing.SOUTH
+        q.facing == EnumFacing.WEST && q.vert1.x == 0f && q.vert2.x == 0f && q.vert3.x == 0f && q.vert4.x == 0f -> EnumFacing.WEST
+        q.facing == EnumFacing.EAST && q.vert1.x == 1f && q.vert2.x == 1f && q.vert3.x == 1f && q.vert4.x == 1f -> EnumFacing.EAST
+        else -> null
+      }
     }.filter { it.second == face }.map { it.first }
   }
 
-  abstract fun addShapes(state: IExtendedBlockState, box: (BoxTemplate.() -> Unit) -> Unit)
-  abstract fun addShapes(stack: ItemStack, box: (BoxTemplate.() -> Unit) -> Unit)
-
-  protected fun box(face: EnumFacing?, quads: MutableList<Quad>): (BoxTemplate.() -> Unit) -> Unit = { op ->
-    val t = BoxTemplate()
-    op(t)
-    quads += t.createQuads(face)
-  }
+  abstract fun addShapes(state: IExtendedBlockState, model: ModelBuilder)
+  abstract fun addShapes(stack: ItemStack, model: ModelBuilder)
 
   protected fun vec(x: Double, y: Double, z: Double): Vec3 = Vec3(x.toFloat(), y.toFloat(), z.toFloat())
   protected fun vec16(x: Double, y: Double, z: Double): Vec3 = Vec3(x.toFloat() / 16F, y.toFloat() / 16F, z.toFloat() / 16F)
@@ -80,6 +77,22 @@ abstract class SimpleModelBakery : AbstractModelBakery() {
 
 interface IQuadFactory {
   fun createQuads(facing: EnumFacing?): List<Quad>
+}
+
+class ModelBuilder(val face: EnumFacing?) {
+  private val context = Context(this)
+
+  var quads: List<Quad> = emptyList(); private set
+
+  operator fun invoke(op: ModelBuilder.Context.() -> Unit) = with(context, op)
+
+  class Context(private val builder: ModelBuilder) {
+    fun box(op: BoxTemplate.() -> Unit) {
+      val t = BoxTemplate()
+      op(t)
+      builder.quads += t.createQuads(builder.face)
+    }
+  }
 }
 
 class BoxTemplate : IQuadFactory {
