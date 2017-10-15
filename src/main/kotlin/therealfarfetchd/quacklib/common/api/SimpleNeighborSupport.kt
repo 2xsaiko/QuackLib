@@ -7,7 +7,7 @@ import therealfarfetchd.quacklib.common.api.wires.BaseConnectable
 inline fun <R, reified T> R.neighborSupport(crossinline filter: (EnumFaceLocation) -> Boolean, crossinline filterResult: (T) -> Boolean): INeighborSupport<T?>
   where R : QBlock,
         R : BaseConnectable
-  = INeighborSupport { fl -> (getNeighbor(fl) as? T).takeIf { filter(fl) && it?.let(filterResult) ?: false } }
+  = INeighborSupport { it.takeIf(filter)?.let { (getNeighbor(it) as? T).takeIf { it?.let(filterResult) ?: false } } }
 
 inline fun <R, reified T> R.neighborSupport(crossinline filter: (EnumFaceLocation) -> Boolean): INeighborSupport<T?>
   where R : QBlock,

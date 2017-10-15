@@ -1,6 +1,9 @@
 package therealfarfetchd.quacklib.client
 
+import net.minecraft.block.Block
 import net.minecraft.client.renderer.block.model.ModelResourceLocation
+import net.minecraft.client.renderer.block.statemap.StateMap
+import net.minecraft.item.Item
 import net.minecraftforge.client.event.ModelBakeEvent
 import net.minecraftforge.client.event.ModelRegistryEvent
 import net.minecraftforge.client.event.TextureStitchEvent
@@ -18,21 +21,24 @@ import therealfarfetchd.quacklib.client.api.gui.elements.Button
 import therealfarfetchd.quacklib.client.api.gui.elements.Dummy
 import therealfarfetchd.quacklib.client.api.gui.elements.Frame
 import therealfarfetchd.quacklib.client.api.gui.elements.Label
-import therealfarfetchd.quacklib.client.api.model.BakedModelRegistry
-import therealfarfetchd.quacklib.client.api.model.CachedBakedModel
-import therealfarfetchd.quacklib.client.api.model.IIconRegister
+import therealfarfetchd.quacklib.client.api.model.*
+import therealfarfetchd.quacklib.client.api.qbr.DynamicModelRenderer
 import therealfarfetchd.quacklib.client.api.qbr.QBContainerTileRenderer
+import therealfarfetchd.quacklib.client.api.qbr.bindSpecialRenderer
 import therealfarfetchd.quacklib.common.Proxy
 import therealfarfetchd.quacklib.common.api.autoconf.DefaultFeatures
 import therealfarfetchd.quacklib.common.api.autoconf.FeatureManager
 import therealfarfetchd.quacklib.common.api.qblock.QBContainerTile
 import therealfarfetchd.quacklib.common.api.qblock.QBContainerTileInventory
 import therealfarfetchd.quacklib.common.api.qblock.QBContainerTileMultipart
+import therealfarfetchd.quacklib.common.api.qblock.QBlock
 import therealfarfetchd.quacklib.common.api.util.IBlockDefinition
 import therealfarfetchd.quacklib.common.api.util.IItemDefinition
 import therealfarfetchd.quacklib.common.block.BlockAlloyFurnace
+import therealfarfetchd.quacklib.common.block.BlockMultiblockExtension
 import therealfarfetchd.quacklib.common.block.BlockNikoliteOre
 import therealfarfetchd.quacklib.common.item.ItemComponent
+import kotlin.reflect.KClass
 
 /**
  * Created by marco on 16.07.17.
@@ -60,6 +66,7 @@ class Proxy : Proxy() {
     GuiLogicRegistry.register("quacklib:null_logic", NullGuiLogic::class)
   }
 
+  @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
   @SubscribeEvent
   fun registerModels(e: ModelRegistryEvent) {
     (IBlockDefinition.definitions + IItemDefinition.definitions)
@@ -83,6 +90,8 @@ class Proxy : Proxy() {
     if (FeatureManager.isRequired(DefaultFeatures.AlloyFurnace)) {
       ModelLoader.setCustomModelResourceLocation(BlockAlloyFurnace.Item, 0, ModelResourceLocation(BlockAlloyFurnace.Item.registryName, "inventory"))
     }
+
+    registerModelBakery(BlockMultiblockExtension::class, BlockMultiblockExtension.Block, null, InvisibleModelBakery)
   }
 
   @SubscribeEvent
@@ -102,4 +111,30 @@ class Proxy : Proxy() {
       }
     }
   }
+}
+
+@Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+fun <T : QBlock> registerModelBakery(qb: KClass<T>, block: Block, item: Item?, bakery: AbstractModelBakery) {
+  val b = StateMap.Builder()
+  b.ignore(*block.defaultState.propertyKeys.toTypedArray())
+  val map = b.build()
+  val rl = ModelResourceLocation(block.registryName, "normal")
+
+  CachedBakedModel(bakery).registerBakedModel(rl)
+  ModelLoader.setCustomStateMapper(block, map)
+  item?.also { ModelLoader.setCustomModelResourceLocation(it, 0, rl) }
+
+  if (bakery is IIconRegister) bakery.registerIconRegister()
+  if (bakery is DynamicModelBakery<*>) {
+    @Suppress("UNCHECKED_CAST")
+    qb.bindSpecialRenderer(DynamicModelRenderer(bakery) as DynamicModelRenderer<T>)
+  }
+}
+
+@Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+fun registerModelBakery(item: Item, bakery: AbstractModelBakery) {
+  val rl = ModelResourceLocation(item.registryName, "normal")
+  CachedBakedModel(bakery).registerBakedModel(rl)
+  ModelLoader.setCustomModelResourceLocation(item, 0, rl)
+  if (bakery is IIconRegister) bakery.registerIconRegister()
 }

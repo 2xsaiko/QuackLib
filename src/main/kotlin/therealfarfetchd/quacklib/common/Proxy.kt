@@ -47,7 +47,6 @@ open class Proxy {
   open fun preInit(e: FMLPreInitializationEvent) {
     MinecraftForge.EVENT_BUS.register(this)
     if (Loader.isModLoaded("mcmultipart")) FeatureManager.registerFeature(DefaultFeatures.MultipartMod)
-    if (Loader.isModLoaded("teckle")) FeatureManager.registerFeature(DefaultFeatures.TeckleMod)
     if (QuackLib.debug) QuackLib.Logger.log(Level.INFO, "Running in a dev environment; enabling debug features!")
 
     e.asmData.getAll(AutoLoad::class.java.name).forEach { Class.forName(it.className) }

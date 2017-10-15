@@ -17,21 +17,26 @@ import therealfarfetchd.quacklib.common.api.util.WireCollisionHelper
 import therealfarfetchd.quacklib.common.api.wires.EnumWireConnection.*
 
 interface BaseConnectable {
+  private val qb: QBlock
+    get() = this as QBlock
+
+  private val QBlock.actualWorld: World
+    get() = if (this is IQBlockMultipart) actualWorld else world
 
   var connections: Map<EnumFaceLocation, EnumWireConnection>
 
   fun updateCableConnections(): Boolean {
     var changed = false
-    if (b.world.isServer) {
+    if (qb.world.isServer) {
       val oldconn = connections
       connections = validEdges.map { edge ->
-        edge to (Internal.takeIf { edge.side != null && checkBlock(b.pos, edge, edge.side, edge.base, it) } ?:
-                 External.takeIf { checkBlock(b.pos.offset(edge.base), edge, edge.base, edge.side, it) } ?:
-                 Corner.takeIf { edge.side != null && checkBlock(b.pos.offset(edge.base).offset(edge.side), edge, edge.side, edge.base.opposite, it) } ?:
+        edge to (Internal.takeIf { edge.side != null && checkBlock(qb.pos, edge, edge.side, edge.base, it) } ?:
+                 External.takeIf { checkBlock(qb.pos.offset(edge.base), edge, edge.base, edge.side, it) } ?:
+                 Corner.takeIf { edge.side != null && checkBlock(qb.pos.offset(edge.base).offset(edge.side), edge, edge.side, edge.base.opposite, it) } ?:
                  None)
       }.toMap()
       if (connections != oldconn) {
-        b.dataChanged()
+        qb.dataChanged()
         changed = true
       }
     }
@@ -40,25 +45,42 @@ interface BaseConnectable {
 
   fun getNeighbor(l: EnumFaceLocation): Any? {
     return when (connections[l]) {
-      Internal -> if (l.side != null) getBlock(b.pos, l.side, l.base) else null
-      External -> getBlock(b.pos.offset(l.base), l.base, l.side)
-      Corner -> if (l.side != null) getBlock(b.pos.offset(l.base).offset(l.side), l.side, l.base.opposite) else null
+      Internal -> if (l.side != null) getBlock(qb.pos, l.side, l.base) else null
+      External -> getBlock(qb.pos.offset(l.base), l.base, l.side)
+      Corner -> if (l.side != null) getBlock(qb.pos.offset(l.base).offset(l.side), l.side, l.base.opposite) else null
       else -> null
     }
   }
 
   private fun checkBlock(pos: BlockPos, e: EnumFaceLocation, f1: EnumFacing, f2: EnumFacing?, c: EnumWireConnection): Boolean {
-    if (c == Corner && WireCollisionHelper.collides(b.world, b.pos.offset(e.base), e)) return false
-    if (c == Internal && b.actualWorld.getTileEntity(b.pos) !is IMultipartContainer) return false
-    val cap: IConnectable = b.actualWorld.getTileEntity(pos)?.getCapability(Capabilities.Connectable, f1.opposite) ?: return false
-    val localCap: IConnectable = b.getCapability(Capabilities.Connectable, e.base) ?: return false
-    cap.getEdge(f2) ?: return false
-    localCap.getEdge(e.side) ?: return false
-    return cap.getType(f2) == localCap.getType(e.side) && (c != Corner || (cap.allowCornerConnections(f2) || localCap.allowCornerConnections(e.side)))
+    return when {
+      c == Corner && WireCollisionHelper.collides(qb.world, qb.pos.offset(e.base), e) -> false
+      c == Internal && qb.actualWorld.getTileEntity(qb.pos) !is IMultipartContainer -> false
+      c == External && connectsToOther(qb.pos, e) -> true
+      else -> {
+        val cap: IConnectable = qb.actualWorld.getTileEntity(pos)?.getCapability(Capabilities.Connectable, f1.opposite) ?: return false
+        val localCap: IConnectable = qb.getCapability(Capabilities.Connectable, e.base) ?: return false
+        val a1 = cap.getEdge(f2) ?: return false
+        val a2 = localCap.getEdge(e.side) ?: return false
+        cap.getType(f2) == localCap.getType(e.side) &&
+        checkAdditional(a1, a2) &&
+        (c != Corner || (cap.allowCornerConnections(f2) || localCap.allowCornerConnections(e.side)))
+      }
+    }
   }
 
+  /**
+   * Allows additional checks to determine if it should connect
+   */
+  fun checkAdditional(cap: Any?, localCap: Any?): Boolean = true
+
+  /**
+   * Allows a method to connect to non IConnectable blocks (e.g redstone dust)
+   */
+  fun connectsToOther(thisBlock: BlockPos, e: EnumFaceLocation): Boolean = false
+
   private fun getBlock(pos: BlockPos, f1: EnumFacing, f2: EnumFacing?): Any? {
-    val cap: IConnectable = b.actualWorld.getTileEntity(pos)?.getCapability(Capabilities.Connectable, f1.opposite) ?: return false
+    val cap: IConnectable = qb.actualWorld.getTileEntity(pos)?.getCapability(Capabilities.Connectable, f1.opposite) ?: return false
     cap.getEdge(f2) ?: return null
     return cap.getEdge(f2)
   }
@@ -86,12 +108,5 @@ interface BaseConnectable {
   }
 
   val validEdges: Set<EnumFaceLocation>
-    get() = EnumFaceLocation.Values.filter { b.getCapability(Capabilities.Connectable, it.base)?.getEdge(it.side) != null }.toSet()
-
+    get() = EnumFaceLocation.Values.filter { qb.getCapability(Capabilities.Connectable, it.base)?.getEdge(it.side) != null }.toSet()
 }
-
-private val BaseConnectable.b: QBlock
-  get() = this as QBlock
-
-private val QBlock.actualWorld: World
-  get() = if (this is IQBlockMultipart) actualWorld else world

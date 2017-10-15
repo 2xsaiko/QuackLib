@@ -255,5 +255,6 @@ open class WireBakery(
     textures = texLocations.map { it to textureMap.registerSprite(it) }.toMap()
   }
 
+  @Suppress("USELESS_ELVIS")
   override fun createKey(state: IExtendedBlockState, face: EnumFacing?): String = super.createKey(state, face) + (state[BlockWire.PropConnections] ?: emptyList()).joinToString()
 }

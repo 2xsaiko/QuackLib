@@ -7,6 +7,7 @@ import net.minecraft.creativetab.CreativeTabs
 import net.minecraft.item.Item
 import net.minecraftforge.fml.common.FMLLog
 import net.minecraftforge.fml.common.discovery.ASMDataTable
+import net.minecraftforge.fml.common.discovery.asm.ModAnnotation
 import org.apache.logging.log4j.core.Logger
 import therealfarfetchd.quacklib.ModID
 import therealfarfetchd.quacklib.QuackLib
@@ -49,8 +50,10 @@ interface IBlockDefinition : ICommonItemDef {
       for (d in data) {
         var warnings: List<String> = emptyList()
 
-        val mainClass = findClass(d.className)!!
+        val mainClass = shutupForge { findClass(d.className)!! }
         QuackLib.Logger.info("Found block ${mainClass.simpleName}")
+
+        val layout = (d.annotationInfo["layout"] as? ModAnnotation.EnumHolder)?.let { BlockClassLayout.valueOf(it.value) } ?: BlockClassLayout.Standard
 
         val requiredFeatures = (d.annotationInfo["dependencies"] as? String ?: "").split(";").filter(String::isNotBlank)
         if (requiredFeatures.isNotEmpty()) {
@@ -70,47 +73,76 @@ interface IBlockDefinition : ICommonItemDef {
           if (skip) continue
         }
 
-        val companionClass = mainClass.companionObject ?: throw IllegalBlockDefLayoutException("QBlock class $mainClass should have companion object!")
-        val companion = mainClass.companionObjectInstance!!
+        when (layout) {
+          BlockClassLayout.Standard -> {
+            val companionClass = mainClass.companionObject ?: throw IllegalBlockDefLayoutException("QBlock class $mainClass should have companion object!")
+            val companion = mainClass.companionObjectInstance!!
 
-        val getblock = findProperty(companionClass, "Block") ?: throw IllegalBlockDefLayoutException("QBlock class $mainClass should have a `Block` field in it's companion object holding the `Block` instance!")
-        val getitem = findProperty(companionClass, "Item")
+            val getblock = findProperty(companionClass, "Block") ?: throw IllegalBlockDefLayoutException("QBlock class $mainClass should have a `Block` field in it's companion object holding the `Block` instance!")
+            val getitem = findProperty(companionClass, "Item")
 
-        val blockInstance = shutupForge { getblock.get(companion).takeIf { it is Block } as Block? }
-                            ?: throw IllegalBlockDefLayoutException("QBlock class $mainClass should have a `Block` field in it's companion object holding the `Block` instance!")
+            val blockInstance = shutupForge { getblock.get(companion).takeIf { it is Block } as Block? }
+                                ?: throw IllegalBlockDefLayoutException("QBlock class $mainClass should have a `Block` field in it's companion object holding the `Block` instance!")
 
-        val item = getitem?.get(companion)?.takeIf {
-          Item::class.isSuperclassOf(it::class) ||
-          { warnings += "Item object found, but it doesn't extend Item! Ignoring."; false }()
-        } as Item?
+            val item = getitem?.get(companion)?.takeIf {
+              Item::class.isSuperclassOf(it::class) ||
+              { warnings += "Item object found, but it doesn't extend Item! Ignoring."; false }()
+            } as Item?
 
-        blockInstance.setCreativeTab(getCreativeTab(d.annotationInfo["creativeTab"] as? String))
+            blockInstance.setCreativeTab(getCreativeTab(d.annotationInfo["creativeTab"] as? String))
 
-        val multipart = IQBlockMultipart::class in mainClass.allSuperclasses
+            val multipart = IQBlockMultipart::class in mainClass.allSuperclasses
 
-        if (multipart) {
-          if (blockInstance is IMultipart) {
-            MultipartRegistry.INSTANCE.registerPartWrapper(blockInstance, blockInstance as IMultipart)
-          } else {
-            warnings += "QBlock is a multipart, but it's corresponding block isn't!"
+            if (multipart) {
+              if (blockInstance is IMultipart) {
+                MultipartRegistry.INSTANCE.registerPartWrapper(blockInstance, blockInstance as IMultipart)
+              } else {
+                warnings += "QBlock is a multipart, but it's corresponding block isn't!"
+              }
+            }
+
+            QuackLib.Logger.info(" -> Item?: ${if (item != null) "Yes" else "No"}")
+            QuackLib.Logger.info(" -> Multipart?: ${if (multipart) "Yes" else "No"}")
+            for (warning in warnings) {
+              QuackLib.Logger.warn(" -> WARNING: $warning")
+            }
+
+            definitions += object : IBlockDefinition {
+              override val item: Item? = item
+              override val block: Block = blockInstance
+              override val multipart: Boolean = multipart
+              override val registerModels: Boolean = d.annotationInfo["registerModels"] as? Boolean ?: true
+            }
           }
-        }
+          BlockClassLayout.StaticBlock -> {
+            val block = (mainClass.objectInstance ?: throw IllegalBlockDefLayoutException("Block ${d.className} should be an object!")) as? Block
+                        ?: throw IllegalBlockDefLayoutException("Block ${d.className} doesn't extend net.minecraft.block.Block!")
 
-        QuackLib.Logger.info(" -> Item?: ${if (item != null) "Yes" else "No"}")
-        QuackLib.Logger.info(" -> Multipart?: ${if (multipart) "Yes" else "No"}")
-        for (warning in warnings) {
-          QuackLib.Logger.warn(" -> WARNING: $warning")
-        }
+            val getitem = findProperty(mainClass, "Item")
+            val item = getitem?.get(block)?.takeIf {
+              Item::class.isSuperclassOf(it::class) ||
+              { warnings += "Item object found, but it doesn't extend Item! Ignoring."; false }()
+            } as Item?
 
-        definitions += object : IBlockDefinition {
-          override val item: Item? = item
-          override val block: Block = blockInstance
-          override val multipart: Boolean = multipart
-          override val registerModels: Boolean = d.annotationInfo["registerModels"] as? Boolean ?: true
+            block.setCreativeTab(getCreativeTab(d.annotationInfo["creativeTab"] as? String))
+            block.unlocalizedName = block.registryName.toString()
+
+            QuackLib.Logger.info(" -> Item?: ${if (item != null) "Yes" else "No"}")
+            QuackLib.Logger.info(" -> Multipart?: not supported yet")
+            for (warning in warnings) {
+              QuackLib.Logger.warn(" -> WARNING: $warning")
+            }
+
+            definitions += object : IBlockDefinition {
+              override val item: Item? = item
+              override val block: Block = block
+              override val multipart: Boolean = false
+              override val registerModels: Boolean = d.annotationInfo["registerModels"] as? Boolean ?: true
+            }
+          }
         }
       }
     }
-
   }
 }
 
