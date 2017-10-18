@@ -201,13 +201,12 @@ open class QBContainer(factory: () -> QBlock) : Block(factory.also { tempFactory
 
   override fun getCollisionBoundingBox(blockState: IBlockState?, world: IBlockAccess, pos: BlockPos): AxisAlignedBB? {
     val qb = world.getQBlock(pos)
-    if (qb != null) return qb.collisionBox
-    else if (world is World) {
-      return buildPart(world, pos) {
+    return when {
+      qb != null -> qb.collisionBox
+      world is World -> buildPart(world, pos) {
         collisionBox
       }
-    } else {
-      error("This should never happen! Raise hell if it does…")
+      else -> error("This should never happen! Raise hell if it does…")
     }
   }
 
