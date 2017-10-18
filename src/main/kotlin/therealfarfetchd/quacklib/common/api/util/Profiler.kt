@@ -9,7 +9,7 @@ object Profiler {
     val ret = op()
     val elapsedTime = System.currentTimeMillis() - startTime
     val flag = elapsedTime > maxtime
-    if (QuackLib.debug || flag) {
+    if (/* QuackLib.debug || */ flag) {
       val s = "$name took longer than expected! (${elapsedTime}ms > ${maxtime}ms)"
       val s1 = "$name took ${elapsedTime}ms."
       QuackLib.Logger.warn(if (flag) s else s1)

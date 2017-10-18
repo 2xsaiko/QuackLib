@@ -22,11 +22,19 @@ import kotlin.reflect.full.*
  */
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS)
-annotation class BlockDef(val registerModels: Boolean = true, val creativeTab: String = ModID, val dependencies: String = "", val layout: BlockClassLayout = BlockClassLayout.Standard)
+annotation class BlockDef(
+  val registerModels: Boolean = true,
+  val creativeTab: String = ModID,
+  val dependencies: String = "",
+  val layout: BlockClassLayout = BlockClassLayout.Standard
+)
 
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS)
-annotation class ItemDef(val registerModels: Boolean = true, val creativeTab: String = ModID)
+annotation class ItemDef(
+  val registerModels: Boolean = true,
+  val creativeTab: String = ModID
+)
 
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS)

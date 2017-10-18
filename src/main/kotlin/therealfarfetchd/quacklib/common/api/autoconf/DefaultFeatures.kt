@@ -16,17 +16,9 @@ import therealfarfetchd.quacklib.common.block.ContainerAlloyFurnace
 @Suppress("MemberVisibilityCanPrivate")
 @AutoLoad
 object DefaultFeatures {
-  val VirtualSilicon = VirtualFeature("silicon")
-  val VirtualSiliconWafer = VirtualFeature("silicon wafer")
-  val VirtualSiliconWaferRed = VirtualFeature("silicon wafer red")
-  val VirtualSiliconWaferBlue = VirtualFeature("silicon wafer blue")
-  val VirtualRedAlloy = VirtualFeature("red alloy ingot")
-  val VirtualBlueAlloy = VirtualFeature("blue alloy ingot")
-  val VirtualBrass = VirtualFeature("brass ingot")
-  val VirtualNikolite = VirtualFeature("nikolite")
-  val VirtualNikoliteOre = VirtualFeature("nikolite ore")
   val VirtualPower = VirtualFeature("power")
   val VirtualItemTubes = VirtualFeature("itemtubes")
+  val VirtualBundledCable = VirtualFeature("bundled cable")
   val MCMultipartCompat = VirtualFeature("mcmultipart compat")
 
   val OreGeneration = Feature("ore generation") {
@@ -36,7 +28,7 @@ object DefaultFeatures {
   }
 
   val NikoliteOre: Feature = Feature("nikolite ore") {
-    depends(Nikolite, OreGeneration); provides(VirtualNikoliteOre)
+    depends(Nikolite, OreGeneration);
 
     action {
       shutupForge {
@@ -78,20 +70,20 @@ object DefaultFeatures {
       LumarPink, LumarGray, LumarSilver, LumarCyan, LumarPurple, LumarBlue, LumarBrown, LumarGreen, LumarRed, LumarBlack)
   }
 
-  val Silicon = ItemFeature(16) { depends(AlloyFurnace); provides(VirtualSilicon) }
-  val SiliconWafer = ItemFeature(17) { depends(VirtualSilicon); provides(VirtualSiliconWafer) }
-  val SiliconWaferRed = ItemFeature(18) { depends(AlloyFurnace, VirtualSiliconWafer); provides(VirtualSiliconWaferRed) }
-  val SiliconWaferBlue = ItemFeature(19) { depends(AlloyFurnace, VirtualSiliconWafer, VirtualNikolite); provides(VirtualSiliconWaferBlue) }
+  val Silicon = ItemFeature(16) { depends(AlloyFurnace) }
+  val SiliconWafer = ItemFeature(17) { depends(Silicon) }
+  val SiliconWaferRed = ItemFeature(18) { depends(AlloyFurnace, SiliconWafer) }
+  val SiliconWaferBlue = ItemFeature(19) { depends(AlloyFurnace, SiliconWafer, Nikolite) }
 
-  val RedAlloy = ItemFeature(20) { depends(AlloyFurnace); provides(VirtualRedAlloy); oreDict("ingotRedAlloy") }
-  val BlueAlloy = ItemFeature(21) { depends(AlloyFurnace); provides(VirtualBlueAlloy); depends(VirtualNikolite); oreDict("ingotBlueAlloy") }
-  val Brass = ItemFeature(22) { depends(AlloyFurnace); provides(VirtualBrass); oreDict("ingotBrass") }
-  val Nikolite = ItemFeature(23) { depends(NikoliteOre); provides(VirtualNikolite); oreDict("dustNikolite", "dyeCyan") }
+  val RedAlloy = ItemFeature(20) { depends(AlloyFurnace); oreDict("ingotRedAlloy") }
+  val BlueAlloy = ItemFeature(21) { depends(AlloyFurnace); depends(Nikolite); oreDict("ingotBlueAlloy") }
+  val Brass = ItemFeature(22) { depends(AlloyFurnace); oreDict("ingotBrass") }
+  val Nikolite = ItemFeature(23) { depends(NikoliteOre); oreDict("dustNikolite", "dyeCyan") }
 
   val CopperWire = ItemFeature(24) { depends(Drawplate) }
   val IronWire = ItemFeature(25) { depends(Drawplate) }
   val CopperCoil = ItemFeature(26) { depends(CopperWire) }
-  val Motor = ItemFeature(27) { depends(CopperCoil, VirtualBlueAlloy) }
+  val Motor = ItemFeature(27) { depends(CopperCoil, BlueAlloy) }
 
   val MultipartMod = Feature("mcmultipart mod") {
     provides(MCMultipartCompat)
