@@ -26,14 +26,16 @@ annotation class BlockDef(
   val registerModels: Boolean = true,
   val creativeTab: String = ModID,
   val dependencies: String = "",
-  val layout: BlockClassLayout = BlockClassLayout.Standard
+  val layout: BlockClassLayout = BlockClassLayout.Standard,
+  val metaModels: IntArray = intArrayOf(0)
 )
 
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS)
 annotation class ItemDef(
   val registerModels: Boolean = true,
-  val creativeTab: String = ModID
+  val creativeTab: String = ModID,
+  val metaModels: IntArray = intArrayOf(1)
 )
 
 @Retention(AnnotationRetention.RUNTIME)
@@ -43,6 +45,7 @@ annotation class AutoLoad
 interface ICommonItemDef {
   val item: Item?
   val registerModels: Boolean
+  val metaModels: Collection<Int>
 }
 
 interface IBlockDefinition : ICommonItemDef {
@@ -62,6 +65,7 @@ interface IBlockDefinition : ICommonItemDef {
         QuackLib.Logger.info("Found block ${mainClass.simpleName}")
 
         val layout = (d.annotationInfo["layout"] as? ModAnnotation.EnumHolder)?.let { BlockClassLayout.valueOf(it.value) } ?: BlockClassLayout.Standard
+        val metaModels = (d.annotationInfo["metaModels"] as? IntArray ?: intArrayOf(0)).toSet()
 
         val requiredFeatures = (d.annotationInfo["dependencies"] as? String ?: "").split(";").filter(String::isNotBlank)
         if (requiredFeatures.isNotEmpty()) {
@@ -116,6 +120,7 @@ interface IBlockDefinition : ICommonItemDef {
             }
 
             definitions += object : IBlockDefinition {
+              override val metaModels: Collection<Int> = metaModels
               override val item: Item? = item
               override val block: Block = blockInstance
               override val multipart: Boolean = multipart
@@ -132,7 +137,7 @@ interface IBlockDefinition : ICommonItemDef {
               { warnings += "Item object found, but it doesn't extend Item! Ignoring."; false }()
             } as Item?
 
-            block.setCreativeTab(getCreativeTab(d.annotationInfo["creativeTab"] as? String))
+            block.setCreativeTabFromName(d.annotationInfo["creativeTab"] as? String)
             block.unlocalizedName = block.registryName.toString()
 
             QuackLib.Logger.info(" -> Item?: ${if (item != null) "Yes" else "No"}")
@@ -142,6 +147,7 @@ interface IBlockDefinition : ICommonItemDef {
             }
 
             definitions += object : IBlockDefinition {
+              override val metaModels: Collection<Int> = metaModels
               override val item: Item? = item
               override val block: Block = block
               override val multipart: Boolean = false
@@ -169,7 +175,7 @@ interface IItemDefinition : ICommonItemDef {
         val item = (mainClass.objectInstance ?: throw IllegalBlockDefLayoutException("Item ${d.className} should be an object!")) as? Item
                    ?: throw IllegalBlockDefLayoutException("Item ${d.className} doesn't extend net.minecraft.item.Item!")
 
-        item.creativeTab = getCreativeTab(d.annotationInfo["creativeTab"] as? String)
+        item.setCreativeTabFromName(d.annotationInfo["creativeTab"] as? String)
         item.unlocalizedName = item.registryName.toString()
 
         QuackLib.Logger.info("Found item ${mainClass.simpleName}")
@@ -180,6 +186,7 @@ interface IItemDefinition : ICommonItemDef {
         definitions += object : IItemDefinition {
           override val item: Item = item
           override val registerModels: Boolean = d.annotationInfo["registerModels"] as? Boolean ?: true
+          override val metaModels: Collection<Int> = (d.annotationInfo["metaModels"] as? IntArray ?: intArrayOf(0)).toSet()
         }
       }
     }
@@ -220,7 +227,12 @@ fun <T> shutupForge(op: () -> T): T {
   }
 }
 
-private fun getCreativeTab(name: String?): CreativeTabs? = CreativeTabs.CREATIVE_TAB_ARRAY.firstOrNull { it.tabLabel == name ?: ModID }
+private fun getCreativeTab(name: String?) = CreativeTabs.CREATIVE_TAB_ARRAY
+  .firstOrNull { it.tabLabel == name ?: ModID }
+
+private fun Block.setCreativeTabFromName(name: String?) = getCreativeTab(name)?.also { setCreativeTab(it) }
+
+private fun Item.setCreativeTabFromName(name: String?) = getCreativeTab(name)?.also { creativeTab = it }
 
 @Suppress("UNCHECKED_CAST")
 private fun findProperty(clazz: KClass<*>, fieldName: String): KProperty1<Any, Any?>? = clazz.memberProperties.find { it.name == fieldName } as KProperty1<Any, Any?>?

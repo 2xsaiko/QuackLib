@@ -7,6 +7,7 @@ import net.minecraft.world.World
 import therealfarfetchd.quacklib.client.api.render.wires.EnumWireRender
 import therealfarfetchd.quacklib.common.api.block.capability.Capabilities
 import therealfarfetchd.quacklib.common.api.block.capability.IConnectable
+import therealfarfetchd.quacklib.common.api.extensions.bothNotNull
 import therealfarfetchd.quacklib.common.api.extensions.isServer
 import therealfarfetchd.quacklib.common.api.extensions.nibbles
 import therealfarfetchd.quacklib.common.api.extensions.unpackNibbles
@@ -58,8 +59,7 @@ interface BaseConnectable {
       c == Internal && qb.actualWorld.getTileEntity(qb.pos) !is IMultipartContainer -> false
       c == External && connectsToOther(qb.pos, e) -> true
       else -> {
-        val cap: IConnectable = qb.actualWorld.getTileEntity(pos)?.getCapability(Capabilities.Connectable, f1.opposite) ?: return false
-        val localCap: IConnectable = qb.getCapability(Capabilities.Connectable, e.base) ?: return false
+        val (cap, localCap) = getCap(pos, e, f1, c) ?: return false
         val a1 = cap.getEdge(f2) ?: return false
         val a2 = localCap.getEdge(e.side) ?: return false
         cap.getType(f2) == localCap.getType(e.side) &&
@@ -68,6 +68,19 @@ interface BaseConnectable {
       }
     }
   }
+
+  private fun getCap(pos: BlockPos, e: EnumFaceLocation, f1: EnumFacing, c: EnumWireConnection) = when (c) {
+  //    EnumWireConnection.Internal -> {
+  //      val te = qb.actualWorld.getTileEntity(qb.pos) as? TileMultipartContainer
+  //
+  //      TODO()
+  //    }
+    else -> Pair(
+      qb.actualWorld.getTileEntity(pos)?.getCapability(Capabilities.Connectable, f1.opposite),
+      qb.getCapability(Capabilities.Connectable, e.base)
+    )
+  }.bothNotNull()
+
 
   /**
    * Allows additional checks to determine if it should connect

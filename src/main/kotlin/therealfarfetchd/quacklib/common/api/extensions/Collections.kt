@@ -98,3 +98,12 @@ fun <A, B> Array<Pair<A, B?>>.filterSecondNotNull(): List<Pair<A, B>> = mapSecon
 fun <A, B> Pair<A, B>.swap(): Pair<B, A> = second to first
 
 fun <A, B> Map<A, B>.asReversed(): Map<B, A> = toList().map { it.swap() }.toMap()
+
+@Suppress("UNCHECKED_CAST")
+fun <A, B> Pair<A?, B>.firstNotNull(): Pair<A, B>? = takeIf { it.first != null } as Pair<A, B>?
+
+@Suppress("UNCHECKED_CAST")
+fun <A, B> Pair<A, B?>.secondNotNull(): Pair<A, B>? = takeIf { it.second != null } as Pair<A, B>?
+
+@Suppress("UNCHECKED_CAST")
+fun <A, B> Pair<A?, B?>.bothNotNull(): Pair<A, B>? = takeIf { it.second != null && it.first != null } as Pair<A, B>?

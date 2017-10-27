@@ -14,7 +14,7 @@ import net.minecraft.util.EnumFacing
 import net.minecraft.world.World
 import net.minecraftforge.common.property.IExtendedBlockState
 
-class CachedBakedModel(private val bakery: AbstractModelBakery) : IBakedModel {
+class CachedBakedModel(private val bakery: IModel) : IBakedModel {
   override fun getParticleTexture(): TextureAtlasSprite = bakery.particleTexture
 
   override fun getQuads(state: IBlockState?, side: EnumFacing?, rand: Long): List<BakedQuad> {

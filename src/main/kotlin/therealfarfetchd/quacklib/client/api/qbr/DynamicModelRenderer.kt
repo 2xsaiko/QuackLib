@@ -5,10 +5,10 @@ import net.minecraft.client.renderer.GlStateManager.*
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import org.lwjgl.opengl.GL11
-import therealfarfetchd.quacklib.client.api.model.DynamicModelBakery
+import therealfarfetchd.quacklib.client.api.model.IDynamicModel
 import therealfarfetchd.quacklib.common.api.qblock.QBlock
 
-class DynamicModelRenderer<in T : QBlock>(val bakery: DynamicModelBakery<T>) : QBlockSpecialRenderer<T>() {
+class DynamicModelRenderer<in T : QBlock>(val bakery: IDynamicModel<T>) : QBlockSpecialRenderer<T>() {
   override fun render(block: T, x: Double, y: Double, z: Double, partialTicks: Float, destroyStage: Int, alpha: Float) {
     pushMatrix()
     translate(x, y, z)

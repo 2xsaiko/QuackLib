@@ -15,7 +15,7 @@ import therealfarfetchd.quacklib.common.api.util.StringPackedProps
 import therealfarfetchd.quacklib.common.api.util.Vec2
 import therealfarfetchd.quacklib.common.api.util.Vec3
 
-abstract class SimpleModelBakery : AbstractModelBakery() {
+abstract class SimpleModel : IModel {
 
   override fun bakeQuads(face: EnumFacing?, state: IExtendedBlockState): List<BakedQuad> {
     val builder = ModelBuilder(face)
@@ -46,28 +46,40 @@ abstract class SimpleModelBakery : AbstractModelBakery() {
   abstract fun addShapes(state: IExtendedBlockState, model: ModelBuilder)
   abstract fun addShapes(stack: ItemStack, model: ModelBuilder)
 
-  protected fun vec(x: Double, y: Double, z: Double): Vec3 = Vec3(x.toFloat(), y.toFloat(), z.toFloat())
-  protected fun vec16(x: Double, y: Double, z: Double): Vec3 = Vec3(x.toFloat() / 16F, y.toFloat() / 16F, z.toFloat() / 16F)
-  protected fun vec16(x: Int, y: Int, z: Int): Vec3 = Vec3(x.toFloat() / 16F, y.toFloat() / 16F, z.toFloat() / 16F)
+  protected fun vec(x: Double, y: Double, z: Double) = Vec3(x.toFloat(), y.toFloat(), z.toFloat())
+  protected fun vec16(x: Double, y: Double, z: Double) = Vec3(x.toFloat() / 16F, y.toFloat() / 16F, z.toFloat() / 16F)
+  protected fun vec16(x: Int, y: Int, z: Int) = Vec3(x.toFloat() / 16F, y.toFloat() / 16F, z.toFloat() / 16F)
 
   protected fun texture(tex: TextureAtlasSprite): TextureTemplate = TextureTemplate(tex, Vec2(0f, 0f), Vec2(1f, 1f), auto = true)
 
-  protected fun texture(tex: TextureAtlasSprite, u: Double, v: Double, u1: Double, v1: Double, flip: Boolean = false): TextureTemplate =
+  protected fun texture(tex: TextureAtlasSprite, uv: Vec2, width: Float, height: Float, flip: Boolean = false) =
+    TextureTemplate(tex, uv, uv + Vec2(width, height), flip = flip)
+
+  protected fun texture(tex: TextureAtlasSprite, u: Float, v: Float, u1: Float, v1: Float, flip: Boolean = false) =
+    TextureTemplate(tex, Vec2(u, v), Vec2(u1, v1), flip = flip)
+
+  protected fun texture(tex: TextureAtlasSprite, u: Double, v: Double, u1: Double, v1: Double, flip: Boolean = false) =
     TextureTemplate(tex, Vec2(u.toFloat(), v.toFloat()), Vec2(u1.toFloat(), v1.toFloat()), flip = flip)
 
-  protected fun texture(tex: TextureAtlasSprite, u: Int, v: Int, u1: Int, v1: Int, flip: Boolean = false): TextureTemplate =
+  protected fun texture(tex: TextureAtlasSprite, u: Int, v: Int, u1: Int, v1: Int, flip: Boolean = false) =
     TextureTemplate(tex, Vec2(u.toFloat(), v.toFloat()), Vec2(u1.toFloat(), v1.toFloat()), flip = flip)
 
-  protected fun texture(size: Int, tex: TextureAtlasSprite, u: Double, v: Double, u1: Double, v1: Double, flip: Boolean = false): TextureTemplate =
+  protected fun texture(size: Int, tex: TextureAtlasSprite, u: Double, v: Double, u1: Double, v1: Double, flip: Boolean = false) =
     TextureTemplate(tex, Vec2(u.toFloat() / size, v.toFloat() / size), Vec2(u1.toFloat() / size, v1.toFloat() / size), flip = flip)
 
-  protected fun texture(size: Int, tex: TextureAtlasSprite, u: Int, v: Int, u1: Int, v1: Int, flip: Boolean = false): TextureTemplate =
+  protected fun texture(size: Int, tex: TextureAtlasSprite, u: Int, v: Int, u1: Int, v1: Int, flip: Boolean = false) =
     TextureTemplate(tex, Vec2(u.toFloat() / size, v.toFloat() / size), Vec2(u1.toFloat() / size, v1.toFloat() / size), flip = flip)
 
-  protected fun texture16(tex: TextureAtlasSprite, u: Double, v: Double, u1: Double, v1: Double, flip: Boolean = false): TextureTemplate =
+  protected fun texture16(tex: TextureAtlasSprite, uv: Vec2, width: Float, height: Float, flip: Boolean = false) =
+    TextureTemplate(tex, uv / 16f, (uv + Vec2(width, height)) / 16f, flip = flip)
+
+  protected fun texture16(tex: TextureAtlasSprite, u: Float, v: Float, u1: Float, v1: Float, flip: Boolean = false) =
+    TextureTemplate(tex, Vec2(u, v) / 16f, Vec2(u1, v1) / 16f, flip = flip)
+
+  protected fun texture16(tex: TextureAtlasSprite, u: Double, v: Double, u1: Double, v1: Double, flip: Boolean = false) =
     TextureTemplate(tex, Vec2(u.toFloat(), v.toFloat()) / 16f, Vec2(u1.toFloat(), v1.toFloat()) / 16f, flip = flip)
 
-  protected fun texture16(tex: TextureAtlasSprite, u: Int, v: Int, u1: Int, v1: Int, flip: Boolean = false): TextureTemplate =
+  protected fun texture16(tex: TextureAtlasSprite, u: Int, v: Int, u1: Int, v1: Int, flip: Boolean = false) =
     TextureTemplate(tex, Vec2(u.toFloat(), v.toFloat()) / 16f, Vec2(u1.toFloat(), v1.toFloat()) / 16f, flip = flip)
 
   protected val missingTex: TextureAtlasSprite

@@ -44,7 +44,6 @@ import kotlin.reflect.KClass
  * Created by marco on 16.07.17.
  */
 class Proxy : Proxy() {
-
   override fun preInit(e: FMLPreInitializationEvent) {
     super.preInit(e)
 
@@ -71,10 +70,10 @@ class Proxy : Proxy() {
   fun registerModels(e: ModelRegistryEvent) {
     (IBlockDefinition.definitions + IItemDefinition.definitions)
       .filter { it.item != null && it.registerModels }
-      .forEach {
-        val mrl = ModelResourceLocation(it.item!!.registryName, "inventory")
-        QuackLib.Logger.log(Level.INFO, "Registered model resource location for item ${it.item!!.registryName} to $mrl")
-        ModelLoader.setCustomModelResourceLocation(it.item, 0, mrl)
+      .forEach { def ->
+        val mrl = ModelResourceLocation(def.item!!.registryName, "inventory")
+        QuackLib.Logger.log(Level.INFO, "Registered model resource location for item ${def.item!!.registryName} to $mrl")
+        def.metaModels.forEach { meta -> ModelLoader.setCustomModelResourceLocation(def.item, meta, mrl) }
       }
 
     if (FeatureManager.isRequired(DefaultFeatures.NikoliteOre)) {
@@ -114,7 +113,7 @@ class Proxy : Proxy() {
 }
 
 @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-fun <T : QBlock> registerModelBakery(qb: KClass<T>, block: Block, item: Item?, bakery: AbstractModelBakery) {
+fun <T : QBlock> registerModelBakery(qb: KClass<T>, block: Block, item: Item?, bakery: IModel) {
   val b = StateMap.Builder()
   b.ignore(*block.defaultState.propertyKeys.toTypedArray())
   val map = b.build()
@@ -122,17 +121,23 @@ fun <T : QBlock> registerModelBakery(qb: KClass<T>, block: Block, item: Item?, b
 
   CachedBakedModel(bakery).registerBakedModel(rl)
   ModelLoader.setCustomStateMapper(block, map)
-  item?.also { ModelLoader.setCustomModelResourceLocation(it, 0, rl) }
+
+  if (item != null) {
+    (IBlockDefinition.definitions + IItemDefinition.definitions)
+      .filter { it.item == item && !it.registerModels }
+      .flatMap { it.metaModels }
+      .forEach { ModelLoader.setCustomModelResourceLocation(item, it, rl) }
+  }
 
   if (bakery is IIconRegister) bakery.registerIconRegister()
-  if (bakery is DynamicModelBakery<*>) {
+  if (bakery is IDynamicModel<*>) {
     @Suppress("UNCHECKED_CAST")
     qb.bindSpecialRenderer(DynamicModelRenderer(bakery) as DynamicModelRenderer<T>)
   }
 }
 
 @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-fun registerModelBakery(item: Item, bakery: AbstractModelBakery) {
+fun registerModelBakery(item: Item, bakery: IModel) {
   val rl = ModelResourceLocation(item.registryName, "normal")
   CachedBakedModel(bakery).registerBakedModel(rl)
   ModelLoader.setCustomModelResourceLocation(item, 0, rl)

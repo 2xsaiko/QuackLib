@@ -8,8 +8,8 @@ import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumFacing.*
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.common.property.IExtendedBlockState
-import therealfarfetchd.quacklib.client.api.model.AbstractModelBakery
 import therealfarfetchd.quacklib.client.api.model.IIconRegister
+import therealfarfetchd.quacklib.client.api.model.IModel
 import therealfarfetchd.quacklib.client.api.render.Quad
 import therealfarfetchd.quacklib.client.api.render.QuadFactory
 import therealfarfetchd.quacklib.common.api.extensions.get
@@ -30,8 +30,7 @@ open class WireBakery(
   private val texLocations: List<ResourceLocation>,
   private val texLocationRetriever: (IExtendedBlockState) -> ResourceLocation,
   private val itemTexLocationRetriever: (ItemStack) -> ResourceLocation
-) : AbstractModelBakery(), IIconRegister {
-
+) : IModel, IIconRegister {
   private val armLength: Float = (1 - cableWidth) / 2
   private val armInnerLength: Float = armLength - cableHeight
   private val armInnerSp: Float = armLength - armInnerLength
@@ -44,7 +43,7 @@ open class WireBakery(
     get() = texture
 
   // texture positions
-  private val arm1TopUv = Vec2(0.0F, 0.0F) / scaleFactor
+  private val arm1TopUv = Vec2(0.0F, 0.0F)
   private val arm2TopUv = Vec2(0.0F, armLength + cableWidth) / scaleFactor
   private val centerTopUv = Vec2(0.0F, armLength) / scaleFactor
   private val centerTopCUv = Vec2(0.0F, 1.0F) / scaleFactor
@@ -100,7 +99,7 @@ open class WireBakery(
     return mkQuads(DOWN, External, External, External, External).map { it.translate(Vec3(0F, 0.275F, 0F)) }.map(Quad::bake)
   }
 
-  fun mkQuads(side: EnumFacing, vararg c: EnumWireConnection): List<Quad> {
+  private fun mkQuads(side: EnumFacing, vararg c: EnumWireConnection): List<Quad> {
     var quads: List<Quad> = emptyList()
     val crossing = c.withIndex()
       .map { it.value to c[(it.index + 1) % c.size] }
@@ -125,7 +124,7 @@ open class WireBakery(
     return quads
   }
 
-  fun mkCenter(side: EnumFacing, vararg c: EnumWireConnection): List<Quad> {
+  private fun mkCenter(side: EnumFacing, vararg c: EnumWireConnection): List<Quad> {
     val crossing = c.withIndex()
       .map { it.value to c[(it.index + 1) % c.size] }
       .any { it.first.renderType != EnumWireRender.Invisible && it.second.renderType != EnumWireRender.Invisible }
@@ -144,12 +143,12 @@ open class WireBakery(
     }
   }
 
-  fun mkUnconnectedExt(edge: EnumEdge, extendEnd: Boolean): List<Quad> {
+  private fun mkUnconnectedExt(edge: EnumEdge, extendEnd: Boolean): List<Quad> {
     val rule = TransformRules.getRule(edge)
     return mkUnconnectedExt(edge, rule.useAlt, rule.useAltForBase, extendEnd).map(rule.op)
   }
 
-  fun mkUnconnectedExt(edge: EnumEdge, alt: Boolean, altBase: Boolean, extendEnd: Boolean): List<Quad> {
+  private fun mkUnconnectedExt(edge: EnumEdge, alt: Boolean, altBase: Boolean, extendEnd: Boolean): List<Quad> {
     if (!extendEnd) {
       val front = listOf(centerSide1Uv, centerSide2Uv)[packInt(altBase)]
       val rules = TransformRules.getRule(edge)
@@ -172,12 +171,12 @@ open class WireBakery(
     }
   }
 
-  fun mkNormalExt(edge: EnumEdge): List<Quad> {
+  private fun mkNormalExt(edge: EnumEdge): List<Quad> {
     val rule = TransformRules.getRule(edge)
     return mkNormalExt(rule.useAlt).map(rule.op)
   }
 
-  fun mkNormalExt(alt: Boolean): List<Quad> {
+  private fun mkNormalExt(alt: Boolean): List<Quad> {
     val key = packInt(false, alt)
     val key2 = key shr 1
     val list = listOf(arm1Side1Uv, arm1Side2Uv, arm2Side1Uv, arm2Side2Uv)
@@ -194,12 +193,12 @@ open class WireBakery(
     )
   }
 
-  fun mkCornerExt(edge: EnumEdge): List<Quad> {
+  private fun mkCornerExt(edge: EnumEdge): List<Quad> {
     val rule = TransformRules.getRule(edge)
     return mkCornerExt(rule.useAlt).map(rule.op)
   }
 
-  fun mkCornerExt(alt: Boolean): List<Quad> {
+  private fun mkCornerExt(alt: Boolean): List<Quad> {
     val key = packInt(false, alt)
     val key2 = key shr 1
     val list = listOf(arm1Side1Uv, arm1Side2Uv, arm2Side1Uv, arm2Side2Uv)
@@ -225,12 +224,12 @@ open class WireBakery(
     )
   }
 
-  fun mkICornerExt(edge: EnumEdge): List<Quad> {
+  private fun mkICornerExt(edge: EnumEdge): List<Quad> {
     val rule = TransformRules.getRule(edge)
     return mkICornerExt(rule.useAlt).map(rule.op)
   }
 
-  fun mkICornerExt(alt: Boolean): List<Quad> {
+  private fun mkICornerExt(alt: Boolean): List<Quad> {
     val key = packInt(false, alt)
     val key2 = key shr 1
     val list = listOf(innerArm1Side1Uv, innerArm1Side2Uv, innerArm2Side1Uv, innerArm2Side2Uv)
