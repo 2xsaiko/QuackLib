@@ -9,6 +9,7 @@ import net.minecraftforge.common.property.IExtendedBlockState
 import therealfarfetchd.quacklib.client.api.render.Quad
 import therealfarfetchd.quacklib.client.api.render.QuadFactory
 import therealfarfetchd.quacklib.client.api.render.wires.TransformRules
+import therealfarfetchd.quacklib.common.api.extensions.compose
 import therealfarfetchd.quacklib.common.api.extensions.mapIf
 import therealfarfetchd.quacklib.common.api.extensions.mapWithCopy
 import therealfarfetchd.quacklib.common.api.util.StringPackedProps
@@ -16,6 +17,7 @@ import therealfarfetchd.quacklib.common.api.util.Vec2
 import therealfarfetchd.quacklib.common.api.util.Vec3
 
 abstract class SimpleModel : IModel {
+  protected val mc = Minecraft.getMinecraft()
 
   override fun bakeQuads(face: EnumFacing?, state: IExtendedBlockState): List<BakedQuad> {
     val builder = ModelBuilder(face)
@@ -46,8 +48,16 @@ abstract class SimpleModel : IModel {
   abstract fun addShapes(state: IExtendedBlockState, model: ModelBuilder)
   abstract fun addShapes(stack: ItemStack, model: ModelBuilder)
 
+  protected fun vec(x: Double, y: Double) = Vec2(x.toFloat(), y.toFloat())
+  protected fun vec(x: Float, y: Float) = Vec2(x, y)
+  protected fun vec16(x: Double, y: Double) = Vec2(x.toFloat() / 16F, y.toFloat() / 16F)
+  protected fun vec16(x: Float, y: Float) = Vec2(x / 16F, y / 16F)
+  protected fun vec16(x: Int, y: Int) = Vec2(x.toFloat() / 16F, y.toFloat() / 16F)
+
   protected fun vec(x: Double, y: Double, z: Double) = Vec3(x.toFloat(), y.toFloat(), z.toFloat())
+  protected fun vec(x: Float, y: Float, z: Float) = Vec3(x, y, z)
   protected fun vec16(x: Double, y: Double, z: Double) = Vec3(x.toFloat() / 16F, y.toFloat() / 16F, z.toFloat() / 16F)
+  protected fun vec16(x: Float, y: Float, z: Float) = Vec3(x / 16F, y / 16F, z / 16F)
   protected fun vec16(x: Int, y: Int, z: Int) = Vec3(x.toFloat() / 16F, y.toFloat() / 16F, z.toFloat() / 16F)
 
   protected fun texture(tex: TextureAtlasSprite): TextureTemplate = TextureTemplate(tex, Vec2(0f, 0f), Vec2(1f, 1f), auto = true)
@@ -65,10 +75,13 @@ abstract class SimpleModel : IModel {
     TextureTemplate(tex, Vec2(u.toFloat(), v.toFloat()), Vec2(u1.toFloat(), v1.toFloat()), flip = flip)
 
   protected fun texture(size: Int, tex: TextureAtlasSprite, u: Double, v: Double, u1: Double, v1: Double, flip: Boolean = false) =
-    TextureTemplate(tex, Vec2(u.toFloat() / size, v.toFloat() / size), Vec2(u1.toFloat() / size, v1.toFloat() / size), flip = flip)
+    TextureTemplate(tex, Vec2(u.toFloat(), v.toFloat()) / size, Vec2(u1.toFloat(), v1.toFloat()) / size, flip = flip)
 
   protected fun texture(size: Int, tex: TextureAtlasSprite, u: Int, v: Int, u1: Int, v1: Int, flip: Boolean = false) =
-    TextureTemplate(tex, Vec2(u.toFloat() / size, v.toFloat() / size), Vec2(u1.toFloat() / size, v1.toFloat() / size), flip = flip)
+    TextureTemplate(tex, Vec2(u.toFloat(), v.toFloat()) / size, Vec2(u1.toFloat(), v1.toFloat()) / size, flip = flip)
+
+  protected fun texture(size: Int, tex: TextureAtlasSprite, uv: Vec2, width: Float, height: Float, flip: Boolean = false) =
+    TextureTemplate(tex, uv / size, (uv + Vec2(width, height)) / size, flip = flip)
 
   protected fun texture16(tex: TextureAtlasSprite, uv: Vec2, width: Float, height: Float, flip: Boolean = false) =
     TextureTemplate(tex, uv / 16f, (uv + Vec2(width, height)) / 16f, flip = flip)
@@ -84,7 +97,6 @@ abstract class SimpleModel : IModel {
 
   protected val missingTex: TextureAtlasSprite
     get() = Minecraft.getMinecraft().textureMapBlocks.missingSprite
-
 }
 
 interface IQuadFactory {
@@ -94,21 +106,45 @@ interface IQuadFactory {
 class ModelBuilder(val face: EnumFacing?) {
   private val context = Context(this)
 
+  private val identity: (Quad) -> Quad = { it }
+  private var trStack: List<(Quad) -> Quad> = listOf(identity)
+
   var quads: List<Quad> = emptyList(); private set
 
   operator fun invoke(op: ModelBuilder.Context.() -> Unit) = with(context, op)
 
   class Context(private val builder: ModelBuilder) {
     fun box(op: BoxTemplate.() -> Unit) {
-      val t = BoxTemplate()
-      op(t)
-      builder.quads += t.createQuads(builder.face)
+      val t = BoxTemplate().also(op)
+      builder.quads += t.createQuads(builder.face).map(builder.trStack.last())
+    }
+
+    fun face(op: FaceTemplate.() -> Unit) {
+      val t = FaceTemplate().also(op)
+      builder.quads += t.createQuads(builder.face).map(builder.trStack.last())
+    }
+
+    fun identity() {
+      builder.trStack = listOf(builder.identity)
+    }
+
+    fun trPush() {
+      builder.trStack += builder.trStack.last()
+    }
+
+    fun trPop() {
+      if (builder.trStack.size <= 1) error("Stack underflow")
+      builder.trStack = builder.trStack.dropLast(1)
+    }
+
+    fun transform(op: Quad.() -> Quad) {
+      val l = builder.trStack.last()
+      builder.trStack = builder.trStack.dropLast(1) + (l compose op)
     }
   }
 }
 
 class BoxTemplate : IQuadFactory {
-
   var min = Vec3(0F, 0F, 0F)
   var max = Vec3(1F, 1F, 1F)
 
@@ -177,22 +213,37 @@ class BoxTemplate : IQuadFactory {
     var quads: List<Quad> = emptyList()
 
     up?.also {
-      quads += QuadFactory.makeQuad(minx, maxy, minz, maxx, maxy, maxz, EnumFacing.UP, it.uv.x, it.uv.y, it.uv1.x, it.uv1.y, it.texture).mapIf(it.flip, Quad::rotatedTexture90)
+      quads += QuadFactory.makeQuad(minx, maxy, minz, maxx, maxy, maxz, EnumFacing.UP, it.uv.x, it.uv.y, it.uv1.x, it.uv1.y, it.texture)
+        .mapIf(it.flip, Quad::rotatedTexture90)
+        .let(it.postProc)
     }
     down?.also {
-      quads += QuadFactory.makeQuad(minx, miny, minz, maxx, miny, maxz, EnumFacing.DOWN, it.uv.x, it.uv.y, it.uv1.x, it.uv1.y, it.texture).flipTexturedSide.mapIf(it.flip, Quad::rotatedTexture90)
+      quads += QuadFactory.makeQuad(minx, miny, minz, maxx, miny, maxz, EnumFacing.DOWN, it.uv.x, it.uv.y, it.uv1.x, it.uv1.y, it.texture)
+        .flipTexturedSide
+        .mapIf(it.flip, Quad::rotatedTexture90)
+        .let(it.postProc)
     }
     north?.also {
-      quads += QuadFactory.makeQuad(minx, maxy, minz, maxx, miny, minz, EnumFacing.NORTH, it.uv.x, it.uv.y, it.uv1.x, it.uv1.y, it.texture).flipTexturedSide.mapIf(it.flip, Quad::rotatedTexture90)
+      quads += QuadFactory.makeQuad(minx, maxy, minz, maxx, miny, minz, EnumFacing.NORTH, it.uv.x, it.uv.y, it.uv1.x, it.uv1.y, it.texture)
+        .flipTexturedSide
+        .mapIf(it.flip, Quad::rotatedTexture90)
+        .let(it.postProc)
     }
     south?.also {
-      quads += QuadFactory.makeQuad(minx, maxy, maxz, maxx, miny, maxz, EnumFacing.SOUTH, it.uv.x, it.uv.y, it.uv1.x, it.uv1.y, it.texture).mapIf(it.flip, Quad::rotatedTexture90)
+      quads += QuadFactory.makeQuad(minx, maxy, maxz, maxx, miny, maxz, EnumFacing.SOUTH, it.uv.x, it.uv.y, it.uv1.x, it.uv1.y, it.texture)
+        .mapIf(it.flip, Quad::rotatedTexture90)
+        .let(it.postProc)
     }
     west?.also {
-      quads += QuadFactory.makeQuad(minx, maxy, minz, minx, miny, maxz, EnumFacing.WEST, it.uv.x, it.uv.y, it.uv1.x, it.uv1.y, it.texture).mapIf(it.flip, Quad::rotatedTexture90)
+      quads += QuadFactory.makeQuad(minx, maxy, minz, minx, miny, maxz, EnumFacing.WEST, it.uv.x, it.uv.y, it.uv1.x, it.uv1.y, it.texture)
+        .mapIf(it.flip, Quad::rotatedTexture90)
+        .let(it.postProc)
     }
     east?.also {
-      quads += QuadFactory.makeQuad(maxx, maxy, minz, maxx, miny, maxz, EnumFacing.EAST, it.uv.x, it.uv.y, it.uv1.x, it.uv1.y, it.texture).flipTexturedSide.mapIf(it.flip, Quad::rotatedTexture90)
+      quads += QuadFactory.makeQuad(maxx, maxy, minz, maxx, miny, maxz, EnumFacing.EAST, it.uv.x, it.uv.y, it.uv1.x, it.uv1.y, it.texture)
+        .flipTexturedSide
+        .mapIf(it.flip, Quad::rotatedTexture90)
+        .let(it.postProc)
     }
 
     if (inverted && cull) {
@@ -205,7 +256,24 @@ class BoxTemplate : IQuadFactory {
 
     return quads.map(transformOp)
   }
-
 }
 
-data class TextureTemplate(val texture: TextureAtlasSprite, val uv: Vec2, val uv1: Vec2, val flip: Boolean = false, val auto: Boolean = false)
+class FaceTemplate : IQuadFactory {
+  var min = Vec2(0f, 0f)
+  var max = Vec2(0f, 0f)
+  var depth = 0f
+  var facing = EnumFacing.UP
+
+  override fun createQuads(facing: EnumFacing?): List<Quad> {
+    TODO("not implemented")
+  }
+}
+
+data class TextureTemplate(
+  val texture: TextureAtlasSprite,
+  val uv: Vec2,
+  val uv1: Vec2,
+  val flip: Boolean = false,
+  val auto: Boolean = false,
+  val postProc: Quad.() -> Quad = { this }
+)

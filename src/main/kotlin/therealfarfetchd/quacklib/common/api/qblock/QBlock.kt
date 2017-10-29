@@ -54,14 +54,14 @@ abstract class QBlock {
   /**
    * Returns the mouseover selection box of the block.
    */
-  open val selectionBox: AxisAlignedBB
-    get() = collisionBox ?: FullAABB
+  open val selectionBox: Set<AxisAlignedBB>
+    get() = listOf(collisionBox).filterNotNull().toSet()
 
   /**
    * Returns the raytrace collision box of the block
    */
   open val rayCollisionBox: AxisAlignedBB?
-    get() = selectionBox
+    get() = selectionBox.reduce(AxisAlignedBB::union)
 
   /**
    * Returns the entity collision box of the block.

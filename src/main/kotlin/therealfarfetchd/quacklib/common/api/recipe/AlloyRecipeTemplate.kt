@@ -1,5 +1,6 @@
 package therealfarfetchd.quacklib.common.api.recipe
 
+import net.minecraft.block.Block
 import net.minecraft.init.Items
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
@@ -12,6 +13,8 @@ class AlloyRecipeTemplate {
   var output: ItemTemplate = ItemStackTemplate(Items.AIR, 1, 0)
 
   fun stack(item: Item, count: Int = 1, meta: Int = 0): ItemTemplate = ItemStackTemplate(item, count, meta)
+
+  fun stack(block: Block, count: Int = 1, meta: Int = 0): ItemTemplate = ItemStackTemplate(Item.getItemFromBlock(block), count, meta)
 
   fun oredict(item: String, count: Int = 1): ItemTemplate = OreDictTemplate(item, count)
 
@@ -37,6 +40,8 @@ data class ItemStackTemplate(val item: Item, val count: Int, val meta: Int) : It
     if (!isValid()) error("Invalid item!")
     return item.makeStack(count, meta)
   }
+
+  override fun toString() = "${item.registryName}@${meta}x$count"
 }
 
 data class OreDictTemplate(val item: String, val count: Int) : ItemTemplate {
@@ -54,4 +59,6 @@ data class OreDictTemplate(val item: String, val count: Int) : ItemTemplate {
   }
 
   override fun makeStack(): ItemStack = stack.copy()
+
+  override fun toString() = "${item}x$count"
 }

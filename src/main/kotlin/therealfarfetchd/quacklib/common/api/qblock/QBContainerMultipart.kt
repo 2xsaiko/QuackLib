@@ -17,7 +17,7 @@ import net.minecraft.util.math.RayTraceResult
 import net.minecraft.world.IBlockAccess
 import net.minecraft.world.World
 import therealfarfetchd.quacklib.common.api.extensions.getQBlock
-import therealfarfetchd.quacklib.common.api.extensions.plus
+import java.util.*
 
 /**
  * Created by marco on 09.07.17.
@@ -40,21 +40,19 @@ open class QBContainerMultipart(factory: () -> QBlock) : QBContainer(factory), I
     }
   }
 
-  override fun getSelectedBoundingBox(state: IBlockState?, world: World, pos: BlockPos): AxisAlignedBB {
+  override fun getOutlineBoxes(world: World, pos: BlockPos, state: IBlockState): Set<AxisAlignedBB> {
     val hit = Minecraft.getMinecraft().objectMouseOver
     if (hit.typeOfHit == RayTraceResult.Type.BLOCK) {
       val te = world.getTileEntity(hit.blockPos)
       if (te is TileMultipartContainer) {
         val slotHit = MCMultiPart.slotRegistry.getValue(hit.subHit)
-        val infoOpt = te.get(slotHit)
-        if (infoOpt.isPresent) {
-          val part = infoOpt.get()
+        te[slotHit].takeIf(Optional<*>::isPresent)?.let(Optional<IPartInfo>::get)?.also { part ->
           val qb = (part.tile as QBContainerTile).qb
-          return qb.selectionBox + pos
+          return qb.selectionBox
         }
       }
     }
-    return super.getSelectedBoundingBox(state, world, pos)
+    return super.getOutlineBoxes(world, pos, state)
   }
 
   override fun getOcclusionBoxes(part: IPartInfo): MutableList<AxisAlignedBB> {

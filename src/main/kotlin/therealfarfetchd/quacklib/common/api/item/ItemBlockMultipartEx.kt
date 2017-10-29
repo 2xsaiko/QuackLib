@@ -18,7 +18,6 @@ import net.minecraft.world.World
  * Created by marco on 24.06.17.
  */
 open class ItemBlockMultipartEx(block: Block, multipartBlock: IMultipart) : ItemBlockMultipart(block, multipartBlock) {
-
   override fun onItemUse(player: EntityPlayer, world: World, pos: BlockPos, hand: EnumHand, facing: EnumFacing, hitX: Float,
                          hitY: Float, hitZ: Float): EnumActionResult {
     return place(player, world, pos, hand, facing, hitX, hitY, hitZ, this, this.block::getStateForPlacement, multipartBlock, this::placeBlockAtTested, this::placePartAt_)
@@ -54,5 +53,4 @@ open class ItemBlockMultipartEx(block: Block, multipartBlock: IMultipart) : Item
       return ItemBlockMultipartEx(block, block)
     }
   }
-
 }

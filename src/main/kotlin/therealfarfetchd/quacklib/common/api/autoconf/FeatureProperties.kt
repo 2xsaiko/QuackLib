@@ -6,7 +6,7 @@ open class FeatureProperties {
   var conflicts: Set<Feature> = emptySet()
   var manualReg: Boolean = false
   var priority: Int = 0
-  var action: () -> Unit= {}
+  var action: Map<EnableAt, () -> Unit> = emptyMap()
 
   fun depends(vararg set: Feature) {
     depends += set
@@ -20,7 +20,7 @@ open class FeatureProperties {
     conflicts += set
   }
 
-  fun action(op: () -> Unit) {
-    action = op
+  fun action(at: EnableAt = EnableAt.FeatureEnable, op: () -> Unit) {
+    action += at to op
   }
 }

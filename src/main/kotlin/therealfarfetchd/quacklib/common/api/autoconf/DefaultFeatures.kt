@@ -1,5 +1,6 @@
 package therealfarfetchd.quacklib.common.api.autoconf
 
+import net.minecraft.init.Items
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.fml.common.registry.GameRegistry
 import therealfarfetchd.quacklib.ModID
@@ -7,11 +8,13 @@ import therealfarfetchd.quacklib.client.gui.GuiAlloyFurnace
 import therealfarfetchd.quacklib.common.QGuiHandler
 import therealfarfetchd.quacklib.common.api.qblock.IQBlockInventory
 import therealfarfetchd.quacklib.common.api.qblock.QBContainerTileMultipart
+import therealfarfetchd.quacklib.common.api.recipe.AlloyFurnaceRecipes
 import therealfarfetchd.quacklib.common.api.util.AutoLoad
 import therealfarfetchd.quacklib.common.api.util.shutupForge
 import therealfarfetchd.quacklib.common.api.world.QWorldGenerator
 import therealfarfetchd.quacklib.common.block.BlockNikoliteOre
 import therealfarfetchd.quacklib.common.block.ContainerAlloyFurnace
+import therealfarfetchd.quacklib.common.item.ItemComponent
 
 @Suppress("MemberVisibilityCanPrivate")
 @AutoLoad
@@ -28,7 +31,7 @@ object DefaultFeatures {
   }
 
   val NikoliteOre: Feature = Feature("nikolite ore") {
-    depends(Nikolite, OreGeneration);
+    depends(Nikolite, OreGeneration)
 
     action {
       shutupForge {
@@ -46,7 +49,9 @@ object DefaultFeatures {
 
   val Drawplate = Feature("drawplate")
 
-  val ComponentItem = Feature("component item")
+  val ComponentItem = Feature("component item") {
+    action { shutupForge { ItemComponent } }
+  }
 
   val LumarWhite = ItemFeature(0)
   val LumarOrange = ItemFeature(1)
@@ -70,14 +75,92 @@ object DefaultFeatures {
       LumarPink, LumarGray, LumarSilver, LumarCyan, LumarPurple, LumarBlue, LumarBrown, LumarGreen, LumarRed, LumarBlack)
   }
 
-  val Silicon = ItemFeature(16) { depends(AlloyFurnace) }
-  val SiliconWafer = ItemFeature(17) { depends(Silicon) }
-  val SiliconWaferRed = ItemFeature(18) { depends(AlloyFurnace, SiliconWafer) }
-  val SiliconWaferBlue = ItemFeature(19) { depends(AlloyFurnace, SiliconWafer, Nikolite) }
+  val Silicon = ItemFeature(16) {
+    depends(AlloyFurnace)
+    oreDict("bouleSilicon")
+    action(EnableAt.GameInitEnd) {
+      AlloyFurnaceRecipes.addRecipe {
+        inputs += oredict("sand", count = 8)
+        inputs += stack(Items.COAL, count = 8)
 
-  val RedAlloy = ItemFeature(20) { depends(AlloyFurnace); oreDict("ingotRedAlloy") }
-  val BlueAlloy = ItemFeature(21) { depends(AlloyFurnace); depends(Nikolite); oreDict("ingotBlueAlloy") }
-  val Brass = ItemFeature(22) { depends(AlloyFurnace); oreDict("ingotBrass") }
+        output = stack(ItemComponent, meta = 16)
+      }
+    }
+  }
+
+  val SiliconWafer = ItemFeature(17) { depends(Silicon); oreDict("waferSilicon") }
+
+  val SiliconWaferRed = ItemFeature(18) {
+    depends(AlloyFurnace, SiliconWafer)
+    oreDict("waferSiliconRed")
+    action(EnableAt.GameInitEnd) {
+      AlloyFurnaceRecipes.addRecipe {
+        inputs += oredict("waferSilicon")
+        inputs += oredict("dustRedstone", count = 4)
+
+        output = stack(ItemComponent, meta = 18)
+      }
+    }
+  }
+
+  val SiliconWaferBlue = ItemFeature(19) {
+    depends(AlloyFurnace, SiliconWafer, Nikolite)
+    oreDict("waferSiliconBlue")
+    action(EnableAt.GameInitEnd) {
+      AlloyFurnaceRecipes.addRecipe {
+        inputs += oredict("waferSilicon")
+        inputs += oredict("dustNikolite", count = 4)
+
+        output = stack(ItemComponent, meta = 19)
+      }
+    }
+  }
+
+  val RedAlloy = ItemFeature(20) {
+    depends(AlloyFurnace)
+    oreDict("ingotRedAlloy")
+    action(EnableAt.GameInitEnd) {
+      AlloyFurnaceRecipes.addRecipe {
+        inputs += oredict("dustRedstone", count = 4)
+        inputs += oredict("ingotCopper")
+
+        output = stack(ItemComponent, meta = 20)
+      }
+      AlloyFurnaceRecipes.addRecipe {
+        inputs += oredict("dustRedstone", count = 4)
+        inputs += oredict("ingotIron")
+
+        output = stack(ItemComponent, meta = 20)
+      }
+    }
+  }
+
+  val BlueAlloy = ItemFeature(21) {
+    depends(AlloyFurnace, Nikolite)
+    oreDict("ingotBlueAlloy")
+    action(EnableAt.GameInitEnd) {
+      AlloyFurnaceRecipes.addRecipe {
+        inputs += oredict("dustNikolite", count = 4)
+        inputs += oredict("ingotSilver")
+
+        output = stack(ItemComponent, meta = 21)
+      }
+    }
+  }
+
+  val Brass = ItemFeature(22) {
+    depends(AlloyFurnace)
+    oreDict("ingotBrass")
+    action(EnableAt.GameInitEnd) {
+      AlloyFurnaceRecipes.addRecipe {
+        inputs += oredict("ingotTin")
+        inputs += oredict("ingotCopper", count = 3)
+
+        output = stack(ItemComponent, count = 4)
+      }
+    }
+  }
+
   val Nikolite = ItemFeature(23) { depends(NikoliteOre); oreDict("dustNikolite", "dyeCyan") }
 
   val CopperWire = ItemFeature(24) { depends(Drawplate) }

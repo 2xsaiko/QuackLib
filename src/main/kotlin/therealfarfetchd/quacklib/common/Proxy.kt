@@ -41,7 +41,6 @@ import therealfarfetchd.quacklib.common.item.ItemComponent
  * Created by marco on 16.07.17.
  */
 open class Proxy {
-
   private lateinit var asmData: ASMDataTable
 
   open fun preInit(e: FMLPreInitializationEvent) {
@@ -89,6 +88,7 @@ open class Proxy {
   open fun init(e: FMLInitializationEvent) {}
 
   open fun postInit(e: FMLPostInitializationEvent) {
+    FeatureManager.enabledFeatures.forEach { it.onGameInit() }
     FeatureManager.printFeatureList()
     FeatureManager.checkFeatures()
     FeatureManager.lockFeatures()
@@ -135,6 +135,7 @@ open class Proxy {
     QBContainer.savedWorld = null
     QBContainer.savedPos = null
     QBContainer.savedNbt = null
+    QBContainer.brokenQBlock = emptyMap()
   }
 
   @SubscribeEvent
@@ -142,11 +143,11 @@ open class Proxy {
     QBContainer.savedWorld = null
     QBContainer.savedPos = null
     QBContainer.savedNbt = null
+    QBContainer.brokenQBlock = emptyMap()
   }
 
   @SubscribeEvent
   fun worldTick(e: TickEvent.WorldTickEvent) {
     if (e.side.isServer) Scheduler.tick()
   }
-
 }

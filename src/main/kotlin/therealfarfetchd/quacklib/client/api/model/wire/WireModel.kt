@@ -1,4 +1,4 @@
-package therealfarfetchd.quacklib.client.api.render.wires
+package therealfarfetchd.quacklib.client.api.model.wire
 
 import net.minecraft.client.renderer.block.model.BakedQuad
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
@@ -12,6 +12,8 @@ import therealfarfetchd.quacklib.client.api.model.IIconRegister
 import therealfarfetchd.quacklib.client.api.model.IModel
 import therealfarfetchd.quacklib.client.api.render.Quad
 import therealfarfetchd.quacklib.client.api.render.QuadFactory
+import therealfarfetchd.quacklib.client.api.render.wires.EnumWireRender
+import therealfarfetchd.quacklib.client.api.render.wires.TransformRules
 import therealfarfetchd.quacklib.common.api.extensions.get
 import therealfarfetchd.quacklib.common.api.extensions.mapIf
 import therealfarfetchd.quacklib.common.api.extensions.packInt
@@ -23,7 +25,7 @@ import therealfarfetchd.quacklib.common.api.wires.EnumWireConnection
 import therealfarfetchd.quacklib.common.api.wires.EnumWireConnection.External
 import therealfarfetchd.quacklib.common.api.wires.EnumWireConnection.None
 
-open class WireBakery(
+open class WireModel(
   private val cableWidth: Float,
   private val cableHeight: Float,
   textureSize: Float,
@@ -37,10 +39,8 @@ open class WireBakery(
   private val scaleFactor: Float = textureSize / 16F
 
   private var textures: Map<ResourceLocation, TextureAtlasSprite> = emptyMap()
-  private lateinit var texture: TextureAtlasSprite
 
-  override val particleTexture: TextureAtlasSprite
-    get() = texture
+  override lateinit var particleTexture: TextureAtlasSprite
 
   // texture positions
   private val arm1TopUv = Vec2(0.0F, 0.0F)
@@ -80,51 +80,53 @@ open class WireBakery(
   constructor(cableWidth: Float, cableHeight: Float, textureSize: Float, texLocation: ResourceLocation) : this(cableWidth, cableHeight, textureSize, listOf(texLocation), { texLocation }, { texLocation })
 
   override fun bakeQuads(face: EnumFacing?, state: IExtendedBlockState): List<BakedQuad> {
-    texture = textures[texLocationRetriever(state)]!!
+    val texture = textures[texLocationRetriever(state)]!!
+    particleTexture = texture
 
     val c = (state.getValue(BlockWire.PropConnections) ?: emptyList()).toTypedArray()
     val side = state.getValue(BlockWire.PropFacing)
 
     if (face !in listOf(null, side)) return emptyList()
 
-    return if (face == null) mkQuads(side, *c).map(Quad::bake)
+    return if (face == null) mkQuads(texture, side, *c).map(Quad::bake)
     else emptyList() // TODO render bottom of wire
   }
 
   override fun bakeItemQuads(face: EnumFacing?, stack: ItemStack): List<BakedQuad> {
-    texture = textures[itemTexLocationRetriever(stack)]!!
+    val texture = textures[itemTexLocationRetriever(stack)]!!
+    particleTexture = texture
 
     if (face != null) return emptyList()
 
-    return mkQuads(DOWN, External, External, External, External).map { it.translate(Vec3(0F, 0.275F, 0F)) }.map(Quad::bake)
+    return mkQuads(texture, DOWN, External, External, External, External).map { it.translate(Vec3(0F, 0.275F, 0F)) }.map(Quad::bake)
   }
 
-  private fun mkQuads(side: EnumFacing, vararg c: EnumWireConnection): List<Quad> {
+  private fun mkQuads(texture: TextureAtlasSprite, side: EnumFacing, vararg c: EnumWireConnection): List<Quad> {
     var quads: List<Quad> = emptyList()
     val crossing = c.withIndex()
       .map { it.value to c[(it.index + 1) % c.size] }
       .any { it.first.renderType != EnumWireRender.Invisible && it.second.renderType != EnumWireRender.Invisible }
     if (c.all { it == EnumWireConnection.None }) {
-      quads += mkCenter(side, None, External, None, External)
+      quads += mkCenter(texture, side, None, External, None, External)
       var b = false
       for (facing in BlockWire.lookupMap[side]!!) {
-        quads += mkUnconnectedExt(EnumEdge.fromFaces(side, facing), b)
+        quads += mkUnconnectedExt(texture, EnumEdge.fromFaces(side, facing), b)
         b = !b
       }
     } else for ((i, c1) in c.withIndex()) {
       val edge = EnumEdge.fromFaces(side, BlockWire.lookupMap[side]!![i])
-      quads += mkCenter(side, *c)
+      quads += mkCenter(texture, side, *c)
       quads += when (c1) {
-        EnumWireConnection.None -> mkUnconnectedExt(edge, !crossing && c[(i + 2) % 4] != EnumWireConnection.None)
-        EnumWireConnection.External -> mkNormalExt(edge)
-        EnumWireConnection.Internal -> mkICornerExt(edge)
-        EnumWireConnection.Corner -> mkCornerExt(edge)
+        EnumWireConnection.None -> mkUnconnectedExt(texture, edge, !crossing && c[(i + 2) % 4] != EnumWireConnection.None)
+        EnumWireConnection.External -> mkNormalExt(texture, edge)
+        EnumWireConnection.Internal -> mkICornerExt(texture, edge)
+        EnumWireConnection.Corner -> mkCornerExt(texture, edge)
       }
     }
     return quads
   }
 
-  private fun mkCenter(side: EnumFacing, vararg c: EnumWireConnection): List<Quad> {
+  private fun mkCenter(texture: TextureAtlasSprite, side: EnumFacing, vararg c: EnumWireConnection): List<Quad> {
     val crossing = c.withIndex()
       .map { it.value to c[(it.index + 1) % c.size] }
       .any { it.first.renderType != EnumWireRender.Invisible && it.second.renderType != EnumWireRender.Invisible }
@@ -143,12 +145,12 @@ open class WireBakery(
     }
   }
 
-  private fun mkUnconnectedExt(edge: EnumEdge, extendEnd: Boolean): List<Quad> {
+  private fun mkUnconnectedExt(texture: TextureAtlasSprite, edge: EnumEdge, extendEnd: Boolean): List<Quad> {
     val rule = TransformRules.getRule(edge)
-    return mkUnconnectedExt(edge, rule.useAlt, rule.useAltForBase, extendEnd).map(rule.op)
+    return mkUnconnectedExt(texture, edge, rule.useAlt, rule.useAltForBase, extendEnd).map(rule.op)
   }
 
-  private fun mkUnconnectedExt(edge: EnumEdge, alt: Boolean, altBase: Boolean, extendEnd: Boolean): List<Quad> {
+  private fun mkUnconnectedExt(texture: TextureAtlasSprite, edge: EnumEdge, alt: Boolean, altBase: Boolean, extendEnd: Boolean): List<Quad> {
     if (!extendEnd) {
       val front = listOf(centerSide1Uv, centerSide2Uv)[packInt(altBase)]
       val rules = TransformRules.getRule(edge)
@@ -171,12 +173,12 @@ open class WireBakery(
     }
   }
 
-  private fun mkNormalExt(edge: EnumEdge): List<Quad> {
+  private fun mkNormalExt(texture: TextureAtlasSprite, edge: EnumEdge): List<Quad> {
     val rule = TransformRules.getRule(edge)
-    return mkNormalExt(rule.useAlt).map(rule.op)
+    return mkNormalExt(texture, rule.useAlt).map(rule.op)
   }
 
-  private fun mkNormalExt(alt: Boolean): List<Quad> {
+  private fun mkNormalExt(texture: TextureAtlasSprite, alt: Boolean): List<Quad> {
     val key = packInt(false, alt)
     val key2 = key shr 1
     val list = listOf(arm1Side1Uv, arm1Side2Uv, arm2Side1Uv, arm2Side2Uv)
@@ -193,12 +195,12 @@ open class WireBakery(
     )
   }
 
-  private fun mkCornerExt(edge: EnumEdge): List<Quad> {
+  private fun mkCornerExt(texture: TextureAtlasSprite, edge: EnumEdge): List<Quad> {
     val rule = TransformRules.getRule(edge)
-    return mkCornerExt(rule.useAlt).map(rule.op)
+    return mkCornerExt(texture, rule.useAlt).map(rule.op)
   }
 
-  private fun mkCornerExt(alt: Boolean): List<Quad> {
+  private fun mkCornerExt(texture: TextureAtlasSprite, alt: Boolean): List<Quad> {
     val key = packInt(false, alt)
     val key2 = key shr 1
     val list = listOf(arm1Side1Uv, arm1Side2Uv, arm2Side1Uv, arm2Side2Uv)
@@ -224,12 +226,12 @@ open class WireBakery(
     )
   }
 
-  private fun mkICornerExt(edge: EnumEdge): List<Quad> {
+  private fun mkICornerExt(texture: TextureAtlasSprite, edge: EnumEdge): List<Quad> {
     val rule = TransformRules.getRule(edge)
-    return mkICornerExt(rule.useAlt).map(rule.op)
+    return mkICornerExt(texture, rule.useAlt).map(rule.op)
   }
 
-  private fun mkICornerExt(alt: Boolean): List<Quad> {
+  private fun mkICornerExt(texture: TextureAtlasSprite, alt: Boolean): List<Quad> {
     val key = packInt(false, alt)
     val key2 = key shr 1
     val list = listOf(innerArm1Side1Uv, innerArm1Side2Uv, innerArm2Side1Uv, innerArm2Side2Uv)

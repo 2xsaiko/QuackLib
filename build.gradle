@@ -43,10 +43,19 @@ repositories {
 }
 
 dependencies {
-    deobfCompile "MCMultiPart2:MCMultiPart-exp:2.3.4_49"
-    deobfCompile "mezz.jei:jei_1.12:4.7.1.71"
-    compile 'com.elytradev:mirage:2.0.1-SNAPSHOT'
+    compile projectOrMvn(":mcmultipart", "MCMultiPart2:MCMultiPart-exp:2.3.4_49")
+    deobfCompile "mezz.jei:jei_1.12.2:4.8.0.110"
+    compile "com.elytradev:mirage:2.0.1-SNAPSHOT"
     compile group: "net.shadowfacts", name: "Forgelin", version: "1.5.1"
+}
+
+def projectOrMvn(String project, String artifact) {
+    Project p = findProject(project)
+    if (p != null)
+        dependencies { compile p }
+    else
+        dependencies { deobfCompile artifact }
+    []
 }
 
 processResources {

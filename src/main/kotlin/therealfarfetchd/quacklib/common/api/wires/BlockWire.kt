@@ -19,9 +19,11 @@ import net.minecraft.world.IBlockAccess
 import net.minecraftforge.common.capabilities.Capability
 import net.minecraftforge.common.property.IExtendedBlockState
 import net.minecraftforge.common.property.IUnlistedProperty
+import therealfarfetchd.quacklib.client.api.render.wires.EnumWireRender
 import therealfarfetchd.quacklib.common.api.block.capability.Capabilities
 import therealfarfetchd.quacklib.common.api.block.capability.WireConnectable
 import therealfarfetchd.quacklib.common.api.extensions.rotate
+import therealfarfetchd.quacklib.common.api.extensions.rotateY
 import therealfarfetchd.quacklib.common.api.qblock.IQBlockMultipart
 import therealfarfetchd.quacklib.common.api.qblock.QBlockConnectable
 import therealfarfetchd.quacklib.common.api.util.DataTarget
@@ -33,6 +35,8 @@ abstract class BlockWire<out T>(width: Double, height: Double) : QBlockConnectab
   val baseBounds = AxisAlignedBB(0.0, 0.0, 0.0, 1.0, height, 1.0)
   val partBounds = AxisAlignedBB((1 - width) / 2, 0.0, (1 - width) / 2, 1 - (1 - width) / 2, height, 1 - (1 - width) / 2)
   val edgeBounds = AxisAlignedBB(-height, 0.0, (1 - width) / 2, 0.0, height, 1 - (1 - width) / 2)
+  val extBounds = AxisAlignedBB(0.0, 0.0, (1 - width) / 2, (1 - width) / 2, height, 1 - (1 - width) / 2)
+  val extNBounds = AxisAlignedBB(0.25, 0.0, (1 - width) / 2, (1 - width) / 2, height, 1 - (1 - width) / 2)
 
   @Suppress("LeakingThis")
   private val connectable = WireConnectable(this)
@@ -57,6 +61,11 @@ abstract class BlockWire<out T>(width: Double, height: Double) : QBlockConnectab
 
   private fun mapConnection(sideIn: Int): EnumWireConnection {
     val el = lookupMap[facing]!![sideIn]
+    return connections[EnumFaceLocation.fromFaces(el, facing)] ?: EnumWireConnection.None
+  }
+
+  private fun mapConnection2(sideIn: Int): EnumWireConnection {
+    val el = lookupMap2[facing]!![sideIn]
     return connections[EnumFaceLocation.fromFaces(el, facing)] ?: EnumWireConnection.None
   }
 
@@ -90,8 +99,20 @@ abstract class BlockWire<out T>(width: Double, height: Double) : QBlockConnectab
 
   override fun blockStrength(player: EntityPlayer): Float = 1f / hardness / 30f
 
-  override val selectionBox: AxisAlignedBB
-    get() = baseBounds.rotate(facing)
+  override val selectionBox: Set<AxisAlignedBB>
+    get() {
+      var set = listOf(partBounds)
+      val ext = (0..3).filter { mapConnection2(it).renderType != EnumWireRender.Invisible }
+      for (i in ext)
+        set += extBounds.rotateY(EnumFacing.getHorizontal(i))
+      if (ext.size == 1) {
+        set += extNBounds.rotateY(getHorizontal((ext.first() + 2) % 4))
+      } else if (ext.isEmpty()) {
+        set += extNBounds.rotateY(NORTH)
+        set += extNBounds.rotateY(SOUTH)
+      }
+      return set.map { it.rotate(facing) }.toSet()
+    }
 
   override val partPlacementBoundingBox: AxisAlignedBB?
     get() = partBounds.rotate(facing)
@@ -110,6 +131,9 @@ abstract class BlockWire<out T>(width: Double, height: Double) : QBlockConnectab
 
   override val validEdges: Set<EnumFaceLocation>
     get() = validSides[facing]!!.map { EnumFaceLocation.fromFaces(it, facing) }.toSet()
+
+  override val rayCollisionBox: AxisAlignedBB?
+    get() = baseBounds.rotate(facing)
 
   override fun getPartSlot(): IPartSlot = EnumFaceSlot.fromFace(facing)
   override fun rotateBlock(axis: EnumFacing): Boolean = false
@@ -141,6 +165,17 @@ abstract class BlockWire<out T>(width: Double, height: Double) : QBlockConnectab
       SOUTH to listOf(DOWN, EAST, UP, WEST),
       WEST to listOf(DOWN, NORTH, UP, SOUTH),
       EAST to listOf(DOWN, NORTH, UP, SOUTH)
+    )
+
+    // Used to determine outline bounding boxes. (why does this have to be so stupid)
+
+    val lookupMap2 = mapOf(
+      DOWN to listOf(EAST, SOUTH, WEST, NORTH),
+      UP to listOf(EAST, SOUTH, WEST, NORTH),
+      NORTH to listOf(EAST, UP, WEST, DOWN),
+      SOUTH to listOf(WEST, UP, EAST, DOWN),
+      WEST to listOf(NORTH, UP, SOUTH, DOWN),
+      EAST to listOf(SOUTH, UP, NORTH, DOWN)
     )
   }
 }

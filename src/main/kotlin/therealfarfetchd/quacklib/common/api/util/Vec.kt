@@ -3,14 +3,19 @@ package therealfarfetchd.quacklib.common.api.util
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumFacing.Axis.*
 import net.minecraft.util.math.MathHelper
+import net.minecraft.util.math.Vec3d
 
 data class Vec3(val x: Float, val y: Float, val z: Float) {
-  operator fun plus(other: Vec3): Vec3 = Vec3(x + other.x, y + other.y, z + other.z)
-  operator fun minus(other: Vec3): Vec3 = Vec3(x - other.x, y - other.y, z - other.z)
-  operator fun times(f: Float): Vec3 = Vec3(x * f, y * f, z * f)
-  operator fun times(other: Vec3): Vec3 = Vec3(x * other.x, y * other.y, z * other.z)
-  operator fun div(f: Float): Vec3 = Vec3(x / f, y / f, z / f)
-  operator fun div(other: Vec3): Vec3 = Vec3(x / other.x, y / other.y, z / other.z)
+  constructor(x: Double, y: Double, z: Double) : this(x.toFloat(), y.toFloat(), z.toFloat())
+
+  operator fun plus(other: Vec3) = Vec3(x + other.x, y + other.y, z + other.z)
+  operator fun minus(other: Vec3) = Vec3(x - other.x, y - other.y, z - other.z)
+  operator fun times(f: Float) = Vec3(x * f, y * f, z * f)
+  operator fun times(other: Vec3) = Vec3(x * other.x, y * other.y, z * other.z)
+  operator fun div(f: Float) = Vec3(x / f, y / f, z / f)
+  operator fun div(other: Vec3) = Vec3(x / other.x, y / other.y, z / other.z)
+
+  operator fun unaryMinus() = Vec3(-x, -y, -z)
 
   val length by lazy { MathHelper.sqrt(x * x + y * y + z * z) }
 
@@ -39,19 +44,26 @@ data class Vec3(val x: Float, val y: Float, val z: Float) {
     return Vec3(cx, cy, cz)
   }
 
-  fun normalize(): Vec3 = this / length
+  fun normalize() = this / length
+
+  fun toVec3d() = Vec3d(x.toDouble(), y.toDouble(), z.toDouble())
 }
 
 data class Vec2(val x: Float, val y: Float) {
-  operator fun plus(other: Vec2): Vec2 = Vec2(x + other.x, y + other.y)
-  operator fun minus(other: Vec2): Vec2 = Vec2(x - other.x, y - other.y)
-  operator fun div(other: Vec2): Vec2 = Vec2(x / other.x, y / other.y)
-  operator fun times(other: Vec2): Vec2 = Vec2(x * other.x, y * other.y)
+  operator fun plus(other: Vec2) = Vec2(x + other.x, y + other.y)
+  operator fun minus(other: Vec2) = Vec2(x - other.x, y - other.y)
+  operator fun div(other: Vec2) = Vec2(x / other.x, y / other.y)
+  operator fun times(other: Vec2) = Vec2(x * other.x, y * other.y)
 
-  operator fun plus(other: Float): Vec2 = Vec2(x + other, y + other)
-  operator fun minus(other: Float): Vec2 = Vec2(x + other, y + other)
-  operator fun div(other: Float): Vec2 = Vec2(x / other, y / other)
-  operator fun times(other: Float): Vec2 = Vec2(x * other, y * other)
+  operator fun plus(other: Float) = Vec2(x + other, y + other)
+  operator fun minus(other: Float) = Vec2(x + other, y + other)
+  operator fun div(other: Float) = Vec2(x / other, y / other)
+  operator fun times(other: Float) = Vec2(x * other, y * other)
+
+  operator fun plus(other: Int) = Vec2(x + other, y + other)
+  operator fun minus(other: Int) = Vec2(x + other, y + other)
+  operator fun div(other: Int) = Vec2(x / other, y / other)
+  operator fun times(other: Int) = Vec2(x * other, y * other)
 
   fun rotate(a: Float, center: Vec2): Vec2 {
     return if (a == 0.0F || center == this) this.copy()

@@ -53,7 +53,11 @@ open class Feature(open val name: String, private val op: FeatureProperties.() -
   open fun onActivate() {
     if (QuackLib.debug)
       QuackLib.Logger.info("Enabled feature $name.")
-    FeatureProperties().also(op).action()
+    FeatureProperties().also(op).action[EnableAt.FeatureEnable]?.invoke()
+  }
+
+  open fun onGameInit() {
+    FeatureProperties().also(op).action[EnableAt.GameInitEnd]?.invoke()
   }
 }
 
@@ -78,7 +82,12 @@ class ItemFeature(val meta: Int, name: String = "item $meta", private val op: Fe
 
   override fun onActivate() {
     super.onActivate()
-    FeaturePropertiesItem().also(op).action()
+    FeaturePropertiesItem().also(op).action[EnableAt.FeatureEnable]?.invoke()
+  }
+
+  override fun onGameInit() {
+    super.onGameInit()
+    FeaturePropertiesItem().also(op).action[EnableAt.GameInitEnd]?.invoke()
   }
 }
 

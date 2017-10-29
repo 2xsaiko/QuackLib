@@ -1,4 +1,4 @@
-package therealfarfetchd.quacklib.client.api.render.wires
+package therealfarfetchd.quacklib.client.api.model.wire
 
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.client.renderer.texture.TextureMap
@@ -12,7 +12,7 @@ import therealfarfetchd.quacklib.client.api.model.SimpleModel
 import therealfarfetchd.quacklib.common.api.util.Vec2
 import therealfarfetchd.quacklib.common.api.wires.BlockWireCentered
 
-class CenteredWireBakery(val textureLocation: ResourceLocation, val textureSize: Float, val width: Float) : SimpleModel(), IIconRegister {
+class CenteredWireModel(val textureLocation: ResourceLocation, val textureSize: Float, val width: Float) : SimpleModel(), IIconRegister {
   private val radius = width / 2
   private val scaleFactor: Float = textureSize / 16F
   private val rmin = 0.5 - radius / scaleFactor
