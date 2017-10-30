@@ -140,6 +140,8 @@ interface IBlockDefinition : ICommonItemDef {
             block.setCreativeTabFromName(d.annotationInfo["creativeTab"] as? String)
             block.unlocalizedName = block.registryName.toString()
 
+            item?.also { it.registryName = block.registryName }
+
             QuackLib.Logger.info(" -> Item?: ${if (item != null) "Yes" else "No"}")
             QuackLib.Logger.info(" -> Multipart?: not supported yet")
             for (warning in warnings) {

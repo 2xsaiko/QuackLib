@@ -31,7 +31,6 @@ import therealfarfetchd.quacklib.common.api.extensions.minus
 import therealfarfetchd.quacklib.common.api.extensions.plus
 import therealfarfetchd.quacklib.common.api.util.ClientServerSeparateData
 import therealfarfetchd.quacklib.common.api.util.DataTarget
-import therealfarfetchd.quacklib.common.api.util.DummyUnlistedProperty
 import therealfarfetchd.quacklib.common.api.util.QNBTCompound
 import java.util.*
 
@@ -70,9 +69,10 @@ open class QBContainer(factory: () -> QBlock) : Block(factory.also { tempFactory
 
   override fun createBlockState(): BlockStateContainer {
     val qb = factory()
-    var unlistedProps = qb.unlistedProperties
-    if (unlistedProps.isEmpty()) unlistedProps += DummyUnlistedProperty
-    return ExtendedBlockState(this, qb.properties.toTypedArray(), unlistedProps.toTypedArray())
+    return when {
+      qb.unlistedProperties.isEmpty() -> BlockStateContainer(this, *qb.properties.toTypedArray())
+      else -> ExtendedBlockState(this, qb.properties.toTypedArray(), qb.unlistedProperties.toTypedArray())
+    }
   }
 
   override fun canRenderInLayer(state: IBlockState?, layer: BlockRenderLayer) = _canRenderInLayer(layer)

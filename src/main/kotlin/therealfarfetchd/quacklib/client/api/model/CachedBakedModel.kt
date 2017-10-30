@@ -12,15 +12,14 @@ import net.minecraft.init.Blocks
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraft.world.World
-import net.minecraftforge.common.property.IExtendedBlockState
 
 class CachedBakedModel(private val bakery: IModel) : IBakedModel {
   override fun getParticleTexture(): TextureAtlasSprite = bakery.particleTexture
 
   override fun getQuads(state: IBlockState?, side: EnumFacing?, rand: Long): List<BakedQuad> {
-    if (state !is IExtendedBlockState) return emptyList()
-    val key = bakery.createKey(state, side)
-    return models[key] ?: bakery.bakeQuads(side, state).also { models += key to it }
+    val s = state?.wrapIfNeeded() ?: return emptyList()
+    val key = bakery.createKey(s, side)
+    return models[key] ?: bakery.bakeQuads(side, s).also { models += key to it }
   }
 
   override fun getItemCameraTransforms(): ItemCameraTransforms = blockItemCameraTransforms
@@ -33,7 +32,8 @@ class CachedBakedModel(private val bakery: IModel) : IBakedModel {
 
   override fun getOverrides(): ItemOverrideList {
     return object : ItemOverrideList(emptyList()) {
-      override fun handleItemState(originalModel: IBakedModel?, stack: ItemStack, world: World?, entity: EntityLivingBase?): IBakedModel = itemModel.apply { this.stack = stack }
+      override fun handleItemState(originalModel: IBakedModel?, stack: ItemStack, world: World?, entity: EntityLivingBase?) =
+        itemModel.apply { this.stack = stack }
     }
   }
 

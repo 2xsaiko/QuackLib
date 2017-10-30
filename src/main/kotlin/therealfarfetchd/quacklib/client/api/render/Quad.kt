@@ -5,11 +5,16 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.util.EnumFacing
 import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad
+import therealfarfetchd.quacklib.client.RGBA
 import therealfarfetchd.quacklib.common.api.util.Vec2
 import therealfarfetchd.quacklib.common.api.util.Vec3
 
-data class Quad(val texture: TextureAtlasSprite, val vert1: Vec3, val vert2: Vec3, val vert3: Vec3, val vert4: Vec3, val tex1: Vec2, val tex2: Vec2, val tex3: Vec2, val tex4: Vec2) {
-
+data class Quad(
+  val texture: TextureAtlasSprite,
+  val vert1: Vec3, val vert2: Vec3, val vert3: Vec3, val vert4: Vec3,
+  val tex1: Vec2, val tex2: Vec2, val tex3: Vec2, val tex4: Vec2,
+  val color: RGBA
+) {
   val normal by lazy { ((vert2 - vert1) crossProduct (vert3 - vert1)).normalize() }
 
   val facing: EnumFacing by lazy { EnumFacing.getFacingFromVector(normal.x, normal.y, normal.z) }
@@ -23,12 +28,17 @@ data class Quad(val texture: TextureAtlasSprite, val vert1: Vec3, val vert2: Vec
     val builder = UnpackedBakedQuad.Builder(DefaultVertexFormats.ITEM)
     builder.setApplyDiffuseLighting(true)
     builder.setQuadOrientation(facing)
+
     builder.setQuadTint(-1)
     builder.setTexture(texture)
 
     for ((xyz, uv) in vertices) {
       builder.put(0, xyz.x, xyz.y, xyz.z, 1f)
-      builder.put(1, 1f, 1f, 1f, 1f)
+      builder.put(1,
+        maxOf(0f, minOf(color.first, 1f)),
+        maxOf(0f, minOf(color.second, 1f)),
+        maxOf(0f, minOf(color.third, 1f)),
+        maxOf(0f, minOf(color.fourth, 1f)))
       builder.put(2, uv.x, uv.y, 0f, 1f)
       builder.put(3, normal.x, normal.y, normal.z, 0f)
       builder.put(4)
@@ -36,6 +46,8 @@ data class Quad(val texture: TextureAtlasSprite, val vert1: Vec3, val vert2: Vec
 
     return builder.build()
   }
+
+  private fun ftoi(float: Float) = (float * 255).toInt()
 
   private fun shuf(i: Int): Pair<Vec3, Vec2> {
     return when (i) {
@@ -54,7 +66,7 @@ data class Quad(val texture: TextureAtlasSprite, val vert1: Vec3, val vert2: Vec
    */
 
   fun translate(vec: Vec3): Quad {
-    return Quad(texture, vert1 + vec, vert2 + vec, vert3 + vec, vert4 + vec, tex1, tex2, tex3, tex4)
+    return Quad(texture, vert1 + vec, vert2 + vec, vert3 + vec, vert4 + vec, tex1, tex2, tex3, tex4, color)
   }
 
   /**
@@ -69,7 +81,7 @@ data class Quad(val texture: TextureAtlasSprite, val vert1: Vec3, val vert2: Vec
     return if (a == 0.0F) this.copy()
     else {
       val r = listOf(vert1, vert2, vert3, vert4).map { it.rotate(a, axis, Vec3(0.5f, 0.5f, 0.5f)) }
-      Quad(texture, r[0], r[1], r[2], r[3], tex1, tex2, tex3, tex4)
+      Quad(texture, r[0], r[1], r[2], r[3], tex1, tex2, tex3, tex4, color)
     }
   }
 

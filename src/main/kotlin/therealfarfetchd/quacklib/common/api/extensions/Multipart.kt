@@ -12,9 +12,11 @@ fun TileMultipartContainer.canConnectRedstone(side: EnumFacing, filter: (IPartIn
     Function { it.any { it } }, false, true, side.opposite) ?: false
 
 fun TileMultipartContainer.getWeakPower(side: EnumFacing, filter: (IPartInfo) -> Boolean = { true }) =
-  SlotUtil.viewContainer<IPartInfo, Int>(this, Function { i -> i.part.getWeakPower((i as PartInfo).wrapAsNeeded(world), pos, i, side).takeIf { filter(i) } },
+  SlotUtil.viewContainer<IPartInfo, Int>(this,
+    Function { i -> i.part.getWeakPower((i as PartInfo).wrapAsNeeded(world), pos, i, side).takeIf { filter(i) } ?: 0 },
     Function { l -> l.max() ?: 0 }, 0, true, side.opposite) ?: 0
 
 fun TileMultipartContainer.getStrongPower(side: EnumFacing, filter: (IPartInfo) -> Boolean = { true }) =
-  SlotUtil.viewContainer<IPartInfo, Int>(this, Function { i -> i.part.getStrongPower((i as PartInfo).wrapAsNeeded(world), pos, i, side).takeIf { filter(i) } },
+  SlotUtil.viewContainer<IPartInfo, Int>(this,
+    Function { i -> i.part.getStrongPower((i as PartInfo).wrapAsNeeded(world), pos, i, side).takeIf { filter(i) } ?: 0 },
     Function { l -> l.max() ?: 0 }, 0, true, side.opposite) ?: 0

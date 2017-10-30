@@ -13,7 +13,9 @@ interface IModel {
 
   fun bakeItemQuads(face: EnumFacing?, stack: ItemStack): List<BakedQuad>
 
-  fun createKey(state: IExtendedBlockState, face: EnumFacing?): String = "$face@${state.clean}@"
+  fun getParticleTexture(state: IExtendedBlockState): TextureAtlasSprite = particleTexture
+
+  fun createKey(state: IExtendedBlockState, face: EnumFacing?): String = "$face@${state.block.registryName}@${state.clean}@"
 
   fun createKey(stack: ItemStack, face: EnumFacing?): String = "$face@${stack.item.registryName}:${stack.metadata}@"
 }

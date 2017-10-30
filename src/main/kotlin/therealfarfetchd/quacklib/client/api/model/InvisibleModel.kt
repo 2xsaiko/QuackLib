@@ -7,7 +7,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraftforge.common.property.IExtendedBlockState
 
-object InvisibleModelBakery : IModel {
+object InvisibleModel : IModel {
   override val particleTexture: TextureAtlasSprite
     get() = Minecraft.getMinecraft().textureMapBlocks.missingSprite
 

@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.ResourceLocation
+import therealfarfetchd.quacklib.client.RGBA
 import therealfarfetchd.quacklib.common.api.util.Vec2
 import therealfarfetchd.quacklib.common.api.util.Vec3
 
@@ -24,7 +25,7 @@ object QuadFactory {
 
     val fv = facing.directionVec
 
-    return Quad(texture, Vec3(x, y, z), vec2, Vec3(x1, y1, z1), vec4, Vec2(u, v), Vec2(u, v1), Vec2(u1, v1), Vec2(u1, v))
+    return Quad(texture, Vec3(x, y, z), vec2, Vec3(x1, y1, z1), vec4, Vec2(u, v), Vec2(u, v1), Vec2(u1, v1), Vec2(u1, v), RGBA(1f, 1f, 1f, 1f))
   }
 
   fun makeQuad(x: Float, y: Float, z: Float, x1: Float, y1: Float, z1: Float, facing: EnumFacing, u: Float, v: Float, u1: Float, v1: Float, texture: ResourceLocation): Quad {

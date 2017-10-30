@@ -169,37 +169,48 @@ class BoxTemplate : IQuadFactory {
   var up: TextureTemplate? = null
     set(value) {
       field = if (value == null || !value.auto) value
-      else TextureTemplate(value.texture, Vec2(minOf(min.x, max.x), minOf(min.z, max.z)), Vec2(maxOf(min.x, max.x), maxOf(min.z, max.z)))
+      else TextureTemplate(value.texture, Vec2(minOf(min.x, max.x), minOf(min.z, max.z)), Vec2(maxOf(min.x, max.x), maxOf(min.z, max.z)), postProc = value.postProc)
     }
 
   var down: TextureTemplate? = null
     set(value) {
       field = if (value == null || !value.auto) value
-      else TextureTemplate(value.texture, Vec2(minOf(min.x, max.x), minOf(min.z, max.z)), Vec2(maxOf(min.x, max.x), maxOf(min.z, max.z)))
+      else TextureTemplate(value.texture, Vec2(minOf(min.x, max.x), minOf(min.z, max.z)), Vec2(maxOf(min.x, max.x), maxOf(min.z, max.z)), postProc = value.postProc)
     }
 
   var north: TextureTemplate? = null
     set(value) {
       field = if (value == null || !value.auto) value
-      else TextureTemplate(value.texture, Vec2(minOf(min.x, max.x), 1 - maxOf(min.y, max.y)), Vec2(maxOf(min.x, max.x), 1 - minOf(min.y, max.y)))
+      else TextureTemplate(value.texture, Vec2(minOf(min.x, max.x), 1 - maxOf(min.y, max.y)), Vec2(maxOf(min.x, max.x), 1 - minOf(min.y, max.y)), postProc = value.postProc)
     }
 
   var south: TextureTemplate? = null
     set(value) {
       field = if (value == null || !value.auto) value
-      else TextureTemplate(value.texture, Vec2(minOf(min.x, max.x), 1 - maxOf(min.y, max.y)), Vec2(maxOf(min.x, max.x), 1 - minOf(min.y, max.y)))
+      else TextureTemplate(value.texture, Vec2(minOf(min.x, max.x), 1 - maxOf(min.y, max.y)), Vec2(maxOf(min.x, max.x), 1 - minOf(min.y, max.y)), postProc = value.postProc)
     }
 
   var west: TextureTemplate? = null
     set(value) {
       field = if (value == null || !value.auto) value
-      else TextureTemplate(value.texture, Vec2(minOf(min.z, max.z), 1 - maxOf(min.y, max.y)), Vec2(maxOf(min.z, max.z), 1 - minOf(min.y, max.y)))
+      else TextureTemplate(value.texture, Vec2(minOf(min.z, max.z), 1 - maxOf(min.y, max.y)), Vec2(maxOf(min.z, max.z), 1 - minOf(min.y, max.y)), postProc = value.postProc)
     }
 
   var east: TextureTemplate? = null
     set(value) {
       field = if (value == null || !value.auto) value
-      else TextureTemplate(value.texture, Vec2(minOf(min.z, max.z), 1 - maxOf(min.y, max.y)), Vec2(maxOf(min.z, max.z), 1 - minOf(min.y, max.y)))
+      else TextureTemplate(value.texture, Vec2(minOf(min.z, max.z), 1 - maxOf(min.y, max.y)), Vec2(maxOf(min.z, max.z), 1 - minOf(min.y, max.y)), postProc = value.postProc)
+    }
+
+  var all: TextureTemplate? = null
+    set(value) {
+      down = value
+      up = value
+      north = value
+      south = value
+      east = value
+      west = value
+      field = value
     }
 
   override fun createQuads(facing: EnumFacing?): List<Quad> {

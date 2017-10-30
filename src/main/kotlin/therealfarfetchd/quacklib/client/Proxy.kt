@@ -109,7 +109,7 @@ class Proxy : Proxy() {
       ModelLoader.setCustomModelResourceLocation(BlockAlloyFurnace.Item, 0, ModelResourceLocation(BlockAlloyFurnace.Item.registryName, "inventory"))
     }
 
-    registerModelBakery(BlockMultiblockExtension::class, BlockMultiblockExtension.Block, null, InvisibleModelBakery)
+    registerModelBakery(BlockMultiblockExtension.Block, null, InvisibleModel)
   }
 
   @SubscribeEvent
@@ -200,8 +200,15 @@ class Proxy : Proxy() {
   }
 }
 
+
 @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-fun <T : QBlock> registerModelBakery(qb: KClass<T>, block: Block, item: Item?, bakery: IModel) {
+fun <T : QBlock, B> registerModelBakery(qb: KClass<T>, block: Block, item: Item?, bakery: B) where B : IModel, B : IDynamicModel<T> {
+  registerModelBakery(block, item, bakery)
+  qb.bindSpecialRenderer(DynamicModelRenderer(bakery))
+}
+
+@Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+fun registerModelBakery(block: Block, item: Item?, bakery: IModel) {
   val b = StateMap.Builder()
   b.ignore(*block.defaultState.propertyKeys.toTypedArray())
   val map = b.build()
@@ -218,10 +225,6 @@ fun <T : QBlock> registerModelBakery(qb: KClass<T>, block: Block, item: Item?, b
   }
 
   if (bakery is IIconRegister) bakery.registerIconRegister()
-  if (bakery is IDynamicModel<*>) {
-    @Suppress("UNCHECKED_CAST")
-    qb.bindSpecialRenderer(DynamicModelRenderer(bakery) as DynamicModelRenderer<T>)
-  }
 }
 
 @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
