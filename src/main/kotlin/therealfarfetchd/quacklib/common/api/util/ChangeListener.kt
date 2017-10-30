@@ -1,23 +1,21 @@
 package therealfarfetchd.quacklib.common.api.util
 
-import kotlin.reflect.KProperty0
-
 /**
  * Created by marco on 13.07.17.
  */
-class ChangeListener(vararg values: KProperty0<*>) {
+class ChangeListener(vararg values: () -> Any?) {
 
-  private var properties: Set<KProperty0<*>> = values.toSet()
+  private var properties: Set<() -> Any?> = values.toSet()
 
-  private var map: Map<KProperty0<*>, Any?> = emptyMap()
+  private var map: Map<() -> Any?, Any?> = emptyMap()
 
-  private fun mkMap(): Map<KProperty0<*>, Any?> = map + properties.associate { it to tryCopy(it.get()) }
+  private fun mkMap(): Map<() -> Any?, Any?> = map + properties.associate { it to tryCopy(it()) }
 
-  fun addProperties(vararg values: KProperty0<*>) {
+  fun addProperties(vararg values: () -> Any?) {
     properties += values
   }
 
-  fun removeProperties(vararg values: KProperty0<*>) {
+  fun removeProperties(vararg values: () -> Any?) {
     properties -= values
   }
 

@@ -7,6 +7,15 @@ import kotlin.experimental.or
  * Created by marco on 13.07.17.
  */
 
+fun Float.toIntBits() = java.lang.Float.floatToIntBits(this)
+
+fun Float.toRawIntBits() = java.lang.Float.floatToRawIntBits(this)
+fun Int.toFloatBits() = java.lang.Float.intBitsToFloat(this)
+
+fun Double.toLongBits() = java.lang.Double.doubleToLongBits(this)
+fun Double.toRawLongBits() = java.lang.Double.doubleToRawLongBits(this)
+fun Long.toDoubleBits() = java.lang.Double.longBitsToDouble(this)
+
 fun List<Int>.nibbles(): List<Byte> {
   var list: List<Byte> = emptyList()
   var inList: List<Int> = this
