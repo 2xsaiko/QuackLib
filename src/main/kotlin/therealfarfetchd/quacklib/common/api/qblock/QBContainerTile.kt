@@ -1,7 +1,5 @@
 package therealfarfetchd.quacklib.common.api.qblock
 
-import com.elytradev.mirage.lighting.IColoredLight
-import com.elytradev.mirage.lighting.Light
 import net.minecraft.block.Block
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.network.NetworkManager
@@ -12,7 +10,6 @@ import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import net.minecraftforge.common.capabilities.Capability
-import net.minecraftforge.fml.common.Optional
 import therealfarfetchd.quacklib.common.api.extensions.copyTo
 import therealfarfetchd.quacklib.common.api.extensions.packByte
 import therealfarfetchd.quacklib.common.api.extensions.unpack
@@ -22,8 +19,8 @@ import therealfarfetchd.quacklib.common.api.util.QNBTCompound
 /**
  * Created by marco on 08.07.17.
  */
-@Optional.Interface(iface = "com.elytradev.mirage.lighting.IColoredLight", modid = "mirage")
-open class QBContainerTile() : TileEntity(), IColoredLight {
+//@Optional.Interface(iface = "com.elytradev.mirage.lighting.IColoredLight", modid = "mirage")
+open class QBContainerTile() : TileEntity() { //, IColoredLight {
   private var _qb: QBlock? = null
 
   var qb: QBlock
@@ -54,10 +51,10 @@ open class QBContainerTile() : TileEntity(), IColoredLight {
     qb.pos = pos
   }
 
-  @Optional.Method(modid = "mirage")
-  override fun getColoredLight(): Light? {
-    return (qb as? IQBlockColoredLight)?.getColoredLight()
-  }
+  // @Optional.Method(modid = "mirage")
+  // override fun getColoredLight(): Light? {
+  //   return (qb as? IQBlockColoredLight)?.getColoredLight()
+  // }
 
   override fun writeToNBT(compound: NBTTagCompound): NBTTagCompound {
     val subTag = NBTTagCompound()
@@ -146,5 +143,4 @@ open class QBContainerTile() : TileEntity(), IColoredLight {
       qb = qbIn
     }
   }
-
 }
