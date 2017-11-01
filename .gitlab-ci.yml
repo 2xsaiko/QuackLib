@@ -6,7 +6,7 @@ stages:
 jar:
   stage: build
   script:
-   - ./gradlew build
+   - ./gradlew setupCiWorkspace build
   artifacts:
     paths:
      - build/libs/*
