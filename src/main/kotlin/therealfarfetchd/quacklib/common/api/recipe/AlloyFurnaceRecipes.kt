@@ -5,8 +5,10 @@ import net.minecraft.item.ItemStack
 import therealfarfetchd.quacklib.QuackLib
 import therealfarfetchd.quacklib.common.api.extensions.makeStack
 
+typealias AlloyRecipe = Pair<List<ItemTemplate>, ItemTemplate>
+
 object AlloyFurnaceRecipes {
-  private var recipesList: Set<Pair<List<ItemTemplate>, ItemTemplate>> = emptySet()
+  var recipesList: Set<AlloyRecipe> = emptySet(); private set
 
   fun addRecipe(op: AlloyRecipeTemplate.() -> Unit) {
     val t = AlloyRecipeTemplate().also(op)
@@ -14,7 +16,7 @@ object AlloyFurnaceRecipes {
     else recipesList += t.inputs to t.output
   }
 
-  fun findRecipe(stacksIn: List<ItemStack>): Pair<List<ItemTemplate>, ItemTemplate>? {
+  fun findRecipe(stacksIn: List<ItemStack>): AlloyRecipe? {
     val stacks: List<ItemStack> = {
       var m: Map<Pair<Item, Int>, Int> = emptyMap()
       stacksIn

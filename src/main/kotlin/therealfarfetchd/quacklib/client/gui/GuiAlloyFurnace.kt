@@ -10,7 +10,6 @@ import therealfarfetchd.quacklib.common.api.qblock.IQBlockInventory
 import therealfarfetchd.quacklib.common.block.ContainerAlloyFurnace
 
 class GuiAlloyFurnace(val playerInv: InventoryPlayer, val inventory: IQBlockInventory) : GuiContainer(ContainerAlloyFurnace(playerInv, inventory)) {
-
   val container: ContainerAlloyFurnace = inventorySlots as ContainerAlloyFurnace
 
   val texture = ResourceLocation(ModID, "textures/gui/alloy_furnace.png")
@@ -52,5 +51,4 @@ class GuiAlloyFurnace(val playerInv: InventoryPlayer, val inventory: IQBlockInve
     if (base == 0) return 0
     return (maxOf(0F, minOf(progress / base.toFloat(), 1F)) * size).toInt()
   }
-
 }

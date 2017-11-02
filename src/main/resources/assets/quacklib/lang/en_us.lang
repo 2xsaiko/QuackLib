@@ -35,3 +35,5 @@ tile.quacklib:alloy_furnace.name=Alloy Furnace
 quacklib:container.alloy_furnace=Alloy Furnace
 
 itemGroup.quacklib=QuackLib
+
+recipe.quacklib:alloy_recipe=Alloying
