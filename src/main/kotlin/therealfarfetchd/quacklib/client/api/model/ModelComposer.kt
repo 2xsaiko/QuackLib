@@ -6,6 +6,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraftforge.common.property.IExtendedBlockState
 import therealfarfetchd.quacklib.common.api.qblock.QBlock
+import therealfarfetchd.quacklib.common.api.util.Vec3
 
 sealed class StandardComposedModel(val components: List<IModel>) : IModel {
   override val particleTexture: TextureAtlasSprite
@@ -26,5 +27,5 @@ sealed class StandardComposedModel(val components: List<IModel>) : IModel {
 
 class DynamicComposedModel<in T : QBlock>(components: List<IModel>, val dynComponents: List<IDynamicModel<T>>
 ) : StandardComposedModel(components), IDynamicModel<T> {
-  override fun bakeDynamicQuads(block: T) = dynComponents.flatMap { it.bakeDynamicQuads(block) }
+  override fun bakeDynamicQuads(block: T, playerPos: Vec3) = dynComponents.flatMap { it.bakeDynamicQuads(block, playerPos) }
 }

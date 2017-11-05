@@ -5,6 +5,7 @@ import net.minecraft.client.renderer.block.model.BakedQuad
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
+import net.minecraft.util.math.MathHelper
 import net.minecraftforge.common.property.IExtendedBlockState
 import therealfarfetchd.quacklib.client.api.render.Quad
 import therealfarfetchd.quacklib.client.api.render.QuadFactory
@@ -12,6 +13,7 @@ import therealfarfetchd.quacklib.client.api.render.wires.TransformRules
 import therealfarfetchd.quacklib.common.api.extensions.compose
 import therealfarfetchd.quacklib.common.api.extensions.mapIf
 import therealfarfetchd.quacklib.common.api.extensions.mapWithCopy
+import therealfarfetchd.quacklib.common.api.util.MathUtils
 import therealfarfetchd.quacklib.common.api.util.StringPackedProps
 import therealfarfetchd.quacklib.common.api.util.Vec2
 import therealfarfetchd.quacklib.common.api.util.Vec3
@@ -109,11 +111,31 @@ class ModelBuilder(val face: EnumFacing?) {
   private val identity: (Quad) -> Quad = { it }
   private var trStack: List<(Quad) -> Quad> = listOf(identity)
 
+  private var _playerPos: Vec3 = Vec3(0f, 0f, 0f)
+
+  fun setPlayerPos(vec3: Vec3) {
+    _playerPos = vec3
+  }
+
   var quads: List<Quad> = emptyList(); private set
+
+  val fullbright
+    get() = context.fullbright
 
   operator fun invoke(op: ModelBuilder.Context.() -> Unit) = with(context, op)
 
   class Context(private val builder: ModelBuilder) {
+    /**
+     * Only supported with dynamic models (TESR)
+     */
+    var fullbright = false
+
+    /**
+     * Only supported with dynamic models (TESR)
+     */
+    val playerPos
+      get() = builder._playerPos
+
     fun box(op: BoxTemplate.() -> Unit) {
       val t = BoxTemplate().also(op)
       builder.quads += t.createQuads(builder.face).map(builder.trStack.last())
@@ -121,6 +143,14 @@ class ModelBuilder(val face: EnumFacing?) {
 
     fun face(op: FaceTemplate.() -> Unit) {
       val t = FaceTemplate().also(op)
+      builder.quads += t.createQuads(builder.face).map(builder.trStack.last())
+    }
+
+    /**
+     * Only supported with dynamic models (TESR)
+     */
+    fun sign(op: SignTemplate.() -> Unit) {
+      val t = SignTemplate(playerPos).also(op)
       builder.quads += t.createQuads(builder.face).map(builder.trStack.last())
     }
 
@@ -213,6 +243,24 @@ class BoxTemplate : IQuadFactory {
       field = value
     }
 
+  var sides: TextureTemplate? = null
+    set(value) {
+      north = value
+      south = value
+      east = value
+      west = value
+      field = value
+    }
+
+  var sidesC: TextureTemplate? = null
+    set(value) {
+      north = value?.copy(postProc = { mirrorTextureX })
+      south = value
+      east = value?.copy(postProc = { mirrorTextureX })
+      west = value
+      field = value
+    }
+
   override fun createQuads(facing: EnumFacing?): List<Quad> {
     val minx = minOf(min.x, max.x)
     val miny = minOf(min.y, max.y)
@@ -277,6 +325,37 @@ class FaceTemplate : IQuadFactory {
 
   override fun createQuads(facing: EnumFacing?): List<Quad> {
     TODO("not implemented")
+  }
+}
+
+class SignTemplate(private val playerPos: Vec3) : IQuadFactory {
+  var center = Vec3(0.5f, 0.5f, 0.5f)
+  var dimUp = 0.5f
+  var dimDown = 0.5f
+  var dimLeft = 0.5f
+  var dimRight = 0.5f
+
+  var tex: TextureTemplate? = null
+    set(value) {
+      field = if (value == null || !value.auto) value
+      else TextureTemplate(value.texture, Vec2(0f, 0f), Vec2(1f, 1f), postProc = value.postProc)
+    }
+
+  override fun createQuads(facing: EnumFacing?): List<Quad> {
+    var q = tex?.let {
+      QuadFactory.makeQuad(center.x - dimLeft, center.y - dimDown, center.z, center.x + dimRight, center.y + dimUp, center.z,
+        EnumFacing.SOUTH, it.uv.x, it.uv.y, it.uv1.x, it.uv1.y, it.texture).mirrorTextureY
+    }
+    if (q != null) {
+      val pposFixed = playerPos + Vec3(0.5f, 0.5f, 0.5f)
+      val pitch = MathHelper.atan2(pposFixed.y.toDouble() - Minecraft.getMinecraft().renderViewEntity!!.eyeHeight, MathUtils.getDistance(pposFixed.x, pposFixed.z).toDouble()) * MathUtils.toDegrees
+      val yaw = -90 + MathHelper.atan2(pposFixed.z.toDouble(), pposFixed.x.toDouble()) * MathUtils.toDegrees
+
+      q = q
+        .rotate(EnumFacing.Axis.X, pitch.toFloat(), center)
+        .rotate(EnumFacing.Axis.Y, yaw.toFloat(), center)
+    }
+    return listOf(q).filterNotNull()
   }
 }
 

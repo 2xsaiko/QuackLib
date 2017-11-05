@@ -77,10 +77,10 @@ data class Quad(
    * @return The rotated quad
    */
 
-  fun rotate(axis: EnumFacing.Axis, a: Float): Quad {
+  fun rotate(axis: EnumFacing.Axis, a: Float, center: Vec3 = Vec3(0.5f, 0.5f, 0.5f)): Quad {
     return if (a == 0.0F) this.copy()
     else {
-      val r = listOf(vert1, vert2, vert3, vert4).map { it.rotate(a, axis, Vec3(0.5f, 0.5f, 0.5f)) }
+      val r = listOf(vert1, vert2, vert3, vert4).map { it.rotate(a, axis, center) }
       Quad(texture, r[0], r[1], r[2], r[3], tex1, tex2, tex3, tex4, color)
     }
   }
