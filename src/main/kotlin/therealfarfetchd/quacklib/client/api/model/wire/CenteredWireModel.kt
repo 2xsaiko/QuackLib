@@ -9,7 +9,7 @@ import net.minecraftforge.common.property.IExtendedBlockState
 import therealfarfetchd.quacklib.client.api.model.IIconRegister
 import therealfarfetchd.quacklib.client.api.model.ModelBuilder
 import therealfarfetchd.quacklib.client.api.model.SimpleModel
-import therealfarfetchd.quacklib.common.api.util.Vec2
+import therealfarfetchd.quacklib.common.api.util.vec.Vec2
 import therealfarfetchd.quacklib.common.api.wires.BlockWireCentered
 
 class CenteredWireModel(val textureLocation: ResourceLocation, val textureSize: Float, val width: Float) : SimpleModel(), IIconRegister {

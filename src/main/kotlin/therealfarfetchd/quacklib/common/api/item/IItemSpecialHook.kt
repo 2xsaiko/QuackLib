@@ -11,11 +11,11 @@ interface IItemSpecialHook {
   private val item
     get() = this as Item
 
-  fun getUnlocalizedName(stack: ItemStack): String {
+  fun getUnlocalizedNameH(stack: ItemStack): String {
     return "item.${item.unlocalizedName}"
   }
 
-  fun getSubItems(tab: CreativeTabs, items: NonNullList<ItemStack>) {
+  fun getSubItemsH(tab: CreativeTabs, items: NonNullList<ItemStack>) {
     if (item.isInCreativeTab(tab)) {
       items.add(item.makeStack())
     }

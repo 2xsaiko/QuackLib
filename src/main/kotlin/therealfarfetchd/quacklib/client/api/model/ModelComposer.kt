@@ -6,7 +6,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraftforge.common.property.IExtendedBlockState
 import therealfarfetchd.quacklib.common.api.qblock.QBlock
-import therealfarfetchd.quacklib.common.api.util.Vec3
+import therealfarfetchd.quacklib.common.api.util.vec.Vec3
 
 sealed class StandardComposedModel(val components: List<IModel>) : IModel {
   override val particleTexture: TextureAtlasSprite

@@ -5,8 +5,8 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.ResourceLocation
 import therealfarfetchd.quacklib.client.RGBA
-import therealfarfetchd.quacklib.common.api.util.Vec2
-import therealfarfetchd.quacklib.common.api.util.Vec3
+import therealfarfetchd.quacklib.common.api.util.vec.Vec2
+import therealfarfetchd.quacklib.common.api.util.vec.Vec3
 
 object QuadFactory {
   @Suppress("WHEN_ENUM_CAN_BE_NULL_IN_JAVA")

@@ -49,7 +49,7 @@ import therealfarfetchd.quacklib.common.api.qblock.QBlock
 import therealfarfetchd.quacklib.common.api.util.IBlockDefinition
 import therealfarfetchd.quacklib.common.api.util.IItemDefinition
 import therealfarfetchd.quacklib.common.api.util.Tuple4
-import therealfarfetchd.quacklib.common.api.util.Vec3
+import therealfarfetchd.quacklib.common.api.util.vec.Vec3
 import therealfarfetchd.quacklib.common.block.BlockAlloyFurnace
 import therealfarfetchd.quacklib.common.block.BlockMultiblockExtension
 import therealfarfetchd.quacklib.common.block.BlockNikoliteOre

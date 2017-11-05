@@ -7,7 +7,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import org.lwjgl.opengl.GL11
 import therealfarfetchd.quacklib.client.api.model.IDynamicModel
 import therealfarfetchd.quacklib.common.api.qblock.QBlock
-import therealfarfetchd.quacklib.common.api.util.Vec3
+import therealfarfetchd.quacklib.common.api.util.vec.Vec3
 
 class DynamicModelRenderer<in T : QBlock>(val bakery: IDynamicModel<T>) : QBlockSpecialRenderer<T>() {
   override fun render(block: T, x: Double, y: Double, z: Double, partialTicks: Float, destroyStage: Int, alpha: Float) {

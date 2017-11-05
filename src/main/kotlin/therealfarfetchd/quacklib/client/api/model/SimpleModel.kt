@@ -10,13 +10,14 @@ import net.minecraftforge.common.property.IExtendedBlockState
 import therealfarfetchd.quacklib.client.api.render.Quad
 import therealfarfetchd.quacklib.client.api.render.QuadFactory
 import therealfarfetchd.quacklib.client.api.render.wires.TransformRules
-import therealfarfetchd.quacklib.common.api.extensions.compose
 import therealfarfetchd.quacklib.common.api.extensions.mapIf
 import therealfarfetchd.quacklib.common.api.extensions.mapWithCopy
 import therealfarfetchd.quacklib.common.api.util.MathUtils
 import therealfarfetchd.quacklib.common.api.util.StringPackedProps
-import therealfarfetchd.quacklib.common.api.util.Vec2
-import therealfarfetchd.quacklib.common.api.util.Vec3
+import therealfarfetchd.quacklib.common.api.util.vec.Mat4
+import therealfarfetchd.quacklib.common.api.util.vec.Vec2
+import therealfarfetchd.quacklib.common.api.util.vec.Vec3
+import therealfarfetchd.quacklib.common.api.util.vec.times
 
 abstract class SimpleModel : IModel {
   protected val mc = Minecraft.getMinecraft()
@@ -108,8 +109,7 @@ interface IQuadFactory {
 class ModelBuilder(val face: EnumFacing?) {
   private val context = Context(this)
 
-  private val identity: (Quad) -> Quad = { it }
-  private var trStack: List<(Quad) -> Quad> = listOf(identity)
+  private var trStack: List<Mat4> = listOf(Mat4.Identity)
 
   private var _playerPos: Vec3 = Vec3(0f, 0f, 0f)
 
@@ -136,14 +136,16 @@ class ModelBuilder(val face: EnumFacing?) {
     val playerPos
       get() = builder._playerPos
 
+    val center = Vec3(0.5f, 0.5f, 0.5f)
+
     fun box(op: BoxTemplate.() -> Unit) {
       val t = BoxTemplate().also(op)
-      builder.quads += t.createQuads(builder.face).map(builder.trStack.last())
+      builder.quads += t.createQuads(builder.face).map { it.transform(builder.trStack.last()) }
     }
 
     fun face(op: FaceTemplate.() -> Unit) {
       val t = FaceTemplate().also(op)
-      builder.quads += t.createQuads(builder.face).map(builder.trStack.last())
+      builder.quads += t.createQuads(builder.face).map { it.transform(builder.trStack.last()) }
     }
 
     /**
@@ -151,11 +153,11 @@ class ModelBuilder(val face: EnumFacing?) {
      */
     fun sign(op: SignTemplate.() -> Unit) {
       val t = SignTemplate(playerPos).also(op)
-      builder.quads += t.createQuads(builder.face).map(builder.trStack.last())
+      builder.quads += t.createQuads(builder.face).map { it.transform(builder.trStack.last()) }
     }
 
     fun identity() {
-      builder.trStack = listOf(builder.identity)
+      builder.trStack = listOf(Mat4.Identity)
     }
 
     fun trPush() {
@@ -167,9 +169,25 @@ class ModelBuilder(val face: EnumFacing?) {
       builder.trStack = builder.trStack.dropLast(1)
     }
 
-    fun transform(op: Quad.() -> Quad) {
+    fun translate(x: Float, y: Float, z: Float) {
+      transform(Mat4.translateMat(x, y, z))
+    }
+
+    fun translate(xyz: Vec3) {
+      transform(Mat4.translateMat(xyz))
+    }
+
+    fun scale(x: Float, y: Float, z: Float) {
+      transform(Mat4.scaleMat(x, y, z))
+    }
+
+    fun rotate(x: Float, y: Float, z: Float, angle: Float) {
+      transform(Mat4.rotationMat(x, y, z, angle))
+    }
+
+    fun transform(mat: Mat4) {
       val l = builder.trStack.last()
-      builder.trStack = builder.trStack.dropLast(1) + (l compose op)
+      builder.trStack = builder.trStack.dropLast(1) + l * mat
     }
   }
 }
@@ -351,9 +369,13 @@ class SignTemplate(private val playerPos: Vec3) : IQuadFactory {
       val pitch = MathHelper.atan2(pposFixed.y.toDouble() - Minecraft.getMinecraft().renderViewEntity!!.eyeHeight, MathUtils.getDistance(pposFixed.x, pposFixed.z).toDouble()) * MathUtils.toDegrees
       val yaw = -90 + MathHelper.atan2(pposFixed.z.toDouble(), pposFixed.x.toDouble()) * MathUtils.toDegrees
 
-      q = q
-        .rotate(EnumFacing.Axis.X, pitch.toFloat(), center)
-        .rotate(EnumFacing.Axis.Y, yaw.toFloat(), center)
+      q = q.transform(
+        Mat4.Identity
+          .translate(center)
+          .rotate(0f, 1f, 0f, yaw.toFloat())
+          .rotate(1f, 0f, 0f, pitch.toFloat())
+          .translate(-center)
+      )
     }
     return listOf(q).filterNotNull()
   }

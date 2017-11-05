@@ -6,8 +6,10 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.util.EnumFacing
 import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad
 import therealfarfetchd.quacklib.client.RGBA
-import therealfarfetchd.quacklib.common.api.util.Vec2
-import therealfarfetchd.quacklib.common.api.util.Vec3
+import therealfarfetchd.quacklib.common.api.util.vec.Mat4
+import therealfarfetchd.quacklib.common.api.util.vec.Vec2
+import therealfarfetchd.quacklib.common.api.util.vec.Vec3
+import therealfarfetchd.quacklib.common.api.util.vec.times
 
 data class Quad(
   val texture: TextureAtlasSprite,
@@ -65,9 +67,8 @@ data class Quad(
    * @return The moved quad
    */
 
-  fun translate(vec: Vec3): Quad {
-    return Quad(texture, vert1 + vec, vert2 + vec, vert3 + vec, vert4 + vec, tex1, tex2, tex3, tex4, color)
-  }
+  fun translate(vec: Vec3) =
+    transform(Mat4.translateMat(vec.x, vec.y, vec.z))
 
   /**
    * Rotates the quad around the given axis with the angle a
@@ -84,6 +85,9 @@ data class Quad(
       Quad(texture, r[0], r[1], r[2], r[3], tex1, tex2, tex3, tex4, color)
     }
   }
+
+  fun transform(mat: Mat4) =
+    copy(vert1 = mat * vert1, vert2 = mat * vert2, vert3 = mat * vert3, vert4 = mat * vert4)
 
   /**
    * Rotates the texture by 90°.
