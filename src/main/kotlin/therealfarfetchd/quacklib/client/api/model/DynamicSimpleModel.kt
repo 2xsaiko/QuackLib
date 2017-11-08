@@ -2,7 +2,7 @@ package therealfarfetchd.quacklib.client.api.model
 
 import net.minecraft.client.renderer.block.model.BakedQuad
 import therealfarfetchd.quacklib.common.api.qblock.QBlock
-import therealfarfetchd.quacklib.common.api.util.vec.Vec3
+import therealfarfetchd.quacklib.common.api.util.math.Vec3
 
 abstract class DynamicSimpleModel<in T : QBlock> : SimpleModel(), IDynamicModel<T> {
   override fun bakeDynamicQuads(block: T, playerPos: Vec3): List<Pair<BakedQuad, Boolean>> {

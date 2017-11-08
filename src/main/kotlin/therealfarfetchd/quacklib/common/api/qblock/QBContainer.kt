@@ -25,10 +25,7 @@ import net.minecraftforge.common.property.IExtendedBlockState
 import org.apache.logging.log4j.Level
 import therealfarfetchd.quacklib.QuackLib
 import therealfarfetchd.quacklib.common.api.block.IBlockAdvancedOutline
-import therealfarfetchd.quacklib.common.api.extensions.getFacing
-import therealfarfetchd.quacklib.common.api.extensions.getQBlock
-import therealfarfetchd.quacklib.common.api.extensions.minus
-import therealfarfetchd.quacklib.common.api.extensions.plus
+import therealfarfetchd.quacklib.common.api.extensions.*
 import therealfarfetchd.quacklib.common.api.util.ClientServerSeparateData
 import therealfarfetchd.quacklib.common.api.util.DataTarget
 import therealfarfetchd.quacklib.common.api.util.QNBTCompound
@@ -184,7 +181,7 @@ open class QBContainer(factory: () -> QBlock) : Block(factory.also { tempFactory
     world.getQBlock(pos)?.selectionBox ?: noqb(pos)
 
   override fun getSelectedBoundingBox(state: IBlockState, world: World, pos: BlockPos) =
-    getOutlineBoxes(world, pos, state).reduce(AxisAlignedBB::union) + pos
+    getOutlineBoxes(world, pos, state).reduceOrNull(AxisAlignedBB::union)?.let { it + pos }
 
   override fun getCollisionBoundingBox(blockState: IBlockState?, world: IBlockAccess, pos: BlockPos): AxisAlignedBB? {
     val qb = world.getQBlock(pos)
@@ -194,7 +191,20 @@ open class QBContainer(factory: () -> QBlock) : Block(factory.also { tempFactory
         collisionBox
       }
       else -> error("This should never happen! Raise hell if it does…")
+    }.reduceOrNull(AxisAlignedBB::union)
+  }
+
+  override fun addCollisionBoxToList(state: IBlockState?, world: World, pos: BlockPos, entityBox: AxisAlignedBB, collidingBoxes: MutableList<AxisAlignedBB>, entityIn: Entity?, p_185477_7_: Boolean) {
+    val qb = world.getQBlock(pos)
+    when {
+      qb != null -> qb.collisionBox
+      else -> buildPart(world, pos) {
+        collisionBox
+      }
     }
+      .map { it + pos }
+      .filter(entityBox::intersects)
+      .also { collidingBoxes.addAll(it) }
   }
 
   override fun getBoundingBox(state: IBlockState?, world: IBlockAccess, pos: BlockPos): AxisAlignedBB? {

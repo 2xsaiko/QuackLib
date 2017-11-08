@@ -1,7 +1,7 @@
-package therealfarfetchd.quacklib.common.api.util.vec
+package therealfarfetchd.quacklib.common.api.util.math
 
 import net.minecraft.util.math.MathHelper
-import therealfarfetchd.quacklib.common.api.util.MathUtils
+import javax.vecmath.Matrix4f
 
 data class Mat4(
   val c00: Float, val c01: Float, val c02: Float, val c03: Float,
@@ -18,6 +18,13 @@ data class Mat4(
   val c1 by lazy { Vec4(c01, c11, c21, c31) }
   val c2 by lazy { Vec4(c02, c12, c22, c32) }
   val c3 by lazy { Vec4(c03, c13, c23, c33) }
+
+  // I'm not even going to bother
+  val inverse by lazy {
+    val jm = Matrix4f(c00, c01, c02, c03, c10, c11, c12, c13, c20, c21, c22, c23, c30, c31, c32, c33)
+    jm.invert()
+    Mat4(jm.m00, jm.m01, jm.m02, jm.m03, jm.m10, jm.m11, jm.m12, jm.m13, jm.m20, jm.m21, jm.m22, jm.m23, jm.m30, jm.m31, jm.m32, jm.m33)
+  }
 
   fun translate(x: Float, y: Float, z: Float) = this * translateMat(x, y, z)
 

@@ -1,4 +1,4 @@
-package therealfarfetchd.quacklib.common.api.util.vec
+package therealfarfetchd.quacklib.common.api.util.math
 
 import net.minecraft.util.math.MathHelper
 

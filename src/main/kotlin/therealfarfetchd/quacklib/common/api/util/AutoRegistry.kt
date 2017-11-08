@@ -5,9 +5,13 @@ import mcmultipart.multipart.MultipartRegistry
 import net.minecraft.block.Block
 import net.minecraft.creativetab.CreativeTabs
 import net.minecraft.item.Item
+import net.minecraftforge.fml.common.FMLCommonHandler
 import net.minecraftforge.fml.common.FMLLog
+import net.minecraftforge.fml.common.ProgressManager
 import net.minecraftforge.fml.common.discovery.ASMDataTable
 import net.minecraftforge.fml.common.discovery.asm.ModAnnotation
+import net.minecraftforge.fml.relauncher.ReflectionHelper
+import net.minecraftforge.fml.relauncher.Side
 import org.apache.logging.log4j.core.Logger
 import therealfarfetchd.quacklib.ModID
 import therealfarfetchd.quacklib.QuackLib
@@ -58,10 +62,12 @@ interface IBlockDefinition : ICommonItemDef {
     @Suppress("UNCHECKED_CAST")
     fun populateBlockDefs(asmData: ASMDataTable) {
       val data = asmData.getAll(BlockDef::class.java.name)
+      val bar = ProgressManager.push("Preparing block registry", data.size)
       for (d in data) {
         var warnings: List<String> = emptyList()
 
         val mainClass = shutupForge { findClass(d.className)!! }
+        bar.step(mainClass.java)
         QuackLib.Logger.info("Found block ${mainClass.simpleName}")
 
         val layout = (d.annotationInfo["layout"] as? ModAnnotation.EnumHolder)?.let { BlockClassLayout.valueOf(it.value) } ?: BlockClassLayout.Standard
@@ -158,6 +164,7 @@ interface IBlockDefinition : ICommonItemDef {
           }
         }
       }
+      ProgressManager.pop(bar)
     }
   }
 }
@@ -170,10 +177,12 @@ interface IItemDefinition : ICommonItemDef {
 
     fun populateItemDefs(asmData: ASMDataTable) {
       val data = asmData.getAll(ItemDef::class.java.name)
+      val bar = ProgressManager.push("Preparing item registry", data.size)
       for (d in data) {
         var warnings: List<String> = emptyList()
 
         val mainClass = shutupForge { findClass(d.className)!! }
+        bar.step(mainClass.java)
         val item = (mainClass.objectInstance ?: throw IllegalBlockDefLayoutException("Item ${d.className} should be an object!")) as? Item
                    ?: throw IllegalBlockDefLayoutException("Item ${d.className} doesn't extend net.minecraft.item.Item!")
 
@@ -191,8 +200,8 @@ interface IItemDefinition : ICommonItemDef {
           override val metaModels: Collection<Int> = (d.annotationInfo["metaModels"] as? IntArray ?: intArrayOf(0)).toSet()
         }
       }
+      ProgressManager.pop(bar)
     }
-
   }
 }
 
@@ -214,11 +223,8 @@ enum class BlockClassLayout {
  */
 fun <T> shutupForge(op: () -> T): T {
   val log = FMLLog.log
-  val privateConfigF = Logger::class.java.getDeclaredField("privateConfig")
-  privateConfigF.isAccessible = true
-  val privateConfig = privateConfigF[log]
-  val intLevelF = privateConfig.javaClass.getDeclaredField("intLevel")
-  intLevelF.isAccessible = true
+  val privateConfig = ReflectionHelper.findField(Logger::class.java, "privateConfig")[log]
+  val intLevelF = ReflectionHelper.findField(privateConfig.javaClass, "intLevel")
   val intLevel = intLevelF[privateConfig] as Int
   intLevelF[privateConfig] = 299 // disable WARN logging
 
@@ -229,8 +235,11 @@ fun <T> shutupForge(op: () -> T): T {
   }
 }
 
-private fun getCreativeTab(name: String?) = CreativeTabs.CREATIVE_TAB_ARRAY
-  .firstOrNull { it.tabLabel == name ?: ModID }
+private fun getCreativeTab(name: String?) = when (FMLCommonHandler.instance().side) {
+  Side.CLIENT -> CreativeTabs.CREATIVE_TAB_ARRAY.firstOrNull { it.tabLabel == name ?: ModID }
+  Side.SERVER -> null
+}
+
 
 private fun Block.setCreativeTabFromName(name: String?) = getCreativeTab(name)?.also { setCreativeTab(it) }
 

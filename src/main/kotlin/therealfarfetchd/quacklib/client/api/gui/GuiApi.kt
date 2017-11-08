@@ -62,11 +62,11 @@ object GuiApi {
   }
 
   private fun javaRepr(je: JsonElement): Any? {
-    when (je) {
-      is JsonPrimitive -> return handlePrimitive(je)
-      is JsonObject -> return handleObject(je)
-      is JsonArray -> return handleArray(je)
-      else -> return null
+    return when (je) {
+      is JsonPrimitive -> handlePrimitive(je)
+      is JsonObject -> handleObject(je)
+      is JsonArray -> handleArray(je)
+      else -> null
     }
   }
 

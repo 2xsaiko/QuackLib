@@ -31,7 +31,6 @@ import therealfarfetchd.quacklib.common.api.util.EnumFaceLocation
 import therealfarfetchd.quacklib.common.api.util.QNBTCompound
 
 abstract class BlockWire<out T>(width: Double, height: Double) : QBlockConnectable(), IQBlockMultipart {
-
   val baseBounds = AxisAlignedBB(0.0, 0.0, 0.0, 1.0, height, 1.0)
   val partBounds = AxisAlignedBB((1 - width) / 2, 0.0, (1 - width) / 2, 1 - (1 - width) / 2, height, 1 - (1 - width) / 2)
   val edgeBounds = AxisAlignedBB(-height, 0.0, (1 - width) / 2, 0.0, height, 1 - (1 - width) / 2)
@@ -139,7 +138,7 @@ abstract class BlockWire<out T>(width: Double, height: Double) : QBlockConnectab
   override fun rotateBlock(axis: EnumFacing): Boolean = false
   override val properties: Set<IProperty<*>> = super.properties + PropFacing
   override val unlistedProperties: Set<IUnlistedProperty<*>> = super.unlistedProperties + PropConnections
-  override val collisionBox: AxisAlignedBB? = null
+  override val collisionBox: Collection<AxisAlignedBB> = emptySet()
   override val isFullBlock: Boolean = false
   override val hardness: Float = 0.25F
   override val material: Material = Material.IRON

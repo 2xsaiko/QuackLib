@@ -8,6 +8,7 @@ import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.common.capabilities.CapabilityManager
 import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.fml.common.Loader
+import net.minecraftforge.fml.common.ProgressManager
 import net.minecraftforge.fml.common.discovery.ASMDataTable
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent
@@ -48,7 +49,19 @@ open class Proxy {
     if (Loader.isModLoaded("mcmultipart")) FeatureManager.registerFeature(DefaultFeatures.MultipartMod)
     if (QuackLib.debug) QuackLib.Logger.log(Level.INFO, "Running in a dev environment; enabling debug features!")
 
-    e.asmData.getAll(AutoLoad::class.java.name).forEach { Class.forName(it.className) }
+    val classes = e.asmData.getAll(AutoLoad::class.java.name)
+    val bar = ProgressManager.push("Loading classes", classes.size)
+    classes.forEach {
+      bar.step(it.javaClass)
+      try {
+        Class.forName(it.className)
+      } catch (e: ClassNotFoundException) {
+      } catch (e: LinkageError) {
+        e.printStackTrace()
+      }
+    }
+    ProgressManager.pop(bar)
+
     asmData = e.asmData
 
     WrapperImplManager.registerModifier(ITickable::class)
@@ -88,10 +101,14 @@ open class Proxy {
   open fun init(e: FMLInitializationEvent) {}
 
   open fun postInit(e: FMLPostInitializationEvent) {
+    val bar = ProgressManager.push("Finalizing feature list", 2)
+    bar.step("Processing events")
     FeatureManager.enabledFeatures.forEach { it.onGameInit() }
     FeatureManager.printFeatureList()
+    bar.step("Checking for valid state")
     FeatureManager.checkFeatures()
     FeatureManager.lockFeatures()
+    ProgressManager.pop(bar)
   }
 
   @SubscribeEvent
@@ -111,8 +128,12 @@ open class Proxy {
     if (FeatureManager.isRequired(DefaultFeatures.AlloyFurnace)) {
       e.registry.register(BlockAlloyFurnace.Item)
     }
-    e.registry.registerAll(*IBlockDefinition.definitions.mapNotNull { it.item }.toTypedArray())
-    e.registry.registerAll(*IItemDefinition.definitions.map { it.item }.toTypedArray())
+    val d = IBlockDefinition.definitions.mapNotNull { it.item } + IItemDefinition.definitions.map { it.item }
+    val bar = ProgressManager.push("Registering items", d.size)
+    for (item in d) {
+      bar.step(item.registryName.toString())
+      e.registry.register(item)
+    }
   }
 
   @SubscribeEvent

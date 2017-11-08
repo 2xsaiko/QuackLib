@@ -68,3 +68,9 @@ processResources {
         exclude 'mcmod.info'
     }
 }
+
+kotlin {
+    experimental {
+        coroutines "enable"
+    }
+}

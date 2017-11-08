@@ -6,10 +6,10 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.util.EnumFacing
 import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad
 import therealfarfetchd.quacklib.client.RGBA
-import therealfarfetchd.quacklib.common.api.util.vec.Mat4
-import therealfarfetchd.quacklib.common.api.util.vec.Vec2
-import therealfarfetchd.quacklib.common.api.util.vec.Vec3
-import therealfarfetchd.quacklib.common.api.util.vec.times
+import therealfarfetchd.quacklib.common.api.util.math.Mat4
+import therealfarfetchd.quacklib.common.api.util.math.Vec2
+import therealfarfetchd.quacklib.common.api.util.math.Vec3
+import therealfarfetchd.quacklib.common.api.util.math.times
 
 data class Quad(
   val texture: TextureAtlasSprite,

@@ -106,7 +106,7 @@ abstract class BlockWireCentered<out T>(val width: Double) : QBlock(), IQBlockMu
     super.properties + PropConnUp + PropConnDown + PropConnNorth + PropConnSouth + PropConnWest + PropConnEast
 
   override val validEdges: Set<EnumFaceLocation> = validFaces
-  override val collisionBox: AxisAlignedBB? = baseBounds
+  override val collisionBox: Collection<AxisAlignedBB> = setOf(baseBounds)
   override val isFullBlock: Boolean = false
   override val hardness: Float = 0.25F
   override val material: Material = Material.IRON

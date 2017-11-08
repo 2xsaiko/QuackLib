@@ -31,7 +31,7 @@ interface IQBlockMultipart {
   fun beforePlace(sidePlaced: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) {}
 
   val partPlacementBoundingBox: AxisAlignedBB?
-    get() = qb.collisionBox
+    get() = qb.collisionBox.reduce(AxisAlignedBB::union)
 
   val occlusionBoxes: List<AxisAlignedBB>
     get() = listOf(partPlacementBoundingBox).filterNotNull()

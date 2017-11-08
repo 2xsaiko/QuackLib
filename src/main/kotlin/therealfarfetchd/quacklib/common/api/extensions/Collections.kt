@@ -59,13 +59,19 @@ inline fun <T, R> Array<T>.mapWithCopy(op: (T) -> R): List<Pair<T, R>> = map { i
 
 inline fun <T, R> Collection<T>.mapWithCopy(op: (T) -> R): List<Pair<T, R>> = map { it to op(it) }
 
+inline fun <T, R> Sequence<T>.mapWithCopy(crossinline op: (T) -> R): Sequence<Pair<T, R>> = map { it to op(it) }
+
 inline fun <A, B, R> Array<Pair<A, B>>.mapFirst(op: (A) -> R): List<Pair<R, B>> = map { op(it.first) to it.second }
 
 inline fun <A, B, R> Collection<Pair<A, B>>.mapFirst(op: (A) -> R): List<Pair<R, B>> = map { op(it.first) to it.second }
 
+inline fun <A, B, R> Sequence<Pair<A, B>>.mapFirst(crossinline op: (A) -> R): Sequence<Pair<R, B>> = map { op(it.first) to it.second }
+
 inline fun <A, B, R> Array<Pair<A, B>>.mapSecond(op: (B) -> R): List<Pair<A, R>> = map { it.first to op(it.second) }
 
 inline fun <A, B, R> Collection<Pair<A, B>>.mapSecond(op: (B) -> R): List<Pair<A, R>> = map { it.first to op(it.second) }
+
+inline fun <A, B, R> Sequence<Pair<A, B>>.mapSecond(crossinline op: (B) -> R): Sequence<Pair<A, R>> = map { it.first to op(it.second) }
 
 @Suppress("UNCHECKED_CAST")
 fun <A, B, R> Collection<Pair<A, B>>.mapFirstNotNull(op: (A) -> R?): List<Pair<R, B>> {
@@ -107,3 +113,5 @@ fun <A, B> Pair<A, B?>.secondNotNull(): Pair<A, B>? = takeIf { it.second != null
 
 @Suppress("UNCHECKED_CAST")
 fun <A, B> Pair<A?, B?>.bothNotNull(): Pair<A, B>? = takeIf { it.second != null && it.first != null } as Pair<A, B>?
+
+fun <T> Collection<T>.reduceOrNull(op: (T, T) -> T) = if (isNotEmpty()) reduce(op) else null

@@ -23,6 +23,8 @@ import net.minecraftforge.fml.client.registry.ClientRegistry
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.fml.relauncher.Side
+import net.minecraftforge.fml.relauncher.SideOnly
 import org.apache.logging.log4j.Level
 import org.lwjgl.opengl.GL11.GL_LINES
 import therealfarfetchd.quacklib.QuackLib
@@ -49,7 +51,7 @@ import therealfarfetchd.quacklib.common.api.qblock.QBlock
 import therealfarfetchd.quacklib.common.api.util.IBlockDefinition
 import therealfarfetchd.quacklib.common.api.util.IItemDefinition
 import therealfarfetchd.quacklib.common.api.util.Tuple4
-import therealfarfetchd.quacklib.common.api.util.vec.Vec3
+import therealfarfetchd.quacklib.common.api.util.math.Vec3
 import therealfarfetchd.quacklib.common.block.BlockAlloyFurnace
 import therealfarfetchd.quacklib.common.block.BlockMultiblockExtension
 import therealfarfetchd.quacklib.common.block.BlockNikoliteOre
@@ -202,12 +204,14 @@ class Proxy : Proxy() {
 
 
 @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+@SideOnly(Side.CLIENT)
 fun <T : QBlock, B> registerModelBakery(qb: KClass<T>, block: Block, item: Item?, bakery: B) where B : IModel, B : IDynamicModel<T> {
   registerModelBakery(block, item, bakery)
   qb.bindSpecialRenderer(DynamicModelRenderer(bakery))
 }
 
 @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+@SideOnly(Side.CLIENT)
 fun registerModelBakery(block: Block, item: Item?, bakery: IModel) {
   val b = StateMap.Builder()
   b.ignore(*block.defaultState.propertyKeys.toTypedArray())
@@ -228,6 +232,7 @@ fun registerModelBakery(block: Block, item: Item?, bakery: IModel) {
 }
 
 @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+@SideOnly(Side.CLIENT)
 fun registerModelBakery(item: Item, bakery: IModel) {
   val rl = ModelResourceLocation(item.registryName, "normal")
   CachedBakedModel(bakery).registerBakedModel(rl)

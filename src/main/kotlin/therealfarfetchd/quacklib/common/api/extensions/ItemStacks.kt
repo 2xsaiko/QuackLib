@@ -7,7 +7,7 @@ import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
-import therealfarfetchd.quacklib.common.api.util.Random
+import therealfarfetchd.quacklib.common.api.util.math.Random
 
 /**
  * Created by marco on 08.07.17.

@@ -12,12 +12,8 @@ import therealfarfetchd.quacklib.client.api.render.QuadFactory
 import therealfarfetchd.quacklib.client.api.render.wires.TransformRules
 import therealfarfetchd.quacklib.common.api.extensions.mapIf
 import therealfarfetchd.quacklib.common.api.extensions.mapWithCopy
-import therealfarfetchd.quacklib.common.api.util.MathUtils
 import therealfarfetchd.quacklib.common.api.util.StringPackedProps
-import therealfarfetchd.quacklib.common.api.util.vec.Mat4
-import therealfarfetchd.quacklib.common.api.util.vec.Vec2
-import therealfarfetchd.quacklib.common.api.util.vec.Vec3
-import therealfarfetchd.quacklib.common.api.util.vec.times
+import therealfarfetchd.quacklib.common.api.util.math.*
 
 abstract class SimpleModel : IModel {
   protected val mc = Minecraft.getMinecraft()

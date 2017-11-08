@@ -17,6 +17,7 @@ import net.minecraft.util.math.RayTraceResult
 import net.minecraft.world.IBlockAccess
 import net.minecraft.world.World
 import therealfarfetchd.quacklib.common.api.extensions.getQBlock
+import therealfarfetchd.quacklib.common.api.extensions.plus
 import java.util.*
 
 /**
@@ -40,7 +41,7 @@ open class QBContainerMultipart(factory: () -> QBlock) : QBContainer(factory), I
     }
   }
 
-  override fun getOutlineBoxes(world: World, pos: BlockPos, state: IBlockState): Set<AxisAlignedBB> {
+  override fun getOutlineBoxes(world: World, pos: BlockPos, state: IBlockState): Collection<AxisAlignedBB> {
     val hit = Minecraft.getMinecraft().objectMouseOver
     if (hit.typeOfHit == RayTraceResult.Type.BLOCK) {
       val te = world.getTileEntity(hit.blockPos)
@@ -67,13 +68,10 @@ open class QBContainerMultipart(factory: () -> QBlock) : QBContainer(factory), I
 
   override fun addCollisionBoxToList(part: IPartInfo, entityBox: AxisAlignedBB, collidingBoxes: MutableList<AxisAlignedBB>, entity: Entity?, unknown: Boolean) {
     val qb = (part.tile as QBContainerTile).qb
-    val blockBox = qb.collisionBox
-    if (blockBox != NULL_AABB) {
-      val axisalignedbb = blockBox!!.offset(part.partPos)
-      if (entityBox.intersects(axisalignedbb)) {
-        collidingBoxes.add(axisalignedbb)
-      }
-    }
+    qb.collisionBox
+      .map { it + part.partPos }
+      .filter(entityBox::intersects)
+      .also { collidingBoxes.addAll(it) }
   }
 
   override fun getDrops(world: IBlockAccess?, pos: BlockPos?, part: IPartInfo, fortune: Int): MutableList<ItemStack> {

@@ -1,4 +1,4 @@
-package therealfarfetchd.quacklib.common.api.util.vec
+package therealfarfetchd.quacklib.common.api.util.math
 
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.math.MathHelper
@@ -47,3 +47,5 @@ data class Vec3(val x: Float, val y: Float, val z: Float) {
 
   fun toVec3d() = Vec3d(x.toDouble(), y.toDouble(), z.toDouble())
 }
+
+fun Vec3d.toVec3() = Vec3(x, y, z)

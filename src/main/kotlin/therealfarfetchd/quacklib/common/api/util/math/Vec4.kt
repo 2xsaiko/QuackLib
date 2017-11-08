@@ -1,4 +1,4 @@
-package therealfarfetchd.quacklib.common.api.util.vec
+package therealfarfetchd.quacklib.common.api.util.math
 
 data class Vec4(val x: Float, val y: Float, val z: Float, val w: Float) {
   infix fun dotProduct(other: Vec4) = x * other.x + y * other.y + z * other.z + w * other.w

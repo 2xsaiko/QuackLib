@@ -54,8 +54,8 @@ abstract class QBlock {
   /**
    * Returns the mouseover selection box of the block.
    */
-  open val selectionBox: Set<AxisAlignedBB>
-    get() = listOf(collisionBox).filterNotNull().toSet()
+  open val selectionBox: Collection<AxisAlignedBB>
+    get() = collisionBox.toSet()
 
   /**
    * Returns the raytrace collision box of the block
@@ -66,7 +66,7 @@ abstract class QBlock {
   /**
    * Returns the entity collision box of the block.
    */
-  open val collisionBox: AxisAlignedBB? = FullAABB
+  open val collisionBox: Collection<AxisAlignedBB> = setOf(FullAABB)
 
   /**
    * Returns true if this block is a full (0,0,0->1,1,1) cube. Must stay constant at all times.

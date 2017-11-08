@@ -18,8 +18,8 @@ import therealfarfetchd.quacklib.common.api.extensions.get
 import therealfarfetchd.quacklib.common.api.extensions.mapIf
 import therealfarfetchd.quacklib.common.api.extensions.packInt
 import therealfarfetchd.quacklib.common.api.util.EnumEdge
-import therealfarfetchd.quacklib.common.api.util.vec.Vec2
-import therealfarfetchd.quacklib.common.api.util.vec.Vec3
+import therealfarfetchd.quacklib.common.api.util.math.Vec2
+import therealfarfetchd.quacklib.common.api.util.math.Vec3
 import therealfarfetchd.quacklib.common.api.wires.BlockWire
 import therealfarfetchd.quacklib.common.api.wires.EnumWireConnection
 import therealfarfetchd.quacklib.common.api.wires.EnumWireConnection.External
