@@ -5,6 +5,9 @@ package therealfarfetchd.quacklib.common.api.util
 import java.io.Serializable
 
 // kotlin.Pair
+
+operator fun Pair<Int, Int>.plus(other: Pair<Int, Int>) = Pair(first + other.first, second + other.second)
+
 // kotlin.Triple
 
 data class Tuple4<out A, out B, out C, out D>(

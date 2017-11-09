@@ -35,7 +35,7 @@ class QGuiScreen(private val logic: AbstractGuiLogic) : GuiScreen() {
 
   override fun drawScreen(mouseX: Int, mouseY: Int, partialTicks: Float) {
     logic.update()
-    drawDefaultBackground()
+    if (root.shadow) drawDefaultBackground()
     GlStateManager.pushMatrix()
     GlStateManager.scale(realScale, realScale, 1F)
     root.render((mouseX / realScale).toInt(), (mouseY / realScale).toInt())
@@ -81,6 +81,7 @@ class QGuiScreen(private val logic: AbstractGuiLogic) : GuiScreen() {
     var scale: List<Int> by transform<List<Int>, List<BigDecimal>>({ map { BigDecimal(it) } }, { map { it.intValueExact() } })
     var pause: Boolean by mapper()
     var repeat_keys: Boolean by mapper()
+    var shadow: Boolean by mapper()
 
     var kbd: (Char, Int) -> Any? = { _, _ -> }
 
@@ -88,6 +89,7 @@ class QGuiScreen(private val logic: AbstractGuiLogic) : GuiScreen() {
       scale = emptyList() // let MC handle the scaling
       pause = false
       repeat_keys = false
+      shadow = true
     }
 
     override fun render(mouseX: Int, mouseY: Int) {

@@ -120,7 +120,7 @@ class Proxy : Proxy() {
       e::class.qualifiedName == "mcmultipart.api.event.DrawMultipartHighlightEvent" -> (e as DrawMultipartHighlightEvent).partInfo.partWorld
       else -> e.player.world
     }
-    val pos = e.target.blockPos
+    val pos = e.target.blockPos ?: return
     val state = world.getBlockState(pos)
     val block = state.block
     if (block is IBlockAdvancedOutline) {

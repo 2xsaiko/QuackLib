@@ -12,7 +12,7 @@ import therealfarfetchd.quacklib.common.api.util.ObservableMap
 abstract class GuiElement : IGuiElement {
   internal val sprites = ResourceLocation("$ModID:textures/gui/elements.png")
 
-  protected val mc = Minecraft.getMinecraft()!!
+  protected val mc = Minecraft.getMinecraft()
 
   var x: Int by number()
   var y: Int by number()
@@ -57,20 +57,16 @@ abstract class GuiElement : IGuiElement {
     GlStateManager.popMatrix()
   }
 
-  open fun getEffectiveX(x: Int): Int {
-    when (relx) {
-      RelativeX.Left -> return x
-      RelativeX.Center -> return x + parent!!.width / 2 - width / 2
-      RelativeX.Right -> return x + parent!!.width - width
-    }
+  open fun getEffectiveX(x: Int) = when (relx) {
+    RelativeX.Left -> x
+    RelativeX.Center -> x + parent!!.width / 2 - width / 2
+    RelativeX.Right -> x + parent!!.width - width
   }
 
-  open fun getEffectiveY(y: Int): Int {
-    when (rely) {
-      RelativeY.Top -> return y
-      RelativeY.Center -> return y + parent!!.height / 2 - height / 2
-      RelativeY.Bottom -> return y + parent!!.height - height
-    }
+  open fun getEffectiveY(y: Int) = when (rely) {
+    RelativeY.Top -> y
+    RelativeY.Center -> y + parent!!.height / 2 - height / 2
+    RelativeY.Bottom -> y + parent!!.height - height
   }
 
 }
