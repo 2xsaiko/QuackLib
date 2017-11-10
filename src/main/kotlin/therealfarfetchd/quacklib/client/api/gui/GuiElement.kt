@@ -46,6 +46,7 @@ abstract class GuiElement : IGuiElement {
   }
 
   open fun transformAndRender(mouseX: Int, mouseY: Int) {
+    prepare(mouseX, mouseY)
     GlStateManager.pushMatrix()
     val effx = getEffectiveX(x)
     val effy = getEffectiveY(y)

@@ -10,7 +10,6 @@ import therealfarfetchd.quacklib.client.api.gui.number
  * Created by marco on 17.07.17.
  */
 class Label : GuiElement() {
-
   var value: String by mapper()
   var shadow: Boolean by mapper()
   var background: Boolean by mapper()
@@ -31,12 +30,16 @@ class Label : GuiElement() {
   override fun render(mouseX: Int, mouseY: Int) {
     GlStateManager.enableTexture2D()
     val text = localized(value)
-    width = mc.fontRenderer.getStringWidth(text) + 4
     val color = 0xFF000000.toInt() or
-        ((r * 255).toInt() shl 16) or
-        ((g * 255).toInt() shl 8) or
-        ((g * 255).toInt())
+      ((r * 255).toInt() shl 16) or
+      ((g * 255).toInt() shl 8) or
+      ((g * 255).toInt())
     if (background) Gui.drawRect(0, 0, width, height, 0x70707070)
     mc.fontRenderer.drawString(text, 2F, 2F, color, shadow)
+  }
+
+  override fun prepare(mouseX: Int, mouseY: Int) {
+    val text = localized(value)
+    width = mc.fontRenderer.getStringWidth(text) + 4
   }
 }

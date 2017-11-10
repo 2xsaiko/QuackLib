@@ -1,3 +1,5 @@
+@file:Suppress("ClassName")
+
 package therealfarfetchd.quacklib.client.api.gui
 
 import java.math.BigDecimal
@@ -51,6 +53,6 @@ class number<T> : ReadWriteProperty<IGuiElement, T> {
   }
 
   override fun setValue(thisRef: IGuiElement, property: KProperty<*>, value: T) {
-    thisRef.properties [property.name] = BigDecimal(value.toString())
+    thisRef.properties[property.name] = BigDecimal(value.toString())
   }
 }

@@ -40,6 +40,11 @@ interface IGuiElement {
     GlStateManager.color(1f, 1f, 1f)
   }
 
+  /**
+   * Called before drawing the object, to set up width and height, for example.
+   */
+  fun prepare(mouseX: Int, mouseY: Int) {}
+
   fun mouseClicked(x: Int, y: Int, button: Int) {
     elements.forEach { it.mouseClicked(x - it.getEffectiveX(it.x), y - it.getEffectiveY(it.y), button) }
   }
