@@ -44,7 +44,8 @@ abstract class QBlock {
   /**
    * The sound type of the block.
    */
-  open val soundType: SoundType = SoundType.STONE
+  open val soundType: SoundType
+    get() = SoundType.STONE
 
   /**
    * How long it takes to break this block.

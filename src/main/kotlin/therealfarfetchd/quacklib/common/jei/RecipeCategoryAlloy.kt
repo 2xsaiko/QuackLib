@@ -1,20 +1,19 @@
 package therealfarfetchd.quacklib.common.jei
 
+import mezz.jei.api.IGuiHelper
 import mezz.jei.api.gui.IDrawableAnimated
 import mezz.jei.api.gui.IRecipeLayout
 import mezz.jei.api.ingredients.IIngredients
 import mezz.jei.api.recipe.IRecipeCategory
-import mezz.jei.gui.GuiHelper
 import net.minecraft.client.Minecraft
 import net.minecraft.client.resources.I18n
 import net.minecraft.util.ResourceLocation
 import therealfarfetchd.quacklib.ModID
 
-object RecipeCategoryAlloy : IRecipeCategory<RecipeWrapperAlloy> {
+class RecipeCategoryAlloy(guiHelper: IGuiHelper) : IRecipeCategory<RecipeWrapperAlloy> {
   private val outputSlot = 1
   private val inputSlot1 = 2
 
-  private val guiHelper = GuiHelper()
   private val texture = ResourceLocation(ModID, "textures/gui/jei/alloy_furnace.png")
   private val uid = "$modName:alloy_recipe"
   private val title = I18n.format("recipe.$uid")
@@ -28,6 +27,10 @@ object RecipeCategoryAlloy : IRecipeCategory<RecipeWrapperAlloy> {
   private val arrow = guiHelper.createAnimatedDrawable(
     guiHelper.createDrawable(texture, 139, 14, 23, 16, 256, 128),
     200, IDrawableAnimated.StartDirection.LEFT, false)
+
+  init {
+    Instance = this
+  }
 
   override fun getUid() = uid
 
@@ -52,5 +55,9 @@ object RecipeCategoryAlloy : IRecipeCategory<RecipeWrapperAlloy> {
     }
 
     guiItemStacks.set(ingredients)
+  }
+
+  companion object {
+    lateinit var Instance: RecipeCategoryAlloy
   }
 }
