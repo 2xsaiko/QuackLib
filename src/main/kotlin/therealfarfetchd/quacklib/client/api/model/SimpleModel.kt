@@ -33,12 +33,12 @@ abstract class SimpleModel : IModel {
   private fun filterCategories(face: EnumFacing?, quads: List<Quad>): List<Quad> {
     return quads.mapWithCopy { q ->
       when {
-        q.facing == EnumFacing.UP && q.vert1.y == 1f && q.vert2.y == 1f && q.vert3.y == 1f && q.vert4.y == 1f -> EnumFacing.UP
-        q.facing == EnumFacing.DOWN && q.vert1.y == 0f && q.vert2.y == 0f && q.vert3.y == 0f && q.vert4.y == 0f -> EnumFacing.DOWN
-        q.facing == EnumFacing.NORTH && q.vert1.z == 0f && q.vert2.z == 0f && q.vert3.z == 0f && q.vert4.z == 0f -> EnumFacing.NORTH
-        q.facing == EnumFacing.SOUTH && q.vert1.z == 1f && q.vert2.z == 1f && q.vert3.z == 1f && q.vert4.z == 1f -> EnumFacing.SOUTH
-        q.facing == EnumFacing.WEST && q.vert1.x == 0f && q.vert2.x == 0f && q.vert3.x == 0f && q.vert4.x == 0f -> EnumFacing.WEST
-        q.facing == EnumFacing.EAST && q.vert1.x == 1f && q.vert2.x == 1f && q.vert3.x == 1f && q.vert4.x == 1f -> EnumFacing.EAST
+        q.facing == EnumFacing.UP && q.vert1.y == 1.0 && q.vert2.y == 1.0 && q.vert3.y == 1.0 && q.vert4.y == 1.0 -> EnumFacing.UP
+        q.facing == EnumFacing.DOWN && q.vert1.y == 0.0 && q.vert2.y == 0.0 && q.vert3.y == 0.0 && q.vert4.y == 0.0 -> EnumFacing.DOWN
+        q.facing == EnumFacing.NORTH && q.vert1.z == 0.0 && q.vert2.z == 0.0 && q.vert3.z == 0.0 && q.vert4.z == 0.0 -> EnumFacing.NORTH
+        q.facing == EnumFacing.SOUTH && q.vert1.z == 1.0 && q.vert2.z == 1.0 && q.vert3.z == 1.0 && q.vert4.z == 1.0 -> EnumFacing.SOUTH
+        q.facing == EnumFacing.WEST && q.vert1.x == 0.0 && q.vert2.x == 0.0 && q.vert3.x == 0.0 && q.vert4.x == 0.0 -> EnumFacing.WEST
+        q.facing == EnumFacing.EAST && q.vert1.x == 1.0 && q.vert2.x == 1.0 && q.vert3.x == 1.0 && q.vert4.x == 1.0 -> EnumFacing.EAST
         else -> null
       }
     }.filter { it.second == face }.map { it.first }
@@ -47,37 +47,40 @@ abstract class SimpleModel : IModel {
   abstract fun addShapes(state: IExtendedBlockState, model: ModelBuilder)
   abstract fun addShapes(stack: ItemStack, model: ModelBuilder)
 
-  protected fun vec(x: Double, y: Double) = Vec2(x.toFloat(), y.toFloat())
+  protected fun vec(x: Double, y: Double) = Vec2(x, y)
   protected fun vec(x: Float, y: Float) = Vec2(x, y)
-  protected fun vec16(x: Double, y: Double) = Vec2(x.toFloat() / 16F, y.toFloat() / 16F)
-  protected fun vec16(x: Float, y: Float) = Vec2(x / 16F, y / 16F)
-  protected fun vec16(x: Int, y: Int) = Vec2(x.toFloat() / 16F, y.toFloat() / 16F)
+  protected fun vec16(x: Double, y: Double) = Vec2(x / 16.0, y / 16.0)
+  protected fun vec16(x: Float, y: Float) = Vec2(x / 16.0, y / 16.0)
+  protected fun vec16(x: Int, y: Int) = Vec2(x / 16.0, y / 16.0)
 
-  protected fun vec(x: Double, y: Double, z: Double) = Vec3(x.toFloat(), y.toFloat(), z.toFloat())
+  protected fun vec(x: Double, y: Double, z: Double) = Vec3(x, y, z)
   protected fun vec(x: Float, y: Float, z: Float) = Vec3(x, y, z)
-  protected fun vec16(x: Double, y: Double, z: Double) = Vec3(x.toFloat() / 16F, y.toFloat() / 16F, z.toFloat() / 16F)
-  protected fun vec16(x: Float, y: Float, z: Float) = Vec3(x / 16F, y / 16F, z / 16F)
-  protected fun vec16(x: Int, y: Int, z: Int) = Vec3(x.toFloat() / 16F, y.toFloat() / 16F, z.toFloat() / 16F)
+  protected fun vec16(x: Double, y: Double, z: Double) = Vec3(x / 16.0, y / 16.0, z / 16.0)
+  protected fun vec16(x: Float, y: Float, z: Float) = Vec3(x / 16.0, y / 16.0, z / 16.0)
+  protected fun vec16(x: Int, y: Int, z: Int) = Vec3(x / 16.0, y / 16.0, z / 16.0)
 
-  protected fun texture(tex: TextureAtlasSprite): TextureTemplate = TextureTemplate(tex, Vec2(0f, 0f), Vec2(1f, 1f), auto = true)
+  protected fun texture(tex: TextureAtlasSprite): TextureTemplate = TextureTemplate(tex, Vec2(0.0, 0.0), Vec2(1.0, 1.0), auto = true)
 
   protected fun texture(tex: TextureAtlasSprite, uv: Vec2, width: Float, height: Float, flip: Boolean = false) =
+    TextureTemplate(tex, uv, uv + Vec2(width, height), flip = flip)
+
+  protected fun texture(tex: TextureAtlasSprite, uv: Vec2, width: Double, height: Double, flip: Boolean = false) =
     TextureTemplate(tex, uv, uv + Vec2(width, height), flip = flip)
 
   protected fun texture(tex: TextureAtlasSprite, u: Float, v: Float, u1: Float, v1: Float, flip: Boolean = false) =
     TextureTemplate(tex, Vec2(u, v), Vec2(u1, v1), flip = flip)
 
   protected fun texture(tex: TextureAtlasSprite, u: Double, v: Double, u1: Double, v1: Double, flip: Boolean = false) =
-    TextureTemplate(tex, Vec2(u.toFloat(), v.toFloat()), Vec2(u1.toFloat(), v1.toFloat()), flip = flip)
+    TextureTemplate(tex, Vec2(u, v), Vec2(u1, v1), flip = flip)
 
   protected fun texture(tex: TextureAtlasSprite, u: Int, v: Int, u1: Int, v1: Int, flip: Boolean = false) =
-    TextureTemplate(tex, Vec2(u.toFloat(), v.toFloat()), Vec2(u1.toFloat(), v1.toFloat()), flip = flip)
+    TextureTemplate(tex, Vec2(u, v), Vec2(u1, v1), flip = flip)
 
   protected fun texture(size: Int, tex: TextureAtlasSprite, u: Double, v: Double, u1: Double, v1: Double, flip: Boolean = false) =
-    TextureTemplate(tex, Vec2(u.toFloat(), v.toFloat()) / size, Vec2(u1.toFloat(), v1.toFloat()) / size, flip = flip)
+    TextureTemplate(tex, Vec2(u, v) / size, Vec2(u1, v1) / size, flip = flip)
 
   protected fun texture(size: Int, tex: TextureAtlasSprite, u: Int, v: Int, u1: Int, v1: Int, flip: Boolean = false) =
-    TextureTemplate(tex, Vec2(u.toFloat(), v.toFloat()) / size, Vec2(u1.toFloat(), v1.toFloat()) / size, flip = flip)
+    TextureTemplate(tex, Vec2(u, v) / size, Vec2(u1, v1) / size, flip = flip)
 
   protected fun texture(size: Int, tex: TextureAtlasSprite, uv: Vec2, width: Float, height: Float, flip: Boolean = false) =
     TextureTemplate(tex, uv / size, (uv + Vec2(width, height)) / size, flip = flip)
@@ -89,10 +92,10 @@ abstract class SimpleModel : IModel {
     TextureTemplate(tex, Vec2(u, v) / 16f, Vec2(u1, v1) / 16f, flip = flip)
 
   protected fun texture16(tex: TextureAtlasSprite, u: Double, v: Double, u1: Double, v1: Double, flip: Boolean = false) =
-    TextureTemplate(tex, Vec2(u.toFloat(), v.toFloat()) / 16f, Vec2(u1.toFloat(), v1.toFloat()) / 16f, flip = flip)
+    TextureTemplate(tex, Vec2(u, v) / 16f, Vec2(u1, v1) / 16f, flip = flip)
 
   protected fun texture16(tex: TextureAtlasSprite, u: Int, v: Int, u1: Int, v1: Int, flip: Boolean = false) =
-    TextureTemplate(tex, Vec2(u.toFloat(), v.toFloat()) / 16f, Vec2(u1.toFloat(), v1.toFloat()) / 16f, flip = flip)
+    TextureTemplate(tex, Vec2(u, v) / 16f, Vec2(u1, v1) / 16f, flip = flip)
 
   protected val missingTex: TextureAtlasSprite
     get() = Minecraft.getMinecraft().textureMapBlocks.missingSprite
@@ -107,7 +110,7 @@ class ModelBuilder(val face: EnumFacing?) {
 
   private var trStack: List<Mat4> = listOf(Mat4.Identity)
 
-  private var _playerPos: Vec3 = Vec3(0f, 0f, 0f)
+  private var _playerPos: Vec3 = Vec3(0.0, 0.0, 0.0)
 
   fun setPlayerPos(vec3: Vec3) {
     _playerPos = vec3
@@ -132,7 +135,7 @@ class ModelBuilder(val face: EnumFacing?) {
     val playerPos
       get() = builder._playerPos
 
-    val center = Vec3(0.5f, 0.5f, 0.5f)
+    val center = Vec3(0.5, 0.5, 0.5)
 
     fun box(op: BoxTemplate.() -> Unit) {
       val t = BoxTemplate().also(op)
@@ -166,19 +169,21 @@ class ModelBuilder(val face: EnumFacing?) {
     }
 
     fun translate(x: Float, y: Float, z: Float) {
-      transform(Mat4.translateMat(x, y, z))
+      transform(Mat4.translateMat(x.toDouble(), y.toDouble(), z.toDouble()))
     }
 
     fun translate(xyz: Vec3) {
       transform(Mat4.translateMat(xyz))
     }
 
+    fun scale(u: Float) = scale(u, u, u)
+
     fun scale(x: Float, y: Float, z: Float) {
-      transform(Mat4.scaleMat(x, y, z))
+      transform(Mat4.scaleMat(x.toDouble(), y.toDouble(), z.toDouble()))
     }
 
     fun rotate(x: Float, y: Float, z: Float, angle: Float) {
-      transform(Mat4.rotationMat(x, y, z, angle))
+      transform(Mat4.rotationMat(x.toDouble(), y.toDouble(), z.toDouble(), angle.toDouble()))
     }
 
     fun transform(mat: Mat4) {
@@ -189,8 +194,8 @@ class ModelBuilder(val face: EnumFacing?) {
 }
 
 class BoxTemplate : IQuadFactory {
-  var min = Vec3(0F, 0F, 0F)
-  var max = Vec3(1F, 1F, 1F)
+  var min = Vec3(0.0, 0.0, 0.0)
+  var max = Vec3(1.0, 1.0, 1.0)
 
   /**
    * Render the texture on both sides (inside the box and outside).
@@ -332,8 +337,8 @@ class BoxTemplate : IQuadFactory {
 }
 
 class FaceTemplate : IQuadFactory {
-  var min = Vec2(0f, 0f)
-  var max = Vec2(0f, 0f)
+  var min = Vec2(0.0, 0.0)
+  var max = Vec2(0.0, 0.0)
   var depth = 0f
   var facing = EnumFacing.UP
 
@@ -343,7 +348,7 @@ class FaceTemplate : IQuadFactory {
 }
 
 class SignTemplate(private val playerPos: Vec3) : IQuadFactory {
-  var center = Vec3(0.5f, 0.5f, 0.5f)
+  var center = Vec3(0.5, 0.5, 0.5)
   var dimUp = 0.5f
   var dimDown = 0.5f
   var dimLeft = 0.5f
@@ -352,7 +357,7 @@ class SignTemplate(private val playerPos: Vec3) : IQuadFactory {
   var tex: TextureTemplate? = null
     set(value) {
       field = if (value == null || !value.auto) value
-      else TextureTemplate(value.texture, Vec2(0f, 0f), Vec2(1f, 1f), postProc = value.postProc)
+      else TextureTemplate(value.texture, Vec2(0.0, 0.0), Vec2(1.0, 1.0), postProc = value.postProc)
     }
 
   override fun createQuads(facing: EnumFacing?): List<Quad> {
@@ -361,15 +366,15 @@ class SignTemplate(private val playerPos: Vec3) : IQuadFactory {
         EnumFacing.SOUTH, it.uv.x, it.uv.y, it.uv1.x, it.uv1.y, it.texture).mirrorTextureY
     }
     if (q != null) {
-      val pposFixed = playerPos + Vec3(0.5f, 0.5f, 0.5f)
-      val pitch = MathHelper.atan2(pposFixed.y.toDouble() - Minecraft.getMinecraft().renderViewEntity!!.eyeHeight, MathUtils.getDistance(pposFixed.x, pposFixed.z).toDouble()) * MathUtils.toDegrees
-      val yaw = -90 + MathHelper.atan2(pposFixed.z.toDouble(), pposFixed.x.toDouble()) * MathUtils.toDegrees
+      val pposFixed = playerPos + Vec3(0.5, 0.5, 0.5)
+      val pitch = MathHelper.atan2(pposFixed.y - Minecraft.getMinecraft().renderViewEntity!!.eyeHeight, getDistance(pposFixed.x, pposFixed.z)) * toDegrees
+      val yaw = -90 + MathHelper.atan2(pposFixed.z, pposFixed.x) * toDegrees
 
       q = q.transform(
         Mat4.Identity
           .translate(center)
-          .rotate(0f, 1f, 0f, yaw.toFloat())
-          .rotate(1f, 0f, 0f, pitch.toFloat())
+          .rotate(0.0, 1.0, 0.0, yaw)
+          .rotate(1.0, 0.0, 0.0, pitch)
           .translate(-center)
       )
     }

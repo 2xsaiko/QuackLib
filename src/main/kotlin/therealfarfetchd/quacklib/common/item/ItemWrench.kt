@@ -15,7 +15,6 @@ import therealfarfetchd.quacklib.common.api.util.ItemDef
  */
 @ItemDef
 object ItemWrench : Item() {
-
   init {
     registryName = ResourceLocation(ModID, "wrench")
     maxStackSize = 1
@@ -40,5 +39,4 @@ object ItemWrench : Item() {
   fun playWrenchSound(world: World, pos: BlockPos) {
     world.playSound(null, pos, SoundEvents.ITEM_ARMOR_EQUIP_IRON, SoundCategory.BLOCKS, 1.0f, 1.5f)
   }
-
 }

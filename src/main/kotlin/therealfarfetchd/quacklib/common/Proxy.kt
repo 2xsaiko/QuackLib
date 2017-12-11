@@ -1,5 +1,6 @@
 package therealfarfetchd.quacklib.common
 
+import mcmultipart.api.item.ItemBlockMultipart
 import mcmultipart.api.multipart.IMultipart
 import net.minecraft.block.Block
 import net.minecraft.item.Item
@@ -73,7 +74,7 @@ open class Proxy {
     WrapperImplManager.registerWrapper(IQBlockMultipart::class) {
       container(::QBContainerMultipart)
       te(::QBContainerTileMultipart)
-      item { _, block -> ItemBlockMultipartEx(block, block as IMultipart) }
+      item { _, block -> ItemBlockMultipart(block, block as IMultipart) }
     }
     WrapperImplManager.registerWrapper(IQBlockMultipart::class, ITickable::class) {
       inherit(IQBlockMultipart::class)

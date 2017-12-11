@@ -76,7 +76,7 @@ enum class TransformRules(rules: String = "", val useAlt: Boolean = false, val u
           '°' -> {
             val axis = EnumFacing.Axis.valueOf(spp.getString(1))
             val ang = spp.getString(3)
-            return { it.rotate(axis, ang.toFloat()) }
+            return { it.rotate(axis, ang.toDouble()) }
           }
           '+' -> return valueOf(spp.getString(9)).op
           else -> error("Invalid command: $command")

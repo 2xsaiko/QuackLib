@@ -115,3 +115,5 @@ fun <A, B> Pair<A, B?>.secondNotNull(): Pair<A, B>? = takeIf { it.second != null
 fun <A, B> Pair<A?, B?>.bothNotNull(): Pair<A, B>? = takeIf { it.second != null && it.first != null } as Pair<A, B>?
 
 fun <T> Collection<T>.reduceOrNull(op: (T, T) -> T) = if (isNotEmpty()) reduce(op) else null
+
+inline fun <K, V> Collection<K>.assignValue(op: (K) -> V) = mapWithCopy(op).toMap()

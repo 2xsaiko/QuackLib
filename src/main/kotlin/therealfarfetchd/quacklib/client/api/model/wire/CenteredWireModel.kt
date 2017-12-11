@@ -12,17 +12,17 @@ import therealfarfetchd.quacklib.client.api.model.SimpleModel
 import therealfarfetchd.quacklib.common.api.util.math.Vec2
 import therealfarfetchd.quacklib.common.api.wires.BlockWireCentered
 
-class CenteredWireModel(val textureLocation: ResourceLocation, val textureSize: Float, val width: Float) : SimpleModel(), IIconRegister {
+class CenteredWireModel(val textureLocation: ResourceLocation, textureSize: Float, val width: Double) : SimpleModel(), IIconRegister {
   private val radius = width / 2
   private val scaleFactor: Float = textureSize / 16F
   private val rmin = 0.5 - radius / scaleFactor
   private val rmax = 0.5 + radius / scaleFactor
 
-  private val side1Uv = Vec2(0.0f, 0.0f)
-  private val centerUv = Vec2(0.0f, 0.5f - radius) / scaleFactor
-  private val side2Uv = Vec2(0.0f, 0.5f + radius) / scaleFactor
-  private val bottomUv = Vec2(0.0f, 1.0f) / scaleFactor
-  private val cornerUv = Vec2(width, 0.0f) / scaleFactor
+  private val side1Uv = Vec2(0.0, 0.0)
+  private val centerUv = Vec2(0.0, 0.5 - radius) / scaleFactor
+  private val side2Uv = Vec2(0.0, 0.5 + radius) / scaleFactor
+  private val bottomUv = Vec2(0.0, 1.0) / scaleFactor
+  private val cornerUv = Vec2(width, 0.0) / scaleFactor
 
   lateinit var texture: TextureAtlasSprite
 

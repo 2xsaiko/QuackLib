@@ -7,11 +7,13 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.ResourceLocation
+import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import net.minecraftforge.common.capabilities.Capability
 import therealfarfetchd.quacklib.common.api.extensions.copyTo
 import therealfarfetchd.quacklib.common.api.extensions.packByte
+import therealfarfetchd.quacklib.common.api.extensions.plus
 import therealfarfetchd.quacklib.common.api.extensions.unpack
 import therealfarfetchd.quacklib.common.api.util.DataTarget
 import therealfarfetchd.quacklib.common.api.util.QNBTCompound
@@ -55,6 +57,8 @@ open class QBContainerTile() : TileEntity() { //, IColoredLight {
   // override fun getColoredLight(): Light? {
   //   return (qb as? IQBlockColoredLight)?.getColoredLight()
   // }
+
+  override fun getRenderBoundingBox() = qb.renderBox + getPos()
 
   override fun writeToNBT(compound: NBTTagCompound): NBTTagCompound {
     val subTag = NBTTagCompound()
@@ -126,17 +130,13 @@ open class QBContainerTile() : TileEntity() { //, IColoredLight {
     qb.onUnload()
   }
 
-  override fun hasFastRenderer(): Boolean {
-    return qb.hasFastRenderer
-  }
+  override fun hasFastRenderer() = qb.hasFastRenderer
 
-  override fun hasCapability(capability: Capability<*>, facing: EnumFacing?): Boolean {
-    return super.hasCapability(capability, facing) || qb.getCapability(capability, facing) != null
-  }
+  override fun hasCapability(capability: Capability<*>, facing: EnumFacing?) =
+    super.hasCapability(capability, facing) || qb.getCapability(capability, facing) != null
 
-  override fun <T> getCapability(capability: Capability<T>, facing: EnumFacing?): T? {
-    return qb.getCapability(capability, facing) ?: super.getCapability(capability, facing)
-  }
+  override fun <T> getCapability(capability: Capability<T>, facing: EnumFacing?) =
+    qb.getCapability(capability, facing) ?: super.getCapability(capability, facing)
 
   open class Ticking() : QBContainerTile(), ITickingQBTile {
     constructor(qbIn: QBlock) : this() {

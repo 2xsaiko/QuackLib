@@ -43,6 +43,7 @@ import therealfarfetchd.quacklib.common.Proxy
 import therealfarfetchd.quacklib.common.api.autoconf.DefaultFeatures
 import therealfarfetchd.quacklib.common.api.autoconf.FeatureManager
 import therealfarfetchd.quacklib.common.api.block.IBlockAdvancedOutline
+import therealfarfetchd.quacklib.common.api.extensions.RGBA
 import therealfarfetchd.quacklib.common.api.extensions.plus
 import therealfarfetchd.quacklib.common.api.qblock.QBContainerTile
 import therealfarfetchd.quacklib.common.api.qblock.QBContainerTileInventory
@@ -50,7 +51,6 @@ import therealfarfetchd.quacklib.common.api.qblock.QBContainerTileMultipart
 import therealfarfetchd.quacklib.common.api.qblock.QBlock
 import therealfarfetchd.quacklib.common.api.util.IBlockDefinition
 import therealfarfetchd.quacklib.common.api.util.IItemDefinition
-import therealfarfetchd.quacklib.common.api.util.Tuple4
 import therealfarfetchd.quacklib.common.api.util.math.Vec3
 import therealfarfetchd.quacklib.common.block.BlockAlloyFurnace
 import therealfarfetchd.quacklib.common.block.BlockMultiblockExtension
@@ -61,8 +61,6 @@ import kotlin.reflect.KClass
 /**
  * Created by marco on 16.07.17.
  */
-
-typealias RGBA = Tuple4<Float, Float, Float, Float>
 
 class Proxy : Proxy() {
   override fun preInit(e: FMLPreInitializationEvent) {
@@ -164,17 +162,17 @@ class Proxy : Proxy() {
     color(color.first, color.second, color.third, color.fourth)
 
     val offset = -Vec3(
-      (player.lastTickPosX + (player.posX - player.lastTickPosX) * partialTicks).toFloat(),
-      (player.lastTickPosY + (player.posY - player.lastTickPosY) * partialTicks).toFloat(),
-      (player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * partialTicks).toFloat()
+      player.lastTickPosX + (player.posX - player.lastTickPosX) * partialTicks,
+      player.lastTickPosY + (player.posY - player.lastTickPosY) * partialTicks,
+      player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * partialTicks
     )
 
     val tessellator = Tessellator.getInstance()
     val bufferbuilder = tessellator.buffer
     bufferbuilder.begin(GL_LINES, POSITION)
     for ((min, max) in lines.map { it.first + offset to it.second + offset }) {
-      bufferbuilder.pos(min.x.toDouble(), min.y.toDouble(), min.z.toDouble()).endVertex()
-      bufferbuilder.pos(max.x.toDouble(), max.y.toDouble(), max.z.toDouble()).endVertex()
+      bufferbuilder.pos(min.x, min.y, min.z).endVertex()
+      bufferbuilder.pos(max.x, max.y, max.z).endVertex()
     }
     tessellator.draw()
 

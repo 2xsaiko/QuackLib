@@ -4,10 +4,9 @@ package therealfarfetchd.quacklib.common.api.util
  * Created by marco on 13.07.17.
  */
 class ChangeListener(vararg values: () -> Any?) {
-
   private var properties: Set<() -> Any?> = values.toSet()
 
-  private var map: Map<() -> Any?, Any?> = emptyMap()
+  private var map: Map<() -> Any?, Any?> = properties.associate { it to tryCopy(it()) }
 
   private fun mkMap(): Map<() -> Any?, Any?> = map + properties.associate { it to tryCopy(it()) }
 
@@ -57,5 +56,4 @@ class ChangeListener(vararg values: () -> Any?) {
       else -> a
     }
   }
-
 }

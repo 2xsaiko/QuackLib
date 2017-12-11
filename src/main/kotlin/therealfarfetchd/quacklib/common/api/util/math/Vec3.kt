@@ -4,8 +4,13 @@ import net.minecraft.util.EnumFacing
 import net.minecraft.util.math.MathHelper
 import net.minecraft.util.math.Vec3d
 
-data class Vec3(val x: Float, val y: Float, val z: Float) {
-  constructor(x: Double, y: Double, z: Double) : this(x.toFloat(), y.toFloat(), z.toFloat())
+data class Vec3(val x: Double, val y: Double, val z: Double) {
+  constructor(x: Int, y: Int, z: Int) : this(x.toDouble(), y.toDouble(), z.toDouble())
+  constructor(x: Float, y: Float, z: Float) : this(x.toDouble(), y.toDouble(), z.toDouble())
+
+  val xf = x.toFloat()
+  val yf = y.toFloat()
+  val zf = z.toFloat()
 
   operator fun plus(other: Vec3) = Vec3(x + other.x, y + other.y, z + other.z)
   operator fun minus(other: Vec3) = Vec3(x - other.x, y - other.y, z - other.z)
@@ -18,8 +23,8 @@ data class Vec3(val x: Float, val y: Float, val z: Float) {
 
   val length by lazy { MathHelper.sqrt(x * x + y * y + z * z) }
 
-  fun rotate(a: Float, axis: EnumFacing.Axis, center: Vec3): Vec3 {
-    return if (a == 0.0F || center == this) this.copy()
+  fun rotate(a: Double, axis: EnumFacing.Axis, center: Vec3): Vec3 {
+    return if (a == 0.0 || center == this) this.copy()
     else when (axis) {
       EnumFacing.Axis.X -> {
         val r = Vec2(z, y).rotate(a, Vec2(center.z, center.y))
@@ -45,7 +50,7 @@ data class Vec3(val x: Float, val y: Float, val z: Float) {
 
   fun normalize() = this / length
 
-  fun toVec3d() = Vec3d(x.toDouble(), y.toDouble(), z.toDouble())
+  fun toVec3d() = Vec3d(x, y, z)
 }
 
 fun Vec3d.toVec3() = Vec3(x, y, z)

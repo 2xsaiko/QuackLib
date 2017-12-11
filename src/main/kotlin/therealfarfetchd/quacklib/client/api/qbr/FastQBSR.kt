@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import org.lwjgl.opengl.GL11
 import therealfarfetchd.quacklib.common.api.qblock.QBlock
 
-abstract class FastQBSR<in T:QBlock>:QBlockSpecialRenderer<T>() {
+abstract class FastQBSR<in T : QBlock> : QBlockSpecialRenderer<T>() {
   override fun render(block: T, x: Double, y: Double, z: Double, partialTicks: Float, destroyStage: Int, alpha: Float) {
     val tessellator = Tessellator.getInstance()
     val buffer = tessellator.buffer

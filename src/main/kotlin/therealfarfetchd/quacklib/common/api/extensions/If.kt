@@ -21,6 +21,6 @@ inline fun <T> Boolean.iif(op: () -> T): ConditionalPart<T> = if (this) TruePart
 
 inline fun <T> Boolean.iunless(op: () -> T): ConditionalPart<T> = if (!this) TruePart(op()) else FalsePart
 
-inline fun <R, I : R, E : R> ConditionalPart<I>.ielse(op: () -> E): R = if (isPresent) value else op()
+inline fun <R, I : R> ConditionalPart<I>.ielse(op: () -> R): R = if (isPresent) value else op()
 
 fun <R, A : R, B : R> Boolean.select(trueV: A, falseV: B) = if (this) trueV else falseV

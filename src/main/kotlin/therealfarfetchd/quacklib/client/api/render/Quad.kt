@@ -5,7 +5,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.util.EnumFacing
 import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad
-import therealfarfetchd.quacklib.client.RGBA
+import therealfarfetchd.quacklib.common.api.extensions.RGBA
 import therealfarfetchd.quacklib.common.api.util.math.Mat4
 import therealfarfetchd.quacklib.common.api.util.math.Vec2
 import therealfarfetchd.quacklib.common.api.util.math.Vec3
@@ -19,12 +19,12 @@ data class Quad(
 ) {
   val normal by lazy { ((vert2 - vert1) crossProduct (vert3 - vert1)).normalize() }
 
-  val facing: EnumFacing by lazy { EnumFacing.getFacingFromVector(normal.x, normal.y, normal.z) }
+  val facing: EnumFacing by lazy { EnumFacing.getFacingFromVector(normal.xf, normal.yf, normal.zf) }
 
   fun bake(): BakedQuad {
     val vertices = (0..3).map { i ->
       val (xyz, uv) = shuf(i)
-      xyz to Vec2(texture.getInterpolatedU(uv.x * 16.0), texture.getInterpolatedV(uv.y * 16.0))
+      xyz to Vec2(texture.getInterpolatedU(uv.xf * 16.0).toDouble(), texture.getInterpolatedV(uv.yf * 16.0).toDouble())
     }
 
     val builder = UnpackedBakedQuad.Builder(DefaultVertexFormats.ITEM)
@@ -35,14 +35,14 @@ data class Quad(
     builder.setTexture(texture)
 
     for ((xyz, uv) in vertices) {
-      builder.put(0, xyz.x, xyz.y, xyz.z, 1f)
+      builder.put(0, xyz.xf, xyz.yf, xyz.zf, 1f)
       builder.put(1,
         maxOf(0f, minOf(color.first, 1f)),
         maxOf(0f, minOf(color.second, 1f)),
         maxOf(0f, minOf(color.third, 1f)),
         maxOf(0f, minOf(color.fourth, 1f)))
-      builder.put(2, uv.x, uv.y, 0f, 1f)
-      builder.put(3, normal.x, normal.y, normal.z, 0f)
+      builder.put(2, uv.xf, uv.yf, 0f, 1f)
+      builder.put(3, normal.xf, normal.yf, normal.zf, 0f)
       builder.put(4)
     }
 
@@ -78,8 +78,8 @@ data class Quad(
    * @return The rotated quad
    */
 
-  fun rotate(axis: EnumFacing.Axis, a: Float, center: Vec3 = Vec3(0.5f, 0.5f, 0.5f)): Quad {
-    return if (a == 0.0F) this.copy()
+  fun rotate(axis: EnumFacing.Axis, a: Double, center: Vec3 = Vec3(0.5, 0.5, 0.5)): Quad {
+    return if (a == 0.0) this.copy()
     else {
       val r = listOf(vert1, vert2, vert3, vert4).map { it.rotate(a, axis, center) }
       Quad(texture, r[0], r[1], r[2], r[3], tex1, tex2, tex3, tex4, color)

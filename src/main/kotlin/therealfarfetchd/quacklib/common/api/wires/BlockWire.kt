@@ -12,6 +12,7 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumFacing.*
+import net.minecraft.util.EnumHand
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
@@ -22,8 +23,10 @@ import net.minecraftforge.common.property.IUnlistedProperty
 import therealfarfetchd.quacklib.client.api.render.wires.EnumWireRender
 import therealfarfetchd.quacklib.common.api.block.capability.Capabilities
 import therealfarfetchd.quacklib.common.api.block.capability.WireConnectable
+import therealfarfetchd.quacklib.common.api.extensions.isServer
 import therealfarfetchd.quacklib.common.api.extensions.rotate
 import therealfarfetchd.quacklib.common.api.extensions.rotateY
+import therealfarfetchd.quacklib.common.api.extensions.select
 import therealfarfetchd.quacklib.common.api.qblock.IQBlockMultipart
 import therealfarfetchd.quacklib.common.api.qblock.QBlockConnectable
 import therealfarfetchd.quacklib.common.api.util.DataTarget
@@ -51,6 +54,12 @@ abstract class BlockWire<out T>(width: Double, height: Double) : QBlockConnectab
       clientDataChanged()
       true
     } else false
+  }
+
+  override fun onActivated(player: EntityPlayer, hand: EnumHand, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean {
+    if (world.isServer)
+      println("this is ${container.hashCode()}, it is ${container.isInvalid.select("in", "")}valid")
+    return true
   }
 
   override fun onPlaced(placer: EntityLivingBase?, stack: ItemStack?, sidePlaced: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) {

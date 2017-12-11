@@ -24,6 +24,7 @@ import net.minecraftforge.common.property.ExtendedBlockState
 import net.minecraftforge.common.property.IExtendedBlockState
 import org.apache.logging.log4j.Level
 import therealfarfetchd.quacklib.QuackLib
+import therealfarfetchd.quacklib.common.api.IBlockWrenchable
 import therealfarfetchd.quacklib.common.api.block.IBlockAdvancedOutline
 import therealfarfetchd.quacklib.common.api.extensions.*
 import therealfarfetchd.quacklib.common.api.util.ClientServerSeparateData
@@ -35,7 +36,7 @@ import java.util.*
  * Created by marco on 08.07.17.
  */
 @Suppress("OverridingDeprecatedMember", "DEPRECATION")
-open class QBContainer(factory: () -> QBlock) : Block(factory.also { tempFactory = it }().material), ITileEntityProvider, IBlockAdvancedOutline {
+open class QBContainer(factory: () -> QBlock) : Block(factory.also { tempFactory = it }().material), ITileEntityProvider, IBlockAdvancedOutline, IBlockWrenchable {
   private var _factory: (() -> QBlock)? = null
   internal val factory: () -> QBlock
     get() = _factory ?: tempFactory
@@ -228,6 +229,9 @@ open class QBContainer(factory: () -> QBlock) : Block(factory.also { tempFactory
 
   override fun rotateBlock(world: World, pos: BlockPos, axis: EnumFacing) =
     world.getQBlock(pos)?.rotateBlock(axis) ?: false
+
+  override fun rotateBlock(world: World, pos: BlockPos, axis: EnumFacing, player: EntityPlayer?, hitX: Float, hitY: Float, hitZ: Float) =
+    world.getQBlock(pos)?.rotateBlock(axis, player, hitX, hitY, hitZ) ?: false
 
   override fun onBlockActivated(world: World, pos: BlockPos, state: IBlockState?, player: EntityPlayer, hand: EnumHand, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) =
     world.getQBlock(pos)?.onActivated(player, hand, facing, hitX, hitY, hitZ) ?: false

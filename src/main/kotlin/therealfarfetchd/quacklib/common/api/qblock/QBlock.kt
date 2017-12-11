@@ -22,6 +22,7 @@ import net.minecraftforge.common.property.IUnlistedProperty
 import therealfarfetchd.quacklib.QuackLib
 import therealfarfetchd.quacklib.common.QGuiHandler
 import therealfarfetchd.quacklib.common.api.extensions.isServer
+import therealfarfetchd.quacklib.common.api.extensions.reduceOrNull
 import therealfarfetchd.quacklib.common.api.extensions.spawnAt
 import therealfarfetchd.quacklib.common.api.util.DataTarget
 import therealfarfetchd.quacklib.common.api.util.QNBTCompound
@@ -62,12 +63,17 @@ abstract class QBlock {
    * Returns the raytrace collision box of the block
    */
   open val rayCollisionBox: AxisAlignedBB?
-    get() = selectionBox.reduce(AxisAlignedBB::union)
+    get() = selectionBox.reduceOrNull(AxisAlignedBB::union)
 
   /**
    * Returns the entity collision box of the block.
    */
   open val collisionBox: Collection<AxisAlignedBB> = setOf(FullAABB)
+
+  /**
+   * Returns the render collision box of the block. Used for TESRs.
+   */
+  open val renderBox: AxisAlignedBB = FullAABB
 
   /**
    * Returns true if this block is a full (0,0,0->1,1,1) cube. Must stay constant at all times.
@@ -189,6 +195,11 @@ abstract class QBlock {
    * Gets called when the block gets rotated. (clicked on by a wrench)
    */
   open fun rotateBlock(axis: EnumFacing): Boolean = false
+
+  /**
+   * Gets called when the block gets rotated. Advanced version, works only with QL's wrench
+   */
+  open fun rotateBlock(axis: EnumFacing, player: EntityPlayer?, hitX: Float, hitY: Float, hitZ: Float): Boolean = rotateBlock(axis)
 
   /**
    * Gets called when one of the block's neighbors gets changed (broken, placed, …)

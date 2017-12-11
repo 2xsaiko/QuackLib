@@ -26,58 +26,58 @@ import therealfarfetchd.quacklib.common.api.wires.EnumWireConnection.External
 import therealfarfetchd.quacklib.common.api.wires.EnumWireConnection.None
 
 open class WireModel(
-  private val cableWidth: Float,
-  private val cableHeight: Float,
-  textureSize: Float,
+  private val cableWidth: Double,
+  private val cableHeight: Double,
+  textureSize: Double,
   private val texLocations: List<ResourceLocation>,
   private val texLocationRetriever: (IExtendedBlockState) -> ResourceLocation,
   private val itemTexLocationRetriever: (ItemStack) -> ResourceLocation
 ) : IModel, IIconRegister {
-  private val armLength: Float = (1 - cableWidth) / 2
-  private val armInnerLength: Float = armLength - cableHeight
-  private val armInnerSp: Float = armLength - armInnerLength
-  private val scaleFactor: Float = textureSize / 16F
+  private val armLength: Double = (1 - cableWidth) / 2
+  private val armInnerLength: Double = armLength - cableHeight
+  private val armInnerSp: Double = armLength - armInnerLength
+  private val scaleFactor: Double = textureSize / 16F
 
   private var textures: Map<ResourceLocation, TextureAtlasSprite> = emptyMap()
 
   override lateinit var particleTexture: TextureAtlasSprite
 
   // texture positions
-  private val arm1TopUv = Vec2(0.0F, 0.0F)
-  private val arm2TopUv = Vec2(0.0F, armLength + cableWidth) / scaleFactor
-  private val centerTopUv = Vec2(0.0F, armLength) / scaleFactor
-  private val centerTopCUv = Vec2(0.0F, 1.0F) / scaleFactor
-  private val arm1Side1Uv = Vec2(cableWidth, 0.0F) / scaleFactor
+  private val arm1TopUv = Vec2(0.0, 0.0)
+  private val arm2TopUv = Vec2(0.0, armLength + cableWidth) / scaleFactor
+  private val centerTopUv = Vec2(0.0, armLength) / scaleFactor
+  private val centerTopCUv = Vec2(0.0, 1.0) / scaleFactor
+  private val arm1Side1Uv = Vec2(cableWidth, 0.0) / scaleFactor
   private val arm2Side1Uv = Vec2(cableWidth, armLength + cableWidth) / scaleFactor
   private val centerSide1Uv = Vec2(cableWidth, armLength) / scaleFactor
-  private val arm1Side2Uv = Vec2(cableWidth + cableHeight, 0.0F) / scaleFactor
+  private val arm1Side2Uv = Vec2(cableWidth + cableHeight, 0.0) / scaleFactor
   private val arm2Side2Uv = Vec2(cableWidth + cableHeight, armLength + cableWidth) / scaleFactor
   private val centerSide2Uv = Vec2(cableWidth + cableHeight, armLength) / scaleFactor
-  private val arm1BottomUv = Vec2(cableWidth + 2 * cableHeight, 0.0F) / scaleFactor
+  private val arm1BottomUv = Vec2(cableWidth + 2 * cableHeight, 0.0) / scaleFactor
   private val arm2BottomUv = Vec2(cableWidth + 2 * cableHeight, armLength + cableWidth) / scaleFactor
   private val centerBottomUv = Vec2(cableWidth + 2 * cableHeight, armLength) / scaleFactor
-  private val cableFrontUv = Vec2(cableWidth, 1.0F) / scaleFactor
-  private val cableBackUv = Vec2(cableWidth + cableHeight, 1.0F) / scaleFactor
-  private val cornerTop1Uv = Vec2(0.0F, 1.0F + cableWidth) / scaleFactor
-  private val cornerTop2Uv = Vec2(cableWidth + 2 * cableHeight, 1.0F + cableWidth) / scaleFactor
-  private val cornerSide1Uv = Vec2(cableWidth, 1.0F + cableWidth) / scaleFactor
-  private val cornerSide2Uv = Vec2(cableWidth + cableHeight, 1.0F + cableWidth) / scaleFactor
-  private val icornerSide1Uv = Vec2(2 * cableWidth + 2 * cableHeight, 0.0F) / scaleFactor
+  private val cableFrontUv = Vec2(cableWidth, 1.0) / scaleFactor
+  private val cableBackUv = Vec2(cableWidth + cableHeight, 1.0) / scaleFactor
+  private val cornerTop1Uv = Vec2(0.0, 1.0 + cableWidth) / scaleFactor
+  private val cornerTop2Uv = Vec2(cableWidth + 2 * cableHeight, 1.0 + cableWidth) / scaleFactor
+  private val cornerSide1Uv = Vec2(cableWidth, 1.0 + cableWidth) / scaleFactor
+  private val cornerSide2Uv = Vec2(cableWidth + cableHeight, 1.0 + cableWidth) / scaleFactor
+  private val icornerSide1Uv = Vec2(2 * cableWidth + 2 * cableHeight, 0.0) / scaleFactor
   private val icornerSide2Uv = Vec2(2 * cableWidth + 2 * cableHeight, cableHeight) / scaleFactor
-  private val center8TopUv = Vec2(0.0F, 0.25F) / scaleFactor
+  private val center8TopUv = Vec2(0.0, 0.25) / scaleFactor
   private val center8Top2Uv = arm2TopUv
-  private val center8Arm1Side1Uv = Vec2(cableWidth, 0.25F) / scaleFactor
-  private val center8Arm1Side2Uv = Vec2(cableWidth + cableHeight, 0.25F) / scaleFactor
+  private val center8Arm1Side1Uv = Vec2(cableWidth, 0.25) / scaleFactor
+  private val center8Arm1Side2Uv = Vec2(cableWidth + cableHeight, 0.25) / scaleFactor
   private val center8Arm2Side1Uv = arm2Side1Uv
   private val center8Arm2Side2Uv = arm2Side2Uv
-  private val innerTop1Uv = Vec2(0.0F, armInnerSp) / scaleFactor
+  private val innerTop1Uv = Vec2(0.0, armInnerSp) / scaleFactor
   private val innerTop2Uv = arm2TopUv
   private val innerArm1Side1Uv = Vec2(cableWidth, armInnerSp) / scaleFactor
   private val innerArm1Side2Uv = Vec2(cableWidth + cableHeight, armInnerSp) / scaleFactor
   private val innerArm2Side1Uv = arm2Side1Uv
   private val innerArm2Side2Uv = arm2Side2Uv
 
-  constructor(cableWidth: Float, cableHeight: Float, textureSize: Float, texLocation: ResourceLocation) : this(cableWidth, cableHeight, textureSize, listOf(texLocation), { texLocation }, { texLocation })
+  constructor(cableWidth: Double, cableHeight: Double, textureSize: Double, texLocation: ResourceLocation) : this(cableWidth, cableHeight, textureSize, listOf(texLocation), { texLocation }, { texLocation })
 
   override fun bakeQuads(face: EnumFacing?, state: IExtendedBlockState): List<BakedQuad> {
     val texture = textures[texLocationRetriever(state)]!!
@@ -98,7 +98,7 @@ open class WireModel(
 
     if (face != null) return emptyList()
 
-    return mkQuads(texture, DOWN, External, External, External, External).map { it.translate(Vec3(0F, 0.275F, 0F)) }.map(Quad::bake)
+    return mkQuads(texture, DOWN, External, External, External, External).map { it.translate(Vec3(0.0, 0.275, 0.0)) }.map(Quad::bake)
   }
 
   private fun mkQuads(texture: TextureAtlasSprite, side: EnumFacing, vararg c: EnumWireConnection): List<Quad> {
@@ -133,13 +133,13 @@ open class WireModel(
     return if (!crossing && c.any { it.renderType != EnumWireRender.Invisible }) {
       val up = c.withIndex().filter { it.value.renderType != EnumWireRender.Invisible }.map { TransformRules.getRule(EnumEdge.fromFaces(side, BlockWire.lookupMap[side]!![it.index])) }.first()
       listOf(
-        QuadFactory.makeQuadw(armLength, cableHeight, armLength, cableWidth, 0F, cableWidth, UP,
+        QuadFactory.makeQuadw(armLength, cableHeight, armLength, cableWidth, 0.0, cableWidth, UP,
           centerTopUv, cableWidth, cableWidth, texture, scaleFactor).mapIf(up.useAlt) { it.mirrorTextureY }
       ).map(up.op)
     } else {
       val up = TransformRules.getRule(side)
       listOf(
-        QuadFactory.makeQuadw(armLength, cableHeight, armLength, cableWidth, 0F, cableWidth, UP,
+        QuadFactory.makeQuadw(armLength, cableHeight, armLength, cableWidth, 0.0, cableWidth, UP,
           if (crossing) centerTopCUv else centerTopUv, cableWidth, cableWidth, texture, scaleFactor)
       ).map(up.op)
     }
@@ -154,7 +154,7 @@ open class WireModel(
     if (!extendEnd) {
       val front = listOf(centerSide1Uv, centerSide2Uv)[packInt(altBase)]
       val rules = TransformRules.getRule(edge)
-      return listOf(QuadFactory.makeQuadw(armLength, 0F, armLength, cableWidth, cableHeight, 0F, SOUTH, front, cableHeight, cableWidth, texture, scaleFactor).rotatedTexture90.mapIf(rules.mirrorBase) { it.mirrorTextureX })
+      return listOf(QuadFactory.makeQuadw(armLength, 0.0, armLength, cableWidth, cableHeight, 0.0, SOUTH, front, cableHeight, cableWidth, texture, scaleFactor).rotatedTexture90.mapIf(rules.mirrorBase) { it.mirrorTextureX })
     } else {
       val key = packInt(false, alt)
       val key2 = key shr 1
@@ -165,10 +165,10 @@ open class WireModel(
       val top = listOf(center8TopUv, center8Top2Uv)[key2]
 
       return listOf(
-        QuadFactory.makeQuadw(armLength, cableHeight, 0.25F, cableWidth, 0F, armLength - 0.25F, UP, top, cableWidth, armLength - 0.25F, texture, scaleFactor).mapIf(alt) { it.mirrorTextureY },
-        QuadFactory.makeQuadw(armLength, cableHeight, 0.25F, 0F, -cableHeight, armLength - 0.25F, EAST, side1, cableHeight, armLength - 0.25F, texture, scaleFactor).rotatedTexture90.rotatedTexture180.mapIf(alt) { it.mirrorTextureX },
-        QuadFactory.makeQuadw(armLength + cableWidth, cableHeight, 0.25F, 0F, -cableHeight, armLength - 0.25F, WEST, side2, cableHeight, armLength - 0.25F, texture, scaleFactor).rotatedTexture90.flipTexturedSide.rotatedTexture180.mapIf(alt) { it.mirrorTextureX },
-        QuadFactory.makeQuadw(armLength, 0F, 0.25F, cableWidth, cableHeight, 0F, SOUTH, front, cableHeight, cableWidth, texture, scaleFactor).rotatedTexture90
+        QuadFactory.makeQuadw(armLength, cableHeight, 0.25, cableWidth, 0.0, armLength - 0.25, UP, top, cableWidth, armLength - 0.25, texture, scaleFactor).mapIf(alt) { it.mirrorTextureY },
+        QuadFactory.makeQuadw(armLength, cableHeight, 0.25, 0.0, -cableHeight, armLength - 0.25, EAST, side1, cableHeight, armLength - 0.25, texture, scaleFactor).rotatedTexture90.rotatedTexture180.mapIf(alt) { it.mirrorTextureX },
+        QuadFactory.makeQuadw(armLength + cableWidth, cableHeight, 0.25, 0.0, -cableHeight, armLength - 0.25, WEST, side2, cableHeight, armLength - 0.25, texture, scaleFactor).rotatedTexture90.flipTexturedSide.rotatedTexture180.mapIf(alt) { it.mirrorTextureX },
+        QuadFactory.makeQuadw(armLength, 0.0, 0.25, cableWidth, cableHeight, 0.0, SOUTH, front, cableHeight, cableWidth, texture, scaleFactor).rotatedTexture90
       )
     }
   }
@@ -188,10 +188,10 @@ open class WireModel(
     val top = listOf(arm1TopUv, arm2TopUv)[key2]
 
     return listOf(
-      QuadFactory.makeQuadw(armLength, cableHeight, 0F, cableWidth, 0F, armLength, UP, top, cableWidth, armLength, texture, scaleFactor).mapIf(alt) { it.mirrorTextureY },
-      QuadFactory.makeQuadw(armLength, cableHeight, 0F, 0F, -cableHeight, armLength, EAST, side1, cableHeight, armLength, texture, scaleFactor).rotatedTexture90.rotatedTexture180.mapIf(alt) { it.mirrorTextureX },
-      QuadFactory.makeQuadw(armLength + cableWidth, cableHeight, 0F, 0F, -cableHeight, armLength, WEST, side2, cableHeight, armLength, texture, scaleFactor).rotatedTexture90.flipTexturedSide.rotatedTexture180.mapIf(alt) { it.mirrorTextureX },
-      QuadFactory.makeQuadw(armLength, 0F, 0F, cableWidth, cableHeight, 0F, SOUTH, front, cableHeight, cableWidth, texture, scaleFactor).rotatedTexture90
+      QuadFactory.makeQuadw(armLength, cableHeight, 0.0, cableWidth, 0.0, armLength, UP, top, cableWidth, armLength, texture, scaleFactor).mapIf(alt) { it.mirrorTextureY },
+      QuadFactory.makeQuadw(armLength, cableHeight, 0.0, 0.0, -cableHeight, armLength, EAST, side1, cableHeight, armLength, texture, scaleFactor).rotatedTexture90.rotatedTexture180.mapIf(alt) { it.mirrorTextureX },
+      QuadFactory.makeQuadw(armLength + cableWidth, cableHeight, 0.0, 0.0, -cableHeight, armLength, WEST, side2, cableHeight, armLength, texture, scaleFactor).rotatedTexture90.flipTexturedSide.rotatedTexture180.mapIf(alt) { it.mirrorTextureX },
+      QuadFactory.makeQuadw(armLength, 0.0, 0.0, cableWidth, cableHeight, 0.0, SOUTH, front, cableHeight, cableWidth, texture, scaleFactor).rotatedTexture90
     )
   }
 
@@ -215,14 +215,14 @@ open class WireModel(
     val front = listOf(cableFrontUv, cableBackUv)[key2]
 
     return listOf(
-      QuadFactory.makeQuadw(armLength, cableHeight, 0F, cableWidth, 0F, armLength, UP, top, cableWidth, armLength, texture, scaleFactor).mapIf(alt) { it.mirrorTextureY },
-      QuadFactory.makeQuadw(armLength, cableHeight, 0F, 0F, -cableHeight, armLength, EAST, side1, cableHeight, armLength, texture, scaleFactor).rotatedTexture90.rotatedTexture180.mapIf(alt) { it.mirrorTextureX },
-      QuadFactory.makeQuadw(armLength + cableWidth, cableHeight, 0F, 0F, -cableHeight, armLength, WEST, side2, cableHeight, armLength, texture, scaleFactor).rotatedTexture90.flipTexturedSide.rotatedTexture180.mapIf(alt) { it.mirrorTextureX },
-      QuadFactory.makeQuadw(armLength, cableHeight, -cableHeight, cableWidth, 0.0F, cableHeight, UP, ctop1, cableWidth, cableHeight, texture, scaleFactor),
-      QuadFactory.makeQuadw(armLength, 0.0F, -cableHeight, cableWidth, cableHeight, 0.0F, SOUTH, ctop2, cableWidth, cableHeight, texture, scaleFactor).mirrorTextureY,
-      QuadFactory.makeQuadw(armLength, 0.0F, 0.0F, 0.0F, cableHeight, -cableHeight, EAST, cside1, cableHeight, cableHeight, texture, scaleFactor),
-      QuadFactory.makeQuadw(armLength + cableWidth, 0.0F, 0.0F, 0.0F, cableHeight, -cableHeight, WEST, cside2, cableHeight, cableHeight, texture, scaleFactor).flipTexturedSide,
-      QuadFactory.makeQuadw(armLength, 0F, 0F, cableWidth, 0F, -cableHeight, DOWN, front, cableHeight, cableWidth, texture, scaleFactor).rotatedTexture90
+      QuadFactory.makeQuadw(armLength, cableHeight, 0.0, cableWidth, 0.0, armLength, UP, top, cableWidth, armLength, texture, scaleFactor).mapIf(alt) { it.mirrorTextureY },
+      QuadFactory.makeQuadw(armLength, cableHeight, 0.0, 0.0, -cableHeight, armLength, EAST, side1, cableHeight, armLength, texture, scaleFactor).rotatedTexture90.rotatedTexture180.mapIf(alt) { it.mirrorTextureX },
+      QuadFactory.makeQuadw(armLength + cableWidth, cableHeight, 0.0, 0.0, -cableHeight, armLength, WEST, side2, cableHeight, armLength, texture, scaleFactor).rotatedTexture90.flipTexturedSide.rotatedTexture180.mapIf(alt) { it.mirrorTextureX },
+      QuadFactory.makeQuadw(armLength, cableHeight, -cableHeight, cableWidth, 0.0, cableHeight, UP, ctop1, cableWidth, cableHeight, texture, scaleFactor),
+      QuadFactory.makeQuadw(armLength, 0.0, -cableHeight, cableWidth, cableHeight, 0.0, SOUTH, ctop2, cableWidth, cableHeight, texture, scaleFactor).mirrorTextureY,
+      QuadFactory.makeQuadw(armLength, 0.0, 0.0, 0.0, cableHeight, -cableHeight, EAST, cside1, cableHeight, cableHeight, texture, scaleFactor),
+      QuadFactory.makeQuadw(armLength + cableWidth, 0.0, 0.0, 0.0, cableHeight, -cableHeight, WEST, cside2, cableHeight, cableHeight, texture, scaleFactor).flipTexturedSide,
+      QuadFactory.makeQuadw(armLength, 0.0, 0.0, cableWidth, 0.0, -cableHeight, DOWN, front, cableHeight, cableWidth, texture, scaleFactor).rotatedTexture90
     )
   }
 
@@ -243,12 +243,12 @@ open class WireModel(
     val front = listOf(cableFrontUv, cableBackUv)[key2]
 
     return listOf(
-      QuadFactory.makeQuadw(armLength, cableHeight, armInnerSp, cableWidth, 0F, armInnerLength, UP, top, cableWidth, armInnerLength, texture, scaleFactor).mapIf(alt) { it.mirrorTextureY },
-      QuadFactory.makeQuadw(armLength, cableHeight, armInnerSp, 0F, -cableHeight, armInnerLength, EAST, side1, cableHeight, armInnerLength, texture, scaleFactor).rotatedTexture90.rotatedTexture180.mapIf(alt) { it.mirrorTextureX },
-      QuadFactory.makeQuadw(armLength + cableWidth, cableHeight, armInnerSp, 0F, -cableHeight, armInnerLength, WEST, side2, cableHeight, armInnerLength, texture, scaleFactor).rotatedTexture90.flipTexturedSide.rotatedTexture180.mapIf(alt) { it.mirrorTextureX },
-      QuadFactory.makeQuadw(armLength, cableHeight, 0F, cableWidth, 0F, armInnerSp, UP, front, cableHeight, cableWidth, texture, scaleFactor).rotatedTexture90,
-      QuadFactory.makeQuadw(armLength, 0F, 0F, 0F, cableHeight, armInnerSp, EAST, cside1, cableHeight, cableHeight, texture, scaleFactor).flipTexturedSide,
-      QuadFactory.makeQuadw(armLength + cableWidth, 0F, 0F, 0F, cableHeight, armInnerSp, WEST, cside2, cableHeight, cableHeight, texture, scaleFactor)
+      QuadFactory.makeQuadw(armLength, cableHeight, armInnerSp, cableWidth, 0.0, armInnerLength, UP, top, cableWidth, armInnerLength, texture, scaleFactor).mapIf(alt) { it.mirrorTextureY },
+      QuadFactory.makeQuadw(armLength, cableHeight, armInnerSp, 0.0, -cableHeight, armInnerLength, EAST, side1, cableHeight, armInnerLength, texture, scaleFactor).rotatedTexture90.rotatedTexture180.mapIf(alt) { it.mirrorTextureX },
+      QuadFactory.makeQuadw(armLength + cableWidth, cableHeight, armInnerSp, 0.0, -cableHeight, armInnerLength, WEST, side2, cableHeight, armInnerLength, texture, scaleFactor).rotatedTexture90.flipTexturedSide.rotatedTexture180.mapIf(alt) { it.mirrorTextureX },
+      QuadFactory.makeQuadw(armLength, cableHeight, 0.0, cableWidth, 0.0, armInnerSp, UP, front, cableHeight, cableWidth, texture, scaleFactor).rotatedTexture90,
+      QuadFactory.makeQuadw(armLength, 0.0, 0.0, 0.0, cableHeight, armInnerSp, EAST, cside1, cableHeight, cableHeight, texture, scaleFactor).flipTexturedSide,
+      QuadFactory.makeQuadw(armLength + cableWidth, 0.0, 0.0, 0.0, cableHeight, armInnerSp, WEST, cside2, cableHeight, cableHeight, texture, scaleFactor)
     )
   }
 
