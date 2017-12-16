@@ -10,10 +10,13 @@ import net.minecraftforge.common.property.IExtendedBlockState
 import therealfarfetchd.quacklib.client.api.render.Quad
 import therealfarfetchd.quacklib.client.api.render.QuadFactory
 import therealfarfetchd.quacklib.client.api.render.wires.TransformRules
+import therealfarfetchd.quacklib.common.api.extensions.RGBA
 import therealfarfetchd.quacklib.common.api.extensions.mapIf
 import therealfarfetchd.quacklib.common.api.extensions.mapWithCopy
 import therealfarfetchd.quacklib.common.api.util.StringPackedProps
+import therealfarfetchd.quacklib.common.api.util.Tuple4
 import therealfarfetchd.quacklib.common.api.util.math.*
+import kotlin.math.PI
 
 abstract class SimpleModel : IModel {
   protected val mc = Minecraft.getMinecraft()
@@ -144,6 +147,11 @@ class ModelBuilder(val face: EnumFacing?) {
 
     fun face(op: FaceTemplate.() -> Unit) {
       val t = FaceTemplate().also(op)
+      builder.quads += t.createQuads(builder.face).map { it.transform(builder.trStack.last()) }
+    }
+
+    fun cyl(op: CylinderTemplate.() -> Unit) {
+      val t = CylinderTemplate().also(op)
       builder.quads += t.createQuads(builder.face).map { it.transform(builder.trStack.last()) }
     }
 
@@ -378,7 +386,75 @@ class SignTemplate(private val playerPos: Vec3) : IQuadFactory {
           .translate(-center)
       )
     }
-    return listOf(q).filterNotNull()
+    return listOfNotNull(q)
+  }
+}
+
+class CylinderTemplate : IQuadFactory {
+  var min = Vec3(0.0, 0.0, 0.0)
+  var max = Vec3(1.0, 1.0, 1.0)
+
+  /**
+   * Render the texture on the inside of the box.
+   * Cull isn't available because it looks horrible when rendered on the player.
+   */
+  var inverted = false
+
+  var res = 90
+    set(value) {
+      field = maxOf(3, value)
+    }
+
+  var up: TextureTemplate? = null
+    set(value) {
+      field = if (value == null || !value.auto) value
+      else TextureTemplate(value.texture, Vec2(minOf(min.x, max.x), minOf(min.z, max.z)), Vec2(maxOf(min.x, max.x), maxOf(min.z, max.z)), postProc = value.postProc)
+    }
+
+  var down: TextureTemplate? = null
+    set(value) {
+      field = if (value == null || !value.auto) value
+      else TextureTemplate(value.texture, Vec2(minOf(min.x, max.x), minOf(min.z, max.z)), Vec2(maxOf(min.x, max.x), maxOf(min.z, max.z)), postProc = value.postProc)
+    }
+
+  var side: TextureTemplate? = null
+    set(value) {
+      field = if (value == null || !value.auto) value
+      else TextureTemplate(value.texture, Vec2(minOf(min.x, max.x), minOf(min.z, max.z)), Vec2(maxOf(min.x, max.x), maxOf(min.z, max.z)), postProc = value.postProc)
+    }
+
+  override fun createQuads(facing: EnumFacing?): List<Quad> {
+    var quads: List<Quad> = listOf()
+    side?.also { side ->
+      var last: Tuple4<Double, Double, Double, Double>? = null
+      for (i in 0..res) {
+        val d1 = i / res.toDouble()
+        val p = d1 * (2 * PI)
+        val px = min.x + (sin(p) + 1) / 2 * (max.x - min.x)
+        val pz = min.z + (cos(p) + 1) / 2 * (max.z - min.z)
+        val uvX = side.uv.x + d1 * (side.uv1.x - side.uv.x)
+        if (last != null) {
+          val (lp, lpx, lpz, luvX) = last
+          val quad = Quad(side.texture,
+            Vec3(lpx, min.y, lpz),
+            Vec3(lpx, max.y, lpz),
+            Vec3(px, max.y, pz),
+            Vec3(px, min.y, pz),
+            Vec2(luvX, side.uv1.y),
+            Vec2(luvX, side.uv.y),
+            Vec2(uvX, side.uv.y),
+            Vec2(uvX, side.uv1.y),
+            RGBA(1f, 1f, 1f, 1f)
+          )
+          if (!inverted)
+            quads += quad.flipTexturedSide
+          if (inverted)
+            quads += quad
+        }
+        last = Tuple4(p, px, pz, uvX)
+      }
+    }
+    return quads
   }
 }
 

@@ -12,7 +12,6 @@ import therealfarfetchd.quacklib.common.api.wires.BaseConnectable
  * Created by marco on 09.07.17.
  */
 interface IQBlockMultipart {
-
   private val qb: QBlock
     get() = this as QBlock
 
@@ -34,7 +33,7 @@ interface IQBlockMultipart {
     get() = qb.collisionBox.reduce(AxisAlignedBB::union)
 
   val occlusionBoxes: List<AxisAlignedBB>
-    get() = listOf(partPlacementBoundingBox).filterNotNull()
+    get() = listOfNotNull(partPlacementBoundingBox)
 
   fun onPartChanged(part: IPartInfo) {
     with(qb) {
@@ -42,5 +41,4 @@ interface IQBlockMultipart {
       else if (this is BaseConnectable) updateCableConnections()
     }
   }
-
 }

@@ -1,6 +1,6 @@
 package therealfarfetchd.quacklib.common.api.util.math
 
-import net.minecraft.util.math.MathHelper
+import kotlin.math.atan2
 
 data class Vec2(val x: Double, val y: Double) {
   constructor(x: Int, y: Int) : this(x.toDouble(), y.toDouble())
@@ -34,10 +34,11 @@ data class Vec2(val x: Double, val y: Double) {
     else {
       val x1 = x - center.x
       val y1 = y - center.y
-      val h = MathHelper.sqrt(x1 * x1 + y1 * y1)
-      val angle = Math.toRadians(Math.toDegrees(Math.atan2(y1, x1)) + a)
-      val nx = Math.cos(angle) * h // can't use MathHelper.cos/sin here, it returns 1-[expected value] for some cases >.<
-      val ny = Math.sin(angle) * h
+
+      val h = getDistance(x1, y1)
+      val angle = toRadians * (toDegrees * (atan2(y1, x1)) + a)
+      val nx = cos(angle) * h // can't use MathHelper.cos/sin here, it returns 1-[expected value] for some cases >.<
+      val ny = sin(angle) * h
       Vec2(nx + center.x, ny + center.y)
     }
   }

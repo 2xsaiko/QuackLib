@@ -56,12 +56,6 @@ abstract class BlockWire<out T>(width: Double, height: Double) : QBlockConnectab
     } else false
   }
 
-  override fun onActivated(player: EntityPlayer, hand: EnumHand, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean {
-    if (world.isServer)
-      println("this is ${container.hashCode()}, it is ${container.isInvalid.select("in", "")}valid")
-    return true
-  }
-
   override fun onPlaced(placer: EntityLivingBase?, stack: ItemStack?, sidePlaced: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) {
     facing = sidePlaced
     super.onPlaced(placer, stack, sidePlaced, hitX, hitY, hitZ)
