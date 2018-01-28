@@ -31,7 +31,7 @@ annotation class BlockDef(
   val creativeTab: String = ModID,
   val dependencies: String = "",
   val layout: BlockClassLayout = BlockClassLayout.Standard,
-  val metaModels: IntArray = intArrayOf(0)
+  val metaModels: IntArray = [0]
 )
 
 @Retention(AnnotationRetention.RUNTIME)
@@ -39,7 +39,7 @@ annotation class BlockDef(
 annotation class ItemDef(
   val registerModels: Boolean = true,
   val creativeTab: String = ModID,
-  val metaModels: IntArray = intArrayOf(1)
+  val metaModels: IntArray = [0]
 )
 
 @Retention(AnnotationRetention.RUNTIME)
@@ -70,7 +70,8 @@ interface IBlockDefinition : ICommonItemDef {
         bar.step(mainClass.java)
         QuackLib.Logger.info("Found block ${mainClass.simpleName}")
 
-        val layout = (d.annotationInfo["layout"] as? ModAnnotation.EnumHolder)?.let { BlockClassLayout.valueOf(it.value) } ?: BlockClassLayout.Standard
+        val layout = (d.annotationInfo["layout"] as? ModAnnotation.EnumHolder)?.let { BlockClassLayout.valueOf(it.value) }
+                     ?: BlockClassLayout.Standard
         val metaModels = (d.annotationInfo["metaModels"] as? IntArray ?: intArrayOf(0)).toSet()
 
         val requiredFeatures = (d.annotationInfo["dependencies"] as? String ?: "").split(";").filter(String::isNotBlank)
@@ -92,11 +93,13 @@ interface IBlockDefinition : ICommonItemDef {
         }
 
         when (layout) {
-          BlockClassLayout.Standard -> {
-            val companionClass = mainClass.companionObject ?: throw IllegalBlockDefLayoutException("QBlock class $mainClass should have companion object!")
+          BlockClassLayout.Standard    -> {
+            val companionClass = mainClass.companionObject
+                                 ?: throw IllegalBlockDefLayoutException("QBlock class $mainClass should have companion object!")
             val companion = mainClass.companionObjectInstance!!
 
-            val getblock = findProperty(companionClass, "Block") ?: throw IllegalBlockDefLayoutException("QBlock class $mainClass should have a `Block` field in it's companion object holding the `Block` instance!")
+            val getblock = findProperty(companionClass, "Block")
+                           ?: throw IllegalBlockDefLayoutException("QBlock class $mainClass should have a `Block` field in it's companion object holding the `Block` instance!")
             val getitem = findProperty(companionClass, "Item")
 
             val blockInstance = shutupForge { getblock.get(companion).takeIf { it is Block } as Block? }
@@ -134,7 +137,8 @@ interface IBlockDefinition : ICommonItemDef {
             }
           }
           BlockClassLayout.StaticBlock -> {
-            val block = (mainClass.objectInstance ?: throw IllegalBlockDefLayoutException("Block ${d.className} should be an object!")) as? Block
+            val block = (mainClass.objectInstance
+                         ?: throw IllegalBlockDefLayoutException("Block ${d.className} should be an object!")) as? Block
                         ?: throw IllegalBlockDefLayoutException("Block ${d.className} doesn't extend net.minecraft.block.Block!")
 
             val getitem = findProperty(mainClass, "Item")
@@ -183,7 +187,8 @@ interface IItemDefinition : ICommonItemDef {
 
         val mainClass = shutupForge { findClass(d.className)!! }
         bar.step(mainClass.java)
-        val item = (mainClass.objectInstance ?: throw IllegalBlockDefLayoutException("Item ${d.className} should be an object!")) as? Item
+        val item = (mainClass.objectInstance
+                    ?: throw IllegalBlockDefLayoutException("Item ${d.className} should be an object!")) as? Item
                    ?: throw IllegalBlockDefLayoutException("Item ${d.className} doesn't extend net.minecraft.item.Item!")
 
         item.setCreativeTabFromName(d.annotationInfo["creativeTab"] as? String)
@@ -197,7 +202,8 @@ interface IItemDefinition : ICommonItemDef {
         definitions += object : IItemDefinition {
           override val item: Item = item
           override val registerModels: Boolean = d.annotationInfo["registerModels"] as? Boolean ?: true
-          override val metaModels: Collection<Int> = (d.annotationInfo["metaModels"] as? IntArray ?: intArrayOf(0)).toSet()
+          override val metaModels: Collection<Int> = (d.annotationInfo["metaModels"] as? IntArray
+                                                      ?: intArrayOf(0)).toSet()
         }
       }
       ProgressManager.pop(bar)

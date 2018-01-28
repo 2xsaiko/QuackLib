@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:glowstone_dust"
+    },
+    {
+      "type": "forge:ore_dict",
+      "ore": "dyeLightBlue"
+    }
+  ],
+  "result": {
+    "item": "quacklib:component",
+    "data": 3,
+    "count": 1
+  },
+  "group": "quacklib:lumar"
+}

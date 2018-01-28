@@ -4,6 +4,7 @@ import net.minecraft.block.Block
 import net.minecraft.item.Item
 import net.minecraft.item.ItemBlock
 import net.minecraft.tileentity.TileEntity
+import therealfarfetchd.quacklib.common.api.item.ItemBlockDelegated
 import therealfarfetchd.quacklib.common.api.util.shutupForge
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
@@ -20,6 +21,9 @@ object WrapperImplManager {
 
   private var blocksMap: Map<KClass<QBlock>, Block> = emptyMap()
   private var itemsMap: Map<KClass<QBlock>, Item> = emptyMap()
+
+  private var pendingItemMods: List<Pair<KClass<QBlock>, Item.() -> Unit>> = emptyList()
+  private var finishedLoading = false
 
   init {
     registerWrapper {}
@@ -39,7 +43,8 @@ object WrapperImplManager {
     templates += kClass.toSet() to t
   }
 
-  fun getTemplate(vararg modifiers: KClass<*>): WrapperTemplate = templates[modifiers.toSet()] ?: error("There's no template registered for this combination of modifiers!")
+  fun getTemplate(vararg modifiers: KClass<*>): WrapperTemplate = templates[modifiers.toSet()]
+                                                                  ?: error("There's no template registered for this combination of modifiers!")
 
   fun <T : QBlock> getTemplate(kClass: KClass<T>): WrapperTemplate = getTemplate(*getModifiers(kClass).toTypedArray())
 
@@ -60,23 +65,31 @@ object WrapperImplManager {
 
   fun <T : QBlock> container(kClass: KClass<T>): Lazy<Block> = lazy { getContainer(kClass) }
 
-  fun <T : QBlock> getItem(kClass: KClass<T>, op: Item.() -> Unit = {}): Item {
+  fun <T : QBlock> getItem(kClass: KClass<T>): Item {
     val kClass1 = kClass as KClass<QBlock>
     return if (kClass in itemsMap) itemsMap[kClass]!!
     else {
       val item = getTemplate(kClass).itemOp({ createInstance(kClass) }, getContainer(kClass))
       val qb = createInstance(kClass)
-      shutupForge {
-        item.registryName = qb.blockType
-      }
+      shutupForge { item.registryName = qb.blockType }
       item.unlocalizedName = qb.blockType.toString()
-      op(item)
       itemsMap += kClass1 to item
       item
     }
   }
 
-  fun <T : QBlock> item(kClass: KClass<T>, op: Item.() -> Unit = {}): Lazy<Item> = lazy { getItem(kClass, op) }
+  fun <T : QBlock> item(kClass: KClass<T>): Lazy<Item> = lazy { getItem(kClass) }
+
+  fun <T : QBlock> itemMod(kClass: KClass<T>, op: Item.() -> Unit) {
+    require(!finishedLoading)
+    pendingItemMods += kClass as KClass<QBlock> to op
+  }
+
+  fun applyItemMods() {
+    pendingItemMods.forEach { (cls, op) -> getItem(cls).also(op) }
+    pendingItemMods = emptyList()
+    finishedLoading = true
+  }
 
   fun <T : QBlock> createTileEntity(kClass: KClass<T>): (QBlock) -> TileEntity {
     return getTemplate(kClass).teOp
@@ -88,7 +101,7 @@ object WrapperImplManager {
 
   class WrapperTemplate {
     var containerOp: (() -> QBlock) -> Block = { QBContainer(it) }
-    var itemOp: (() -> QBlock, Block) -> Item = { _, b -> ItemBlock(b) }
+    var itemOp: (() -> QBlock, Block) -> Item = { _, b -> ItemBlockDelegated(b) }
     var teOp: (QBlock) -> TileEntity = ::QBContainerTile
     var qbOp: (KClass<QBlock>) -> QBlock = { it.createInstance() }
 

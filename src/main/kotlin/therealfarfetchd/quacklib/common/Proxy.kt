@@ -29,7 +29,7 @@ import therealfarfetchd.quacklib.common.api.autoconf.ItemFeature
 import therealfarfetchd.quacklib.common.api.block.capability.IConnectable
 import therealfarfetchd.quacklib.common.api.extensions.makeStack
 import therealfarfetchd.quacklib.common.api.extensions.register
-import therealfarfetchd.quacklib.common.api.item.ItemBlockMultipartEx
+import therealfarfetchd.quacklib.common.api.item.ItemBlockMultipartDelegated
 import therealfarfetchd.quacklib.common.api.qblock.*
 import therealfarfetchd.quacklib.common.api.util.AutoLoad
 import therealfarfetchd.quacklib.common.api.util.IBlockDefinition
@@ -74,7 +74,7 @@ open class Proxy {
     WrapperImplManager.registerWrapper(IQBlockMultipart::class) {
       container(::QBContainerMultipart)
       te(::QBContainerTileMultipart)
-      item { _, block -> ItemBlockMultipart(block, block as IMultipart) }
+      item { _, block -> ItemBlockMultipartDelegated(block, block as IMultipart) }
     }
     WrapperImplManager.registerWrapper(IQBlockMultipart::class, ITickable::class) {
       inherit(IQBlockMultipart::class)
@@ -110,6 +110,7 @@ open class Proxy {
     FeatureManager.checkFeatures()
     FeatureManager.lockFeatures()
     ProgressManager.pop(bar)
+    WrapperImplManager.applyItemMods()
   }
 
   @SubscribeEvent

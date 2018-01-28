@@ -93,6 +93,12 @@ open class QBContainerMultipart(factory: () -> QBlock) : QBContainer(factory), I
     (part.tile as QBContainerTile).qb.asmp.onPartChanged(otherPart)
   }
 
+  override fun canPlacePartAt(world: World, pos: BlockPos) =
+    canPlaceBlockAt(world, pos)
+
+  override fun canPlacePartOnSide(world: World, pos: BlockPos, side: EnumFacing, slot: IPartSlot?) =
+    canPlaceBlockOnSide(world, pos, side)
+
   override fun getLightOpacity(state: IBlockState?): Int = this.lightOpacity
   override fun getLightValue(state: IBlockState?): Int = this.lightValue
 
