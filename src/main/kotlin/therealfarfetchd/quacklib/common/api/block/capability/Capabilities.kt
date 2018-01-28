@@ -3,6 +3,8 @@ package therealfarfetchd.quacklib.common.api.block.capability
 import mcmultipart.capability.CapabilityJoiner
 import net.minecraftforge.common.capabilities.Capability
 import net.minecraftforge.common.capabilities.CapabilityInject
+import therealfarfetchd.quacklib.common.api.autoconf.DefaultFeatures
+import therealfarfetchd.quacklib.common.api.autoconf.FeatureManager
 
 object Capabilities {
 
@@ -15,6 +17,7 @@ object Capabilities {
     set(value) {
       if (_Connectable != null) throw IllegalStateException("Capability already initialized!")
       _Connectable = value
-      CapabilityJoiner.registerCapabilityJoiner(value) { MultipartConnectable(it.toSet()) }
+      if (FeatureManager.dependSoft(DefaultFeatures.MultipartMod))
+        CapabilityJoiner.registerCapabilityJoiner(value) { MultipartConnectable(it.toSet()) }
     }
 }

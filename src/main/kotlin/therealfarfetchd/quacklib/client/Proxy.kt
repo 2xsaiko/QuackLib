@@ -53,7 +53,6 @@ import therealfarfetchd.quacklib.common.api.util.IBlockDefinition
 import therealfarfetchd.quacklib.common.api.util.IItemDefinition
 import therealfarfetchd.quacklib.common.api.util.math.Vec3
 import therealfarfetchd.quacklib.common.block.BlockAlloyFurnace
-import therealfarfetchd.quacklib.common.block.BlockMultiblockExtension
 import therealfarfetchd.quacklib.common.block.BlockNikoliteOre
 import therealfarfetchd.quacklib.common.item.ItemComponent
 import kotlin.reflect.KClass
@@ -109,14 +108,14 @@ class Proxy : Proxy() {
       ModelLoader.setCustomModelResourceLocation(BlockAlloyFurnace.Item, 0, ModelResourceLocation(BlockAlloyFurnace.Item.registryName, "inventory"))
     }
 
-    registerModelBakery(BlockMultiblockExtension.Block, null, InvisibleModel)
+    //    registerModelBakery(BlockMultiblockExtension.Block, null, InvisibleModel)
   }
 
   @SubscribeEvent
   fun drawBlockOutline(e: DrawBlockHighlightEvent) {
     val world = when {
       e::class.qualifiedName == "mcmultipart.api.event.DrawMultipartHighlightEvent" -> (e as DrawMultipartHighlightEvent).partInfo.partWorld
-      else -> e.player.world
+      else                                                                          -> e.player.world
     }
     val pos = e.target.blockPos ?: return
     val state = world.getBlockState(pos)
