@@ -28,9 +28,9 @@ interface IItemSpecialHook {
 
   private companion object {
     val isInCreativeTab by lazy {
-      val method = Item::class.declaredFunctions.find { it.name in setOf("isInCreativeTab", "func_194125_a") }!!
+      val method = Item::class.java.declaredMethods.find { it.name in setOf("isInCreativeTab", "func_194125_a") }!!
       method.isAccessible = true
-      { obj: Item, targetTab: CreativeTabs -> method.call(obj, targetTab) as Boolean }
+      { obj: Item, targetTab: CreativeTabs -> method.invoke(obj, targetTab) as Boolean }
     }
 
     fun Item.isInCreativeTab(targetTab: CreativeTabs) = isInCreativeTab(this, targetTab)
