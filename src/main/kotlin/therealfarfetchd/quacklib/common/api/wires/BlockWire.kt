@@ -2,6 +2,7 @@ package therealfarfetchd.quacklib.common.api.wires
 
 import mcmultipart.api.slot.EnumFaceSlot
 import mcmultipart.api.slot.IPartSlot
+import mcmultipart.block.TileMultipartContainer
 import net.minecraft.block.material.Material
 import net.minecraft.block.properties.IProperty
 import net.minecraft.block.properties.PropertyEnum
@@ -12,7 +13,6 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumFacing.*
-import net.minecraft.util.EnumHand
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
@@ -23,15 +23,14 @@ import net.minecraftforge.common.property.IUnlistedProperty
 import therealfarfetchd.quacklib.client.api.render.wires.EnumWireRender
 import therealfarfetchd.quacklib.common.api.block.capability.Capabilities
 import therealfarfetchd.quacklib.common.api.block.capability.WireConnectable
-import therealfarfetchd.quacklib.common.api.extensions.isServer
 import therealfarfetchd.quacklib.common.api.extensions.rotate
 import therealfarfetchd.quacklib.common.api.extensions.rotateY
-import therealfarfetchd.quacklib.common.api.extensions.select
 import therealfarfetchd.quacklib.common.api.qblock.IQBlockMultipart
 import therealfarfetchd.quacklib.common.api.qblock.QBlockConnectable
 import therealfarfetchd.quacklib.common.api.util.DataTarget
-import therealfarfetchd.quacklib.common.api.util.EnumFaceLocation
+import therealfarfetchd.quacklib.common.api.util.EnumFacingExtended
 import therealfarfetchd.quacklib.common.api.util.QNBTCompound
+import therealfarfetchd.quacklib.common.api.util.WireCollisionHelper
 
 abstract class BlockWire<out T>(width: Double, height: Double) : QBlockConnectable(), IQBlockMultipart {
   val baseBounds = AxisAlignedBB(0.0, 0.0, 0.0, 1.0, height, 1.0)
@@ -61,14 +60,22 @@ abstract class BlockWire<out T>(width: Double, height: Double) : QBlockConnectab
     super.onPlaced(placer, stack, sidePlaced, hitX, hitY, hitZ)
   }
 
+  override fun collideParts(mp: TileMultipartContainer, wc: EnumWireConnection, e: EnumFacingExtended): Boolean {
+    return WireCollisionHelper.collidesMultipart(this, e.direction)
+  }
+
+  override fun collideCorner(e: EnumFacingExtended): Boolean {
+    return WireCollisionHelper.collides(this, e.direction)
+  }
+
   private fun mapConnection(sideIn: Int): EnumWireConnection {
     val el = lookupMap[facing]!![sideIn]
-    return connections[EnumFaceLocation.fromFaces(el, facing)] ?: EnumWireConnection.None
+    return connections[EnumFacingExtended.fromFaces(facing, el)] ?: EnumWireConnection.None
   }
 
   private fun mapConnection2(sideIn: Int): EnumWireConnection {
     val el = lookupMap2[facing]!![sideIn]
-    return connections[EnumFaceLocation.fromFaces(el, facing)] ?: EnumWireConnection.None
+    return connections[EnumFacingExtended.fromFaces(facing, el)] ?: EnumWireConnection.None
   }
 
   override fun beforePlace(sidePlaced: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) {
@@ -130,9 +137,6 @@ abstract class BlockWire<out T>(width: Double, height: Double) : QBlockConnectab
     if (capability == Capabilities.Connectable) return connectable as T
     return super.getCapability(capability, side)
   }
-
-  override val validEdges: Set<EnumFaceLocation>
-    get() = validSides[facing]!!.map { EnumFaceLocation.fromFaces(it, facing) }.toSet()
 
   override val rayCollisionBox: AxisAlignedBB?
     get() = baseBounds.rotate(facing)

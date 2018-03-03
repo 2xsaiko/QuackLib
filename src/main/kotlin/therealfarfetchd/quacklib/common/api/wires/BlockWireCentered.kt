@@ -3,6 +3,7 @@ package therealfarfetchd.quacklib.common.api.wires
 import mcmultipart.api.container.IPartInfo
 import mcmultipart.api.slot.EnumCenterSlot
 import mcmultipart.api.slot.IPartSlot
+import mcmultipart.block.TileMultipartContainer
 import net.minecraft.block.material.Material
 import net.minecraft.block.properties.IProperty
 import net.minecraft.block.properties.PropertyBool
@@ -22,10 +23,10 @@ import therealfarfetchd.quacklib.common.api.block.capability.CenteredWireConnect
 import therealfarfetchd.quacklib.common.api.qblock.IQBlockMultipart
 import therealfarfetchd.quacklib.common.api.qblock.QBlock
 import therealfarfetchd.quacklib.common.api.util.DataTarget
-import therealfarfetchd.quacklib.common.api.util.EnumFaceLocation
+import therealfarfetchd.quacklib.common.api.util.EnumFacingExtended
 import therealfarfetchd.quacklib.common.api.util.QNBTCompound
 
-abstract class BlockWireCentered<out T>(val width: Double) : QBlock(), IQBlockMultipart, BaseConnectable {
+abstract class BlockWireCentered<out T>(val width: Double) : QBlock(), IQBlockMultipart, BaseConnectable2 {
 
   val baseBounds = FullAABB.grow(width / 2 - 1)
 
@@ -33,7 +34,7 @@ abstract class BlockWireCentered<out T>(val width: Double) : QBlock(), IQBlockMu
   private val connectable =
     EnumFacing.VALUES.map { it to CenteredWireConnectable(this, it) }.toMap()
 
-  override var connections: Map<EnumFaceLocation, EnumWireConnection> = emptyMap()
+  override var connections: Map<EnumFacingExtended, EnumWireConnection> = emptyMap()
 
   abstract val dataType: ResourceLocation
 
@@ -42,10 +43,9 @@ abstract class BlockWireCentered<out T>(val width: Double) : QBlock(), IQBlockMu
   open fun getAdditionalData(side: EnumFacing, facing: EnumFacing?, key: String): Any? = null
 
   override fun updateCableConnections(): Boolean {
-    return if (super.updateCableConnections()) {
-      clientDataChanged()
-      true
-    } else false
+    if (!super.updateCableConnections()) return false
+    clientDataChanged()
+    return true
   }
 
   override fun onPlaced(placer: EntityLivingBase?, stack: ItemStack?, sidePlaced: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) {
@@ -66,6 +66,11 @@ abstract class BlockWireCentered<out T>(val width: Double) : QBlock(), IQBlockMu
   override fun onPartChanged(part: IPartInfo) {
     super.onPartChanged(part)
     updateCableConnections()
+  }
+
+  override fun collideParts(mp: TileMultipartContainer, wc: EnumWireConnection, e: EnumFacingExtended): Boolean {
+    // TODO
+    return false
   }
 
   override fun getBlockFaceShape(facing: EnumFacing): BlockFaceShape = BlockFaceShape.UNDEFINED
@@ -92,12 +97,12 @@ abstract class BlockWireCentered<out T>(val width: Double) : QBlock(), IQBlockMu
 
   override fun applyProperties(state: IBlockState): IBlockState {
     return super.applyProperties(state)
-      .withProperty(PropConnUp, connections[EnumFaceLocation.UpCenter] != null)
-      .withProperty(PropConnDown, connections[EnumFaceLocation.DownCenter] != null)
-      .withProperty(PropConnNorth, connections[EnumFaceLocation.NorthCenter] != null)
-      .withProperty(PropConnSouth, connections[EnumFaceLocation.SouthCenter] != null)
-      .withProperty(PropConnWest, connections[EnumFaceLocation.WestCenter] != null)
-      .withProperty(PropConnEast, connections[EnumFaceLocation.EastCenter] != null)
+      .withProperty(PropConnUp, connections[EnumFacingExtended.CenterUp] != null)
+      .withProperty(PropConnDown, connections[EnumFacingExtended.CenterDown] != null)
+      .withProperty(PropConnNorth, connections[EnumFacingExtended.CenterNorth] != null)
+      .withProperty(PropConnSouth, connections[EnumFacingExtended.CenterSouth] != null)
+      .withProperty(PropConnWest, connections[EnumFacingExtended.CenterWest] != null)
+      .withProperty(PropConnEast, connections[EnumFacingExtended.CenterEast] != null)
   }
 
   override fun getPartSlot(): IPartSlot = EnumCenterSlot.CENTER
@@ -105,21 +110,17 @@ abstract class BlockWireCentered<out T>(val width: Double) : QBlock(), IQBlockMu
   override val properties: Set<IProperty<*>> =
     super.properties + PropConnUp + PropConnDown + PropConnNorth + PropConnSouth + PropConnWest + PropConnEast
 
-  override val validEdges: Set<EnumFaceLocation> = validFaces
   override val collisionBox: Collection<AxisAlignedBB> = setOf(baseBounds)
   override val isFullBlock: Boolean = false
   override val hardness: Float = 0.25F
   override val material: Material = Material.IRON
 
   companion object {
-    val PropConnUp = PropertyBool.create("up")!!
-    val PropConnDown = PropertyBool.create("down")!!
-    val PropConnNorth = PropertyBool.create("north")!!
-    val PropConnSouth = PropertyBool.create("south")!!
-    val PropConnWest = PropertyBool.create("west")!!
-    val PropConnEast = PropertyBool.create("east")!!
-
-    val validFaces = EnumFaceLocation.Values.filter { it.side == null }.toSet()
+    val PropConnUp: PropertyBool = PropertyBool.create("up")
+    val PropConnDown: PropertyBool = PropertyBool.create("down")
+    val PropConnNorth: PropertyBool = PropertyBool.create("north")
+    val PropConnSouth: PropertyBool = PropertyBool.create("south")
+    val PropConnWest: PropertyBool = PropertyBool.create("west")
+    val PropConnEast: PropertyBool = PropertyBool.create("east")
   }
-
 }

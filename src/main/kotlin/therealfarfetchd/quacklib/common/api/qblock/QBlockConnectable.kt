@@ -4,14 +4,13 @@ import net.minecraft.entity.EntityLivingBase
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import therealfarfetchd.quacklib.common.api.util.DataTarget
-import therealfarfetchd.quacklib.common.api.util.EnumFaceLocation
+import therealfarfetchd.quacklib.common.api.util.EnumFacingExtended
 import therealfarfetchd.quacklib.common.api.util.QNBTCompound
 import therealfarfetchd.quacklib.common.api.util.Scheduler
-import therealfarfetchd.quacklib.common.api.wires.BaseConnectable
-import therealfarfetchd.quacklib.common.api.wires.EnumWireConnection
+import therealfarfetchd.quacklib.common.api.wires.*
 
-abstract class QBlockConnectable : QBlock(), BaseConnectable {
-  override var connections: Map<EnumFaceLocation, EnumWireConnection> = emptyMap()
+abstract class QBlockConnectable : QBlock(), BaseConnectable2 {
+  override var connections: Map<EnumFacingExtended, EnumWireConnection> = emptyMap()
 
   override fun onPlaced(placer: EntityLivingBase?, stack: ItemStack?, sidePlaced: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) {
     super.onPlaced(placer, stack, sidePlaced, hitX, hitY, hitZ)
@@ -26,9 +25,9 @@ abstract class QBlockConnectable : QBlock(), BaseConnectable {
 
   protected fun notifyWires() {
     for (edge in validEdges) {
-      if (edge.side == null) continue
-      val p = pos.offset(edge.base)
-      val q = p.offset(edge.side)
+      if (edge.isVertical) continue
+      val p = edge.part?.let { pos.offset(it) } ?: pos
+      val q = p.offset(edge.direction)
       world.neighborChanged(q, container.blockType, p)
     }
   }

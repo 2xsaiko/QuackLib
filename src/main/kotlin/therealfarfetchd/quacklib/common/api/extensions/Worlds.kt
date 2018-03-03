@@ -21,7 +21,7 @@ val World.isClient
 val World.isServer
   get() = !this.isRemote
 
-fun IBlockAccess.getQBlock(pos: BlockPos): QBlock? = (getTileEntity(pos) as? QBContainerTile)?.qb
+fun IBlockAccess.getQBlock(pos: BlockPos): QBlock? = getTileEntity(pos)?.getQBlock()
 
 fun IBlockAccess.getQBlock(pos: BlockPos, slot: IPartSlot): QBlock? {
   val te = getTileEntity(pos)
@@ -41,3 +41,5 @@ fun TileEntity.notifyNeighborsOfSides(vararg sides: EnumFacing) {
     world.notifyNeighborsOfStateExcept(p, world.getBlockState(p).block, side.opposite)
   }
 }
+
+fun TileEntity.getQBlock() = (this as? QBContainerTile)?.qb
