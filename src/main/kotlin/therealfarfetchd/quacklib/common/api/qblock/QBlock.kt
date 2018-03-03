@@ -56,7 +56,7 @@ abstract class QBlock {
   /**
    * Returns the mouseover selection box of the block.
    */
-  open val selectionBox: Collection<AxisAlignedBB>
+  open val selectionBox: Set<AxisAlignedBB>
     get() = collisionBox.toSet()
 
   /**

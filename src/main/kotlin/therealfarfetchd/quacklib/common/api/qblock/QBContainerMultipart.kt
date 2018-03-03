@@ -41,7 +41,7 @@ open class QBContainerMultipart(factory: () -> QBlock) : QBContainer(factory), I
     }
   }
 
-  override fun getOutlineBoxes(world: World, pos: BlockPos, state: IBlockState): Collection<AxisAlignedBB> {
+  override fun getOutlineBoxes(world: World, pos: BlockPos, state: IBlockState): Set<AxisAlignedBB> {
     val hit = Minecraft.getMinecraft().objectMouseOver
     if (hit.typeOfHit == RayTraceResult.Type.BLOCK) {
       val te = world.getTileEntity(hit.blockPos)

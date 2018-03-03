@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats.POSITION
 import net.minecraft.entity.Entity
 import net.minecraft.item.Item
 import net.minecraft.util.math.AxisAlignedBB
+import net.minecraft.util.math.BlockPos
 import net.minecraftforge.client.event.DrawBlockHighlightEvent
 import net.minecraftforge.client.event.ModelBakeEvent
 import net.minecraftforge.client.event.ModelRegistryEvent
@@ -44,7 +45,6 @@ import therealfarfetchd.quacklib.common.api.autoconf.DefaultFeatures
 import therealfarfetchd.quacklib.common.api.autoconf.FeatureManager
 import therealfarfetchd.quacklib.common.api.block.IBlockAdvancedOutline
 import therealfarfetchd.quacklib.common.api.extensions.RGBA
-import therealfarfetchd.quacklib.common.api.extensions.plus
 import therealfarfetchd.quacklib.common.api.qblock.QBContainerTile
 import therealfarfetchd.quacklib.common.api.qblock.QBContainerTileInventory
 import therealfarfetchd.quacklib.common.api.qblock.QBContainerTileMultipart
@@ -62,6 +62,8 @@ import kotlin.reflect.KClass
  */
 
 class Proxy : Proxy() {
+  private var outlineCache: Map<Set<AxisAlignedBB>, Set<Pair<Vec3, Vec3>>> = emptyMap()
+
   override fun preInit(e: FMLPreInitializationEvent) {
     super.preInit(e)
 
@@ -108,7 +110,7 @@ class Proxy : Proxy() {
       ModelLoader.setCustomModelResourceLocation(BlockAlloyFurnace.Item, 0, ModelResourceLocation(BlockAlloyFurnace.Item.registryName, "inventory"))
     }
 
-    //    registerModelBakery(BlockMultiblockExtension.Block, null, InvisibleModel)
+    // registerModelBakery(BlockMultiblockExtension.Block, null, InvisibleModel)
   }
 
   @SubscribeEvent
@@ -121,15 +123,21 @@ class Proxy : Proxy() {
     val state = world.getBlockState(pos)
     val block = state.block
     if (block is IBlockAdvancedOutline) {
-      val bb = block.getOutlineBoxes(world, pos, state).map { (it + pos).grow(0.002) }
-      val lines = bb
-        .flatMap { it.getLines().map { it1 -> it to it1 } }
-        .asSequence()
-        .filter { (k, v) -> bb.filterNot { it == k }.none { v.first.toVec3d() in it.grow(0.002) && v.second.toVec3d() in it.grow(0.002) } }
-        .map { it.second }
-        .toSet()
+      val outlineBoxes = block.getOutlineBoxes(world, pos, state)
+      val lines = outlineCache[outlineBoxes] ?: run {
+        val bb = outlineBoxes.map { it.grow(0.002) }
+        val lines = bb
+          .flatMap { it.getLines().map { it1 -> it to it1 } }
+          .asSequence()
+          .filter { (k, v) -> bb.filterNot { it == k }.none { v.first.toVec3d() in it.grow(0.002) && v.second.toVec3d() in it.grow(0.002) } }
+          .map { it.second }
+          .toSet()
 
-      drawLines(e.player, e.partialTicks, RGBA(0f, 0f, 0f, 0.4f), lines)
+        outlineCache += outlineBoxes to lines
+        lines
+      }
+
+      drawLines(e.player, e.partialTicks, RGBA(0f, 0f, 0f, 0.4f), lines, pos)
       e.isCanceled = true
     }
   }
@@ -152,7 +160,7 @@ class Proxy : Proxy() {
     Vec3(maxX, minY, minZ) to Vec3(maxX, maxY, minZ)
   )
 
-  private fun drawLines(player: Entity, partialTicks: Float, color: RGBA, lines: Set<Pair<Vec3, Vec3>>) {
+  private fun drawLines(player: Entity, partialTicks: Float, color: RGBA, lines: Collection<Pair<Vec3, Vec3>>, pos: BlockPos) {
     enableBlend()
     tryBlendFuncSeparate(SRC_ALPHA, ONE_MINUS_SRC_ALPHA, ONE, ZERO)
     glLineWidth(2.0f)
@@ -166,6 +174,9 @@ class Proxy : Proxy() {
       player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * partialTicks
     )
 
+    pushMatrix()
+    translate(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble())
+
     val tessellator = Tessellator.getInstance()
     val bufferbuilder = tessellator.buffer
     bufferbuilder.begin(GL_LINES, POSITION)
@@ -174,6 +185,8 @@ class Proxy : Proxy() {
       bufferbuilder.pos(max.x, max.y, max.z).endVertex()
     }
     tessellator.draw()
+
+    popMatrix()
 
     depthMask(true)
     enableTexture2D()

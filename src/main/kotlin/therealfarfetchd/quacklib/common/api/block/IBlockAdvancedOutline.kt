@@ -9,5 +9,5 @@ interface IBlockAdvancedOutline {
   /**
    * Replaces getSelectedBoundingBox.
    */
-  fun getOutlineBoxes(world: World, pos: BlockPos, state: IBlockState): Collection<AxisAlignedBB>
+  fun getOutlineBoxes(world: World, pos: BlockPos, state: IBlockState): Set<AxisAlignedBB>
 }
