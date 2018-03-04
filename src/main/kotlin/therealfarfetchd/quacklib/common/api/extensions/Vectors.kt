@@ -6,7 +6,6 @@ import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraft.util.math.Vec3i
-import therealfarfetchd.quacklib.common.api.util.EnumFaceLocation
 
 /**
  * Created by marco on 08.07.17.
@@ -74,47 +73,3 @@ fun AxisAlignedBB.rotateY(direction: EnumFacing): AxisAlignedBB {
   if (flip90) aabb = AxisAlignedBB(1 - aabb.minZ, aabb.minY, aabb.minX, 1 - aabb.maxZ, aabb.maxY, aabb.maxX)
   return aabb
 }
-
-fun AxisAlignedBB.rotate(e: EnumFaceLocation): AxisAlignedBB {
-  if (e.side == null) error("")
-  return rotateY(lookupMap[e.base]!![e.side]!!).rotate(e.base)
-}
-
-private val lookupMap = mapOf(
-  DOWN to mapOf(
-    NORTH to NORTH,
-    SOUTH to SOUTH,
-    EAST to EAST,
-    WEST to WEST
-  ),
-  UP to mapOf(
-    NORTH to NORTH,
-    SOUTH to SOUTH,
-    EAST to EAST,
-    WEST to WEST
-  ),
-  NORTH to mapOf(
-    DOWN to NORTH,
-    UP to SOUTH,
-    EAST to EAST,
-    WEST to WEST
-  ),
-  SOUTH to mapOf(
-    DOWN to NORTH,
-    UP to SOUTH,
-    EAST to EAST,
-    WEST to WEST
-  ),
-  WEST to mapOf(
-    DOWN to NORTH,
-    UP to SOUTH,
-    NORTH to EAST,
-    SOUTH to WEST
-  ),
-  EAST to mapOf(
-    DOWN to NORTH,
-    UP to SOUTH,
-    NORTH to EAST,
-    SOUTH to WEST
-  )
-)
