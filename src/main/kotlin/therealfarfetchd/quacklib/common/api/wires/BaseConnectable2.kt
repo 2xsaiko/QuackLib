@@ -18,6 +18,8 @@ import therealfarfetchd.quacklib.common.api.qblock.IQBlockMultipart
 import therealfarfetchd.quacklib.common.api.qblock.QBlock
 import therealfarfetchd.quacklib.common.api.util.EnumFacingExtended
 import therealfarfetchd.quacklib.common.api.wires.EnumWireConnection.*
+import kotlin.collections.component1
+import kotlin.collections.component2
 
 interface BaseConnectable2 {
   var connections: Map<EnumFacingExtended, EnumWireConnection>
@@ -172,4 +174,5 @@ private fun BlockPos.getOpposite(e: EnumFacingExtended, wc: EnumWireConnection):
   EnumWireConnection.Corner   -> offset(e.direction).offset(e.part!!)
 }
 
-private fun World.getQBlock1(pos: BlockPos, slot: IPartSlot): QBlock? = getQBlock(pos, slot) ?: getQBlock(pos)
+private fun World.getQBlock1(pos: BlockPos, slot: IPartSlot): QBlock? = getQBlock(pos, slot)
+                                                                        ?: getQBlock(pos) //?.takeIf { it !is IQBlockMultipart }

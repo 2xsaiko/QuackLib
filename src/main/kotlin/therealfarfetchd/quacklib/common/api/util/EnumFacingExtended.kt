@@ -88,9 +88,9 @@ enum class EnumFacingExtended(
 
   val oppositeInternal by lazy {
     when {
+      part == null -> fromFaces(direction, direction.opposite)
       pointsUp     -> fromFaces(null, direction.opposite)
       pointsDown   -> null
-      part == null -> fromFaces(direction, direction.opposite)
       else         -> fromFaces(direction, part)
     }
   }
