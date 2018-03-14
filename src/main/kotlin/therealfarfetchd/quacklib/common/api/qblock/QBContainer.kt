@@ -31,6 +31,7 @@ import therealfarfetchd.quacklib.common.api.util.ClientServerSeparateData
 import therealfarfetchd.quacklib.common.api.util.DataTarget
 import therealfarfetchd.quacklib.common.api.util.QNBTCompound
 import java.util.*
+import kotlin.reflect.KClass
 
 /**
  * Created by marco on 08.07.17.
@@ -61,6 +62,14 @@ open class QBContainer(factory: () -> QBlock) : Block(factory.also { tempFactory
     initDone = true
   }
 
+  protected fun checkQBType(vararg types: KClass<*>) {
+    val value = factory()
+    types
+      .filterNot { it.isInstance(value) }
+      .takeIf { it.isNotEmpty() }
+      ?.apply { error("QBlock ${value::class} is not a subclass of ${joinToString { it.qualifiedName.orEmpty() }}") }
+  }
+
   protected fun noqb(pos: BlockPos? = null): Nothing = error("No QBlock${if (pos != null) " at $pos" else ""}.")
 
   internal open fun tempQB(world: World?, pos: BlockPos?): QBlock = factory().also { qb -> world?.also { qb.world = it }; pos?.also { qb.pos = it }; qb.prePlaced = true }
@@ -69,7 +78,7 @@ open class QBContainer(factory: () -> QBlock) : Block(factory.also { tempFactory
     val qb = factory()
     return when {
       qb.unlistedProperties.isEmpty() -> BlockStateContainer(this, *qb.properties.toTypedArray())
-      else -> ExtendedBlockState(this, qb.properties.toTypedArray(), qb.unlistedProperties.toTypedArray())
+      else                            -> ExtendedBlockState(this, qb.properties.toTypedArray(), qb.unlistedProperties.toTypedArray())
     }
   }
 
@@ -87,12 +96,12 @@ open class QBContainer(factory: () -> QBlock) : Block(factory.also { tempFactory
     placedZ = hitZ
     sidePlaced = facing.opposite
     when (sidePlaced) {
-      EnumFacing.DOWN -> if (placedY == 1.0f) placedY = 0.0f
-      EnumFacing.UP -> if (placedY == 0.0f) placedY = 1.0f
+      EnumFacing.DOWN  -> if (placedY == 1.0f) placedY = 0.0f
+      EnumFacing.UP    -> if (placedY == 0.0f) placedY = 1.0f
       EnumFacing.NORTH -> if (placedZ == 1.0f) placedZ = 0.0f
       EnumFacing.SOUTH -> if (placedZ == 0.0f) placedZ = 1.0f
-      EnumFacing.WEST -> if (placedX == 1.0f) placedX = 0.0f
-      EnumFacing.EAST -> if (placedX == 0.0f) placedX = 1.0f
+      EnumFacing.WEST  -> if (placedX == 1.0f) placedX = 0.0f
+      EnumFacing.EAST  -> if (placedX == 0.0f) placedX = 1.0f
     }
     return super.getStateForPlacement(worldIn, pos, facing, hitX, hitY, hitZ, meta, placer)
   }
@@ -187,11 +196,11 @@ open class QBContainer(factory: () -> QBlock) : Block(factory.also { tempFactory
   override fun getCollisionBoundingBox(blockState: IBlockState?, world: IBlockAccess, pos: BlockPos): AxisAlignedBB? {
     val qb = world.getQBlock(pos)
     return when {
-      qb != null -> qb.collisionBox
+      qb != null     -> qb.collisionBox
       world is World -> buildPart(world, pos) {
         collisionBox
       }
-      else -> error("This should never happen! Raise hell if it does…")
+      else           -> error("This should never happen! Raise hell if it does…")
     }.reduceOrNull(AxisAlignedBB::union)
   }
 
@@ -199,7 +208,7 @@ open class QBContainer(factory: () -> QBlock) : Block(factory.also { tempFactory
     val qb = world.getQBlock(pos)
     when {
       qb != null -> qb.collisionBox
-      else -> buildPart(world, pos) {
+      else       -> buildPart(world, pos) {
         collisionBox
       }
     }
@@ -219,7 +228,8 @@ open class QBContainer(factory: () -> QBlock) : Block(factory.also { tempFactory
     if (initDone) _isOpaque else tempQB(null, null).isOpaque
 
   override fun doesSideBlockRendering(state: IBlockState?, world: IBlockAccess, pos: BlockPos, face: EnumFacing) =
-    (world.getQBlock(pos) ?: world.getQBlock(pos.down()))?.isSideOpaque(face) ?: super.doesSideBlockRendering(state, world, pos, face)
+    (world.getQBlock(pos) ?: world.getQBlock(pos.down()))?.isSideOpaque(face)
+    ?: super.doesSideBlockRendering(state, world, pos, face)
 
   override fun getLightValue(state: IBlockState?, world: IBlockAccess?, pos: BlockPos?) =
     super.getLightValue(state, world, pos) // TODO

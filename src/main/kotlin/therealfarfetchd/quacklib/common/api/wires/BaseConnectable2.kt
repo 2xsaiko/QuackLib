@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package therealfarfetchd.quacklib.common.api.wires
 
 import mcmultipart.api.slot.EnumCenterSlot
@@ -21,6 +23,9 @@ import therealfarfetchd.quacklib.common.api.wires.EnumWireConnection.*
 import kotlin.collections.component1
 import kotlin.collections.component2
 
+interface BaseConnectable : BaseConnectable2
+
+@Deprecated("Use BaseConnectable instead.", ReplaceWith("BaseConnectable", "therealfarfetchd.quacklib.common.api.wires.BaseConnectable"))
 interface BaseConnectable2 {
   var connections: Map<EnumFacingExtended, EnumWireConnection>
 

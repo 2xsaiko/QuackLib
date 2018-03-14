@@ -7,7 +7,6 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.ResourceLocation
-import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import net.minecraftforge.common.capabilities.Capability
@@ -17,6 +16,7 @@ import therealfarfetchd.quacklib.common.api.extensions.plus
 import therealfarfetchd.quacklib.common.api.extensions.unpack
 import therealfarfetchd.quacklib.common.api.util.DataTarget
 import therealfarfetchd.quacklib.common.api.util.QNBTCompound
+import kotlin.reflect.KClass
 
 /**
  * Created by marco on 08.07.17.
@@ -27,10 +27,19 @@ open class QBContainerTile() : TileEntity() { //, IColoredLight {
 
   var qb: QBlock
     get() = _qb!!
-    internal set(value) {
+    protected set(value) {
       _qb = value
       value.container = this
     }
+
+  protected fun setQBChecked(value: QBlock, vararg types: KClass<*>) {
+    types
+      .filterNot { it.isInstance(value) }
+      .takeIf { it.isNotEmpty() }
+      ?.apply { error("QBlock ${value::class} is not a subclass of ${joinToString { it.qualifiedName.orEmpty() }}") }
+    qb = value
+  }
+
   /**
    * 0: qb.onAdded() called
    * 1-6: unused
@@ -71,11 +80,6 @@ open class QBContainerTile() : TileEntity() { //, IColoredLight {
 
   override fun readFromNBT(compound: NBTTagCompound) {
     super.readFromNBT(compound)
-
-    // backward compat
-    if (compound.hasKey("Bits")) compound.setTag("B", compound.getTag("Bits"))
-    if (compound.hasKey("BlockType")) compound.setTag("T", compound.getTag("BlockType"))
-    if (compound.hasKey("QBlockData")) compound.setTag("B", compound.getTag("QBlockData"))
 
     unpack(compound.getByte("B")).copyTo(bits)
     if (_qb == null) {

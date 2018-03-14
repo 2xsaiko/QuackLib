@@ -82,7 +82,7 @@ class Proxy : Proxy() {
       register("minecraft:button", Button::class)
     }
 
-    GuiLogicRegistry.register("quacklib:null_logic", NullGuiLogic::class)
+    GuiLogicRegistry.register(GuiLogicRegistry.fallback, NullGuiLogic::class)
   }
 
   @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
@@ -110,7 +110,7 @@ class Proxy : Proxy() {
       ModelLoader.setCustomModelResourceLocation(BlockAlloyFurnace.Item, 0, ModelResourceLocation(BlockAlloyFurnace.Item.registryName, "inventory"))
     }
 
-    // registerModelBakery(BlockMultiblockExtension.Block, null, InvisibleModel)
+//    registerModelBakery(MultiblockExtension.Block, null, InvisibleModel)
   }
 
   @SubscribeEvent

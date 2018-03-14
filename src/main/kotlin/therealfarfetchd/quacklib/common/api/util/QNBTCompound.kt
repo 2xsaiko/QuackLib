@@ -3,6 +3,8 @@ package therealfarfetchd.quacklib.common.api.util
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.nbt.NBTTagList
+import net.minecraft.nbt.NBTTagLongArray
+import therealfarfetchd.quacklib.common.api.extensions.longArray
 import java.util.*
 
 /**
@@ -104,6 +106,11 @@ class QNBTCompound(val self: NBTTagCompound) {
   val ints = object : IView<String, IntArray> {
     override fun get(k: String): IntArray = self.getIntArray(k)
     override fun set(k: String, v: IntArray) = self.setIntArray(k, v)
+  }
+
+  val longs = object:IView<String,LongArray> {
+    override fun get(k: String): LongArray = (self.getTag(k) as? NBTTagLongArray)?.longArray ?: longArrayOf()
+    override fun set(k: String, v: LongArray) = self.setTag(k, NBTTagLongArray(v))
   }
 
   val uuid = object : IView<String, UUID> {

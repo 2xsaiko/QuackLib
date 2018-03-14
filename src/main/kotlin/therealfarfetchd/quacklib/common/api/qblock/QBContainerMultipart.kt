@@ -25,7 +25,6 @@ import java.util.*
  */
 @Suppress("OverridingDeprecatedMember", "DEPRECATION")
 open class QBContainerMultipart(factory: () -> QBlock) : QBContainer(factory), IMultipart {
-
   init {
     check(factory() is IQBlockMultipart) { "Illegal type: factory() must be QBlock with IQBlockMultipart" }
   }
@@ -104,5 +103,4 @@ open class QBContainerMultipart(factory: () -> QBlock) : QBContainer(factory), I
 
   private val QBlock.asmp: IQBlockMultipart
     get() = this as IQBlockMultipart
-
 }

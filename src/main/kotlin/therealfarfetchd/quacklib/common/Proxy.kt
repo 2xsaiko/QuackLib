@@ -1,6 +1,5 @@
 package therealfarfetchd.quacklib.common
 
-import mcmultipart.api.item.ItemBlockMultipart
 import mcmultipart.api.multipart.IMultipart
 import net.minecraft.block.Block
 import net.minecraft.item.Item
@@ -37,6 +36,7 @@ import therealfarfetchd.quacklib.common.api.util.IItemDefinition
 import therealfarfetchd.quacklib.common.api.util.Scheduler
 import therealfarfetchd.quacklib.common.block.BlockAlloyFurnace
 import therealfarfetchd.quacklib.common.block.BlockNikoliteOre
+import therealfarfetchd.quacklib.common.block.MultiblockExtension
 import therealfarfetchd.quacklib.common.item.ItemComponent
 
 /**
@@ -68,6 +68,7 @@ open class Proxy {
     WrapperImplManager.registerModifier(ITickable::class)
     WrapperImplManager.registerModifier(IQBlockMultipart::class)
     WrapperImplManager.registerModifier(IQBlockInventory::class)
+    WrapperImplManager.registerModifier(IQBlockMultiblock::class)
     WrapperImplManager.registerWrapper(ITickable::class) {
       te(QBContainerTile::Ticking)
     }
@@ -88,12 +89,23 @@ open class Proxy {
       inherit(IQBlockInventory::class)
       te(QBContainerTileInventory::Ticking)
     }
+    WrapperImplManager.registerWrapper(IQBlockMultiblock::class) {
+      container(::QBContainerMultiblock)
+      te(::QBContainerTileMultiblock)
+    }
+    WrapperImplManager.registerWrapper(IQBlockMultiblock::class, ITickable::class) {
+      inherit(IQBlockMultiblock::class)
+      te(QBContainerTileMultiblock::Ticking)
+    }
 
     // register tile entities that come with the library
     GameRegistry.registerTileEntity(QBContainerTile::class.java, "$ModID:qblock_container")
     GameRegistry.registerTileEntity(QBContainerTile.Ticking::class.java, "$ModID:qblock_container_t")
     GameRegistry.registerTileEntity(QBContainerTileInventory::class.java, "$ModID:qblock_container_inv")
     GameRegistry.registerTileEntity(QBContainerTileInventory.Ticking::class.java, "$ModID:qblock_container_inv_t")
+    GameRegistry.registerTileEntity(QBContainerTileMultiblock::class.java, "$ModID:qblock_container_mb")
+    GameRegistry.registerTileEntity(QBContainerTileMultiblock.Ticking::class.java, "$ModID:qblock_container_mb_t")
+    GameRegistry.registerTileEntity(MultiblockExtension.Tile::class.java, "$ModID:multiblock")
 
     CapabilityManager.INSTANCE.register(IConnectable::class)
     NetworkRegistry.INSTANCE.registerGuiHandler(QuackLib, QGuiHandler)
@@ -151,6 +163,7 @@ open class Proxy {
       e.registry.register(BlockAlloyFurnace.Block)
     }
     e.registry.registerAll(*IBlockDefinition.definitions.map { it.block }.toTypedArray())
+    e.registry.register(MultiblockExtension.Block)
   }
 
   @SubscribeEvent
