@@ -90,6 +90,7 @@ private class FillBlocksScopeImpl(val posOrigin: BlockPos, val world: World, val
 
   fun checkState(_pos: BlockPos): Boolean {
     val pos = _pos + posOrigin
+    if (!pos.isValid()) return false
     if (_pos in extBlocks || _pos in currentExtBlocks) return true
     val bs = world.getBlockState(pos)
     return bs.block.isReplaceable(world, pos)
@@ -116,5 +117,10 @@ private class FillBlocksScopeImpl(val posOrigin: BlockPos, val world: World, val
     }
   }
 }
+
+private fun BlockPos.isValid() =
+  x in -30000000..30000000 &&
+  z in -30000000..30000000 &&
+  y in 0..255
 
 private class ScopeControlFlow : Throwable()

@@ -9,6 +9,7 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.network.NetworkManager
 import net.minecraft.network.play.server.SPacketUpdateTileEntity
+import net.minecraft.util.EnumBlockRenderType
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand
 import net.minecraft.util.math.BlockPos
@@ -32,6 +33,7 @@ object MultiblockExtension {
   object Block : MCBlock(Material.ROCK), ITileEntityProvider {
     init {
       setRegistryName(ModID, "multiblock1")
+      setLightOpacity(0)
     }
 
     override fun onBlockActivated(world: World, pos: BlockPos, state: IBlockState, player: EntityPlayer, hand: EnumHand, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean {
@@ -68,9 +70,9 @@ object MultiblockExtension {
       return false
     }
 
-//    override fun isOpaqueCube(state: IBlockState?) = false
-//    override fun isFullCube(state: IBlockState?) = false
-//    override fun getRenderType(state: IBlockState?) = EnumBlockRenderType.INVISIBLE
+    override fun isOpaqueCube(state: IBlockState?) = false
+    override fun isFullCube(state: IBlockState?) = false
+    override fun getRenderType(state: IBlockState?) = EnumBlockRenderType.INVISIBLE
     override fun isTopSolid(state: IBlockState?) = false
     override fun getBlockFaceShape(worldIn: IBlockAccess?, state: IBlockState?, pos: BlockPos?, face: EnumFacing?) = BlockFaceShape.UNDEFINED
     override fun getMobilityFlag(state: IBlockState?) = EnumPushReaction.BLOCK
