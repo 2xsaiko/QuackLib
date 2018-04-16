@@ -1,23 +1,19 @@
 package therealfarfetchd.quacklib.common.api.block.capability
 
-import mcmultipart.capability.CapabilityJoiner
 import net.minecraftforge.common.capabilities.Capability
 import net.minecraftforge.common.capabilities.CapabilityInject
-import therealfarfetchd.quacklib.common.api.autoconf.DefaultFeatures
-import therealfarfetchd.quacklib.common.api.autoconf.FeatureManager
+import therealfarfetchd.quacklib.common.api.wires.TileConnectable as CapTileConnectable
 
 object Capabilities {
-
-  private var _Connectable: Capability<IConnectable>? = null
+  @JvmStatic
+  lateinit var Connectable: Capability<IConnectable>
+    @CapabilityInject(IConnectable::class)
+    @JvmSynthetic
+    internal set
 
   @JvmStatic
-  var Connectable: Capability<IConnectable>
-    get() = _Connectable!!
-    @CapabilityInject(IConnectable::class)
-    set(value) {
-      if (_Connectable != null) throw IllegalStateException("Capability already initialized!")
-      _Connectable = value
-      if (FeatureManager.dependSoft(DefaultFeatures.MultipartMod))
-        CapabilityJoiner.registerCapabilityJoiner(value) { MultipartConnectable(it.toSet()) }
-    }
+  lateinit var TileConnectable: Capability<CapTileConnectable>
+    @CapabilityInject(CapTileConnectable::class)
+    @JvmSynthetic
+    internal set
 }

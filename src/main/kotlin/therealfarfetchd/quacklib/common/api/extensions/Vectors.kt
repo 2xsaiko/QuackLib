@@ -6,6 +6,7 @@ import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraft.util.math.Vec3i
+import therealfarfetchd.quacklib.common.api.util.math.Vec3
 
 /**
  * Created by marco on 08.07.17.
@@ -15,9 +16,13 @@ operator fun AxisAlignedBB.plus(vec: Vec3i): AxisAlignedBB = this.offset(BlockPo
 
 operator fun AxisAlignedBB.plus(vec: Vec3d): AxisAlignedBB = this.offset(vec)
 
+operator fun AxisAlignedBB.plus(vec: Vec3): AxisAlignedBB = this.offset(vec.x, vec.y, vec.z)
+
 operator fun AxisAlignedBB.minus(vec: Vec3i): AxisAlignedBB = this.offset(-BlockPos(vec))
 
 operator fun AxisAlignedBB.minus(vec: Vec3d): AxisAlignedBB = this.offset(-vec)
+
+operator fun AxisAlignedBB.minus(vec: Vec3): AxisAlignedBB = this.offset(-vec.x, -vec.y, -vec.z)
 
 operator fun Vec3i.unaryMinus(): BlockPos = BlockPos(-this.x, -this.y, -this.z)
 
@@ -50,6 +55,10 @@ operator fun Vec3d.component3(): Double = z
 operator fun Vec3i.component1(): Int = x
 operator fun Vec3i.component2(): Int = y
 operator fun Vec3i.component3(): Int = z
+
+fun Vec3i.toVec3() = Vec3(x, y, z)
+
+fun Vec3i.toVec3d() = Vec3d(x.toDouble(), y.toDouble(), z.toDouble())
 
 fun AxisAlignedBB.rotate(direction: EnumFacing): AxisAlignedBB = when (direction) {
   UP    ->

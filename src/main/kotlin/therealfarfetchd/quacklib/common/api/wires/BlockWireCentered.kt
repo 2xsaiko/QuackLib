@@ -26,7 +26,9 @@ import therealfarfetchd.quacklib.common.api.util.DataTarget
 import therealfarfetchd.quacklib.common.api.util.EnumFacingExtended
 import therealfarfetchd.quacklib.common.api.util.QNBTCompound
 
-abstract class BlockWireCentered<out T>(val width: Double) : QBlock(), IQBlockMultipart, BaseConnectable2 {
+abstract class BlockWireCentered<out T>(val width: Double) : QBlock(), IQBlockMultipart, TileConnectable {
+  @Suppress("LeakingThis")
+  protected var cr = ConnectionResolverTile(this)
 
   val baseBounds = FullAABB.grow(width / 2 - 1)
 
@@ -34,38 +36,35 @@ abstract class BlockWireCentered<out T>(val width: Double) : QBlock(), IQBlockMu
   private val connectable =
     EnumFacing.VALUES.map { it to CenteredWireConnectable(this, it) }.toMap()
 
-  override var connections: Map<EnumFacingExtended, EnumWireConnection> = emptyMap()
-
   abstract val dataType: ResourceLocation
 
   abstract val data: T
 
   open fun getAdditionalData(side: EnumFacing, facing: EnumFacing?, key: String): Any? = null
 
-  override fun updateCableConnections(): Boolean {
-    if (!super.updateCableConnections()) return false
+  override fun connectionsChanged() {
+    super.connectionsChanged()
     clientDataChanged()
-    return true
   }
 
   override fun onPlaced(placer: EntityLivingBase?, stack: ItemStack?, sidePlaced: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) {
     super.onPlaced(placer, stack, sidePlaced, hitX, hitY, hitZ)
-    updateCableConnections()
+    cr.updateCableConnections()
   }
 
   override fun onNeighborChanged(side: EnumFacing) {
     super.onNeighborChanged(side)
-    updateCableConnections()
+    cr.updateCableConnections()
   }
 
   override fun onNeighborTEChanged(side: EnumFacing) {
     super.onNeighborTEChanged(side)
-    updateCableConnections()
+    cr.updateCableConnections()
   }
 
   override fun onPartChanged(part: IPartInfo) {
     super.onPartChanged(part)
-    updateCableConnections()
+    cr.updateCableConnections()
   }
 
   override fun collideParts(mp: TileMultipartContainer, wc: EnumWireConnection, e: EnumFacingExtended): Boolean {
@@ -81,29 +80,38 @@ abstract class BlockWireCentered<out T>(val width: Double) : QBlock(), IQBlockMu
 
   override fun saveData(nbt: QNBTCompound, target: DataTarget) {
     super.saveData(nbt, target)
-    if (!prePlaced) nbt.bytes["C"] = serializeConnections().toByteArray()
+    if (!prePlaced) nbt.bytes["C"] = cr.serializeConnections().toByteArray()
   }
 
   override fun loadData(nbt: QNBTCompound, target: DataTarget) {
     super.loadData(nbt, target)
-    if (!prePlaced) deserializeConnections(nbt.bytes["C"].toList())
+    if (!prePlaced) cr.deserializeConnections(nbt.bytes["C"].toList())
   }
 
   @Suppress("UNCHECKED_CAST")
   override fun <T> getCapability(capability: Capability<T>, side: EnumFacing?): T? {
-    if (capability == Capabilities.Connectable && side != null) return connectable[side] as T
-    return super.getCapability(capability, side)
+    return when (capability) {
+      Capabilities.Connectable   -> side?.let { connectable[it] as T }
+      TileConnectable.Capability -> this as T
+      else                       -> super.getCapability(capability, side)
+    }
   }
 
   override fun applyProperties(state: IBlockState): IBlockState {
     return super.applyProperties(state)
-      .withProperty(PropConnUp, connections[EnumFacingExtended.CenterUp] != null)
-      .withProperty(PropConnDown, connections[EnumFacingExtended.CenterDown] != null)
-      .withProperty(PropConnNorth, connections[EnumFacingExtended.CenterNorth] != null)
-      .withProperty(PropConnSouth, connections[EnumFacingExtended.CenterSouth] != null)
-      .withProperty(PropConnWest, connections[EnumFacingExtended.CenterWest] != null)
-      .withProperty(PropConnEast, connections[EnumFacingExtended.CenterEast] != null)
+      .withProperty(PropConnUp, cr.connections[EnumFacingExtended.CenterUp] != null)
+      .withProperty(PropConnDown, cr.connections[EnumFacingExtended.CenterDown] != null)
+      .withProperty(PropConnNorth, cr.connections[EnumFacingExtended.CenterNorth] != null)
+      .withProperty(PropConnSouth, cr.connections[EnumFacingExtended.CenterSouth] != null)
+      .withProperty(PropConnWest, cr.connections[EnumFacingExtended.CenterWest] != null)
+      .withProperty(PropConnEast, cr.connections[EnumFacingExtended.CenterEast] != null)
   }
+
+  override fun getConnectionResolver() = cr
+
+  override fun getTile() = container
+
+  override fun getWorldForScan() = actualWorld
 
   override fun getPartSlot(): IPartSlot = EnumCenterSlot.CENTER
 

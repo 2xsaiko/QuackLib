@@ -48,11 +48,9 @@ abstract class BlockWire<out T>(width: Double, height: Double) : QBlockConnectab
 
   abstract val data: T
 
-  override fun updateCableConnections(): Boolean {
-    return if (super.updateCableConnections()) {
-      clientDataChanged()
-      true
-    } else false
+  override fun connectionsChanged() {
+    super.connectionsChanged()
+    clientDataChanged()
   }
 
   override fun onPlaced(placer: EntityLivingBase?, stack: ItemStack?, sidePlaced: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) {
@@ -70,12 +68,12 @@ abstract class BlockWire<out T>(width: Double, height: Double) : QBlockConnectab
 
   private fun mapConnection(sideIn: Int): EnumWireConnection {
     val el = lookupMap[facing]!![sideIn]
-    return connections[EnumFacingExtended.fromFaces(facing, el)] ?: EnumWireConnection.None
+    return cr.connections[EnumFacingExtended.fromFaces(facing, el)] ?: EnumWireConnection.None
   }
 
   private fun mapConnection2(sideIn: Int): EnumWireConnection {
     val el = lookupMap2[facing]!![sideIn]
-    return connections[EnumFacingExtended.fromFaces(facing, el)] ?: EnumWireConnection.None
+    return cr.connections[EnumFacingExtended.fromFaces(facing, el)] ?: EnumWireConnection.None
   }
 
   override fun beforePlace(sidePlaced: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) {

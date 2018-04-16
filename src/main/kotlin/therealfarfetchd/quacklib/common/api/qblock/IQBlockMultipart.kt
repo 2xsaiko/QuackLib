@@ -6,7 +6,7 @@ import mcmultipart.util.MCMPWorldWrapper
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.world.World
-import therealfarfetchd.quacklib.common.api.wires.BaseConnectable2
+import therealfarfetchd.quacklib.common.api.wires.TileConnectable
 
 /**
  * Created by marco on 09.07.17.
@@ -38,7 +38,7 @@ interface IQBlockMultipart {
   fun onPartChanged(part: IPartInfo) {
     with(qb) {
       if (!canStay()) dismantle()
-      else if (this is BaseConnectable2) updateCableConnections()
+      else if (this is TileConnectable) getConnectionResolver().updateCableConnections()
     }
   }
 }

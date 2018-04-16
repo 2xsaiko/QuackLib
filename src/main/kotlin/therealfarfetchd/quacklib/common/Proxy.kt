@@ -34,6 +34,7 @@ import therealfarfetchd.quacklib.common.api.util.AutoLoad
 import therealfarfetchd.quacklib.common.api.util.IBlockDefinition
 import therealfarfetchd.quacklib.common.api.util.IItemDefinition
 import therealfarfetchd.quacklib.common.api.util.Scheduler
+import therealfarfetchd.quacklib.common.api.wires.TileConnectable
 import therealfarfetchd.quacklib.common.block.BlockAlloyFurnace
 import therealfarfetchd.quacklib.common.block.BlockNikoliteOre
 import therealfarfetchd.quacklib.common.block.MultiblockExtension
@@ -108,6 +109,7 @@ open class Proxy {
     GameRegistry.registerTileEntity(MultiblockExtension.Tile::class.java, "$ModID:multiblock")
 
     CapabilityManager.INSTANCE.register(IConnectable::class)
+    CapabilityManager.INSTANCE.register(TileConnectable::class)
     NetworkRegistry.INSTANCE.registerGuiHandler(QuackLib, QGuiHandler)
   }
 
@@ -148,6 +150,7 @@ open class Proxy {
       bar.step(item.registryName.toString())
       e.registry.register(item)
     }
+    ProgressManager.pop(bar)
   }
 
   @SubscribeEvent

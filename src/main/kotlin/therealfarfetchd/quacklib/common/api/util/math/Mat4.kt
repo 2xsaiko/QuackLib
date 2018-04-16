@@ -1,6 +1,14 @@
 package therealfarfetchd.quacklib.common.api.util.math
 
+import net.minecraft.client.renderer.GlStateManager
+import net.minecraft.util.math.Vec3d
+import net.minecraftforge.fml.relauncher.Side
+import net.minecraftforge.fml.relauncher.SideOnly
+import org.lwjgl.BufferUtils
+import java.nio.FloatBuffer
 import javax.vecmath.Matrix4d
+
+private val fb = BufferUtils.createFloatBuffer(16)
 
 data class Mat4(
   val c00: Double, val c01: Double, val c02: Double, val c03: Double,
@@ -55,6 +63,8 @@ data class Mat4(
       0.0, 0.0, 0.0, 1.0
     )
 
+    fun translateMat(x: Float, y: Float, z: Float) = translateMat(x.toDouble(), y.toDouble(), z.toDouble())
+
     fun translateMat(xyz: Vec3) = translateMat(xyz.x, xyz.y, xyz.z)
 
     fun scaleMat(x: Double, y: Double, z: Double) = Mat4(
@@ -63,6 +73,8 @@ data class Mat4(
       0.0, 0.0, z, 0.0,
       0.0, 0.0, 0.0, 1.0
     )
+
+    fun scaleMat(x: Float, y: Float, z: Float) = scaleMat(x.toDouble(), y.toDouble(), z.toDouble())
 
     fun rotationMat(x: Double, y: Double, z: Double, angle: Double): Mat4 {
       val c = cos(-angle * toRadiansf)
@@ -76,6 +88,16 @@ data class Mat4(
         0.0, 0.0, 0.0, 1.0
       )
     }
+
+    fun rotationMat(x: Float, y: Float, z: Float, angle: Float) =
+      rotationMat(x.toDouble(), y.toDouble(), z.toDouble(), angle.toDouble())
+
+    fun fromBuffer(fb: FloatBuffer) = Mat4(
+      fb[0].toDouble(), fb[4].toDouble(), fb[8].toDouble(), fb[12].toDouble(),
+      fb[1].toDouble(), fb[5].toDouble(), fb[9].toDouble(), fb[13].toDouble(),
+      fb[2].toDouble(), fb[6].toDouble(), fb[10].toDouble(), fb[14].toDouble(),
+      fb[3].toDouble(), fb[7].toDouble(), fb[11].toDouble(), fb[15].toDouble()
+    )
   }
 }
 
@@ -105,3 +127,16 @@ operator fun Mat4.times(other: Vec4) =
 
 operator fun Mat4.times(other: Vec3) =
   (this * other.toVec4()).toVec3()
+
+operator fun Mat4.times(other: Vec3d) =
+  (this * other.toVec3()).toVec3d()
+
+@SideOnly(Side.CLIENT)
+fun glMultMatrix(mat: Mat4) {
+  fb.clear()
+  listOf(mat.c00, mat.c10, mat.c20, mat.c30, mat.c01, mat.c11, mat.c21, mat.c31, mat.c02, mat.c12, mat.c22, mat.c32, mat.c03, mat.c13, mat.c23, mat.c33)
+    .map(Double::toFloat)
+    .forEach { fb.put(it) }
+  fb.rewind()
+  GlStateManager.multMatrix(fb)
+}

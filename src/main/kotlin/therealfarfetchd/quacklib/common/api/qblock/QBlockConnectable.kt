@@ -3,18 +3,21 @@ package therealfarfetchd.quacklib.common.api.qblock
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
+import net.minecraftforge.common.capabilities.Capability
 import therealfarfetchd.quacklib.common.api.util.DataTarget
-import therealfarfetchd.quacklib.common.api.util.EnumFacingExtended
 import therealfarfetchd.quacklib.common.api.util.QNBTCompound
 import therealfarfetchd.quacklib.common.api.util.Scheduler
-import therealfarfetchd.quacklib.common.api.wires.*
+import therealfarfetchd.quacklib.common.api.wires.ConnectionResolverTile
+import therealfarfetchd.quacklib.common.api.wires.TileConnectable
+import therealfarfetchd.quacklib.common.api.wires.validEdges
 
-abstract class QBlockConnectable : QBlock(), BaseConnectable2 {
-  override var connections: Map<EnumFacingExtended, EnumWireConnection> = emptyMap()
+abstract class QBlockConnectable : QBlock(), TileConnectable {
+  @Suppress("LeakingThis")
+  protected var cr = ConnectionResolverTile(this)
 
   override fun onPlaced(placer: EntityLivingBase?, stack: ItemStack?, sidePlaced: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) {
     super.onPlaced(placer, stack, sidePlaced, hitX, hitY, hitZ)
-    updateCableConnections()
+    cr.updateCableConnections()
     notifyWires()
   }
 
@@ -34,21 +37,33 @@ abstract class QBlockConnectable : QBlock(), BaseConnectable2 {
 
   override fun onNeighborChanged(side: EnumFacing) {
     super.onNeighborChanged(side)
-    updateCableConnections()
+    cr.updateCableConnections()
   }
 
   override fun onNeighborTEChanged(side: EnumFacing) {
     super.onNeighborTEChanged(side)
-    updateCableConnections()
+    cr.updateCableConnections()
   }
 
   override fun saveData(nbt: QNBTCompound, target: DataTarget) {
     super.saveData(nbt, target)
-    if (!prePlaced) nbt.bytes["C"] = serializeConnections().toByteArray()
+    if (!prePlaced) nbt.bytes["C"] = cr.serializeConnections().toByteArray()
   }
 
   override fun loadData(nbt: QNBTCompound, target: DataTarget) {
     super.loadData(nbt, target)
-    if (!prePlaced) deserializeConnections(nbt.bytes["C"].toList())
+    if (!prePlaced) cr.deserializeConnections(nbt.bytes["C"].toList())
+  }
+
+  override fun getConnectionResolver() = cr
+
+  override fun getTile() = container
+
+  override fun getWorldForScan() = if (this is IQBlockMultipart) actualWorld else world
+
+  @Suppress("UNCHECKED_CAST")
+  override fun <T> getCapability(capability: Capability<T>, side: EnumFacing?): T? {
+    return if (capability == TileConnectable.Capability) this as T
+    else super.getCapability(capability, side)
   }
 }

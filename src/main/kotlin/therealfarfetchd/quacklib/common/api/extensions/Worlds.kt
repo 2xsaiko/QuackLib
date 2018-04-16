@@ -15,10 +15,10 @@ import therealfarfetchd.quacklib.common.api.qblock.QBlock
  * Created by marco on 09.07.17.
  */
 
-val World.isClient
+inline val World.isClient
   get() = this.isRemote
 
-val World.isServer
+inline val World.isServer
   get() = !this.isRemote
 
 fun IBlockAccess.getQBlock(pos: BlockPos): QBlock? = getTileEntity(pos)?.getQBlock()
