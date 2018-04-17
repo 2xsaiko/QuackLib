@@ -12,7 +12,7 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'kotlin'
 
-version = "2.1.1"
+version = "2.2.1"
 group = "therealfarfetchd.quacklib"
 archivesBaseName = "quacklib"
 
@@ -25,9 +25,10 @@ compileKotlin {
 }
 
 minecraft {
-    version = "1.12.2-14.23.0.2501"
+    version = "1.12.2-14.23.3.2668"
     runDir = "run"
     mappings = "snapshot_20171120"
+    useDepAts = true
 }
 
 repositories {

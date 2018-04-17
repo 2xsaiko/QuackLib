@@ -68,7 +68,7 @@ class CachedBakedModel(private val bakery: IModel) : IBakedModel {
       itemModels = emptyMap()
     }
 
-    private val blockItemCameraTransforms by lazy {
+    val blockItemCameraTransforms by lazy {
       Minecraft.getMinecraft().blockRendererDispatcher.blockModelShapes.getModelForState(Blocks.STONE.defaultState).itemCameraTransforms
     }
   }

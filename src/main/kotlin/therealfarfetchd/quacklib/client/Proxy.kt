@@ -110,7 +110,7 @@ class Proxy : Proxy() {
       ModelLoader.setCustomModelResourceLocation(BlockAlloyFurnace.Item, 0, ModelResourceLocation(BlockAlloyFurnace.Item.registryName, "inventory"))
     }
 
-//    registerModelBakery(MultiblockExtension.Block, null, InvisibleModel)
+    //    registerModelBakery(MultiblockExtension.Block, null, InvisibleModel)
   }
 
   @SubscribeEvent
