@@ -12,6 +12,8 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'kotlin'
 
+apply from: 'publish.gradle.kts'
+
 version = "2.2.1"
 group = "therealfarfetchd.quacklib"
 archivesBaseName = "quacklib"
@@ -33,12 +35,8 @@ minecraft {
 
 repositories {
     jcenter()
-    maven {
-        url "https://modmaven.k-4u.nl/"
-    }
-    maven {
-        url "http://maven.shadowfacts.net/"
-    }
+    maven { url "https://modmaven.k-4u.nl/" }
+    maven { url "http://maven.shadowfacts.net/" }
 }
 
 dependencies {
