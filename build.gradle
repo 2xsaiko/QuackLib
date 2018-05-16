@@ -12,7 +12,7 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'kotlin'
 
-apply from: 'publish.gradle.kts'
+apply from: 'publish.gradle'
 
 version = "2.2.1"
 group = "therealfarfetchd.quacklib"
