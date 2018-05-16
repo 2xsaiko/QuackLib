@@ -12,11 +12,11 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'kotlin'
 
-apply from: 'publish.gradle'
-
 version = "2.2.1"
 group = "therealfarfetchd.quacklib"
 archivesBaseName = "quacklib"
+
+apply from: 'publish.gradle'
 
 sourceCompatibility = targetCompatibility = '1.8'
 compileJava {
