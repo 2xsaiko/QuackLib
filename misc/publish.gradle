@@ -1,0 +1,37 @@
+if (project.group.length() == 0) {
+  throw new IllegalStateException("Project group must be set") // failsafe...
+}
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+
+task sourcesJar(type: Jar) {
+  from(sourceSets.main.allSource) {
+    classifier = "sources"
+  }
+}
+
+artifacts {
+  archives sourcesJar
+}
+
+uploadArchives {
+  if (System.getenv("LOCAL_MAVEN") != null) {
+    repositories {
+      mavenDeployer {
+        repository(url: "file://" + System.getenv("LOCAL_MAVEN"))
+        pom {
+          groupId = project.group
+          version = project.version
+          artifactId = project.archivesBaseName
+
+          if (System.getenv("BUILD_NUMBER") != null && System.getenv("SHOW_BUILD_NUMBER") != null)
+            version = project.version + "_" + System.getenv("BUILD_NUMBER")
+          if (System.getenv("MAVEN_ARTIFACT") != null)
+            artifactId = System.getenv("MAVEN_ARTIFACT")
+        }
+      }
+    }
+  }
+}
