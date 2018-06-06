@@ -1,0 +1,15 @@
+{
+  "modListVersion": 2,
+  "modList": [{
+    "modid": "quacklib",
+    "name": "QuackLib",
+    "description": "Utilities to make a modder's tasks easier.",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "https://github.com/therealfarfetchd/QuackLib",
+    "authorList": ["the_real_farfetchd"],
+    "credits": "20,000 Republic Dataries",
+    "logoFile": "farfetchd.png",
+    "requiredMods": ["forge", "forgelin"]
+  }]
+}

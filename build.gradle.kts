@@ -27,6 +27,7 @@ buildscript {
 plugins { `java-library` }
 apply(plugin = "kotlin")
 apply(plugin = "net.minecraftforge.gradle-kotlin")
+apply(from = "components.gradle.kts")
 
 group = "therealfarfetchd.quacklib"
 version = mod_version
@@ -59,13 +60,6 @@ forgegradle {
   mappings {
     channel = "snapshot"
     version = mappings_version
-  }
-}
-
-java.sourceSets {
-  val api = "api"()
-  "main" {
-    compileClasspath += api.compileClasspath + api.output
   }
 }
 
