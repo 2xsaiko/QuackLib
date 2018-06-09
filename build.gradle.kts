@@ -1,84 +1,108 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import net.minecraftforge.gradle.kotlin.*
+@file:Suppress("PropertyName")
 
-val kotlin_version: String by extra
-val mappings_version: String by extra
-val mc_version: String by extra
+import net.minecraftforge.gradle.user.UserBaseExtension
+import org.gradle.jvm.tasks.Jar
+
 val mod_version: String by extra
+val mc_version: String by extra
 val forge_version: String by extra
+val mappings_version: String by extra
+val kotlin_version: String by extra
 val jei_version: String by extra
+val forgelin_version: String by extra
+
+val Project.minecraft: UserBaseExtension
+  get() = extensions.getByName<UserBaseExtension>("minecraft")
 
 buildscript {
   val kotlin_version: String by extra
-
   repositories {
+    jcenter()
     mavenCentral()
-    mavenLocal()
-    maven("https://repo.gradle.org/gradle/libs-releases-local/")
+    maven("http://files.minecraftforge.net/maven")
   }
-
   dependencies {
-    classpath(gradleApi())
+    classpath("net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT")
     classpath(kotlin("gradle-plugin", kotlin_version))
-    classpath("net.minecraftforge.gradle:forgegradle-kotlin:1.0.+")
   }
 }
 
-plugins { `java-library` }
-apply(plugin = "kotlin")
-apply(plugin = "net.minecraftforge.gradle-kotlin")
-//apply(from = "components.gradle.kts")
+plugins {
+  `java-library`
+}
 
-group = "therealfarfetchd.quacklib"
+apply {
+  plugin("net.minecraftforge.gradle.forge")
+  plugin("kotlin")
+}
+
 version = mod_version
+group = "therealfarfetchd.quacklib"
+
+minecraft {
+  version = "$mc_version-$forge_version"
+  runDir = "run"
+  mappings = "snapshot_$mappings_version"
+  isUseDepAts = true
+}
+
+tasks.withType<JavaCompile> {
+  sourceCompatibility = "1.8"
+  targetCompatibility = "1.8"
+}
 
 repositories {
   mavenCentral()
-  forgeMaven()
-  minecraftMaven()
-
   maven("https://modmaven.k-4u.nl/")
-
-  mappings(mcp())
+  maven("http://maven.shadowfacts.net/")
 }
 
 dependencies {
   implementation(kotlin("stdlib-jdk8", kotlin_version))
   implementation(kotlin("reflect", kotlin_version))
 
-  implementation(forge(forge_version))
-  implementation(remap("net.minecraft", "minecraft", mc_version, classifier = "server-pure", mapping = "notch-mcp", remapTransitives = false))
-  implementation(remap("net.minecraft", "minecraft", mc_version, classifier = "client", mapping = "notch-mcp", remapTransitives = false))
+  runtimeOnly("net.shadowfacts", "Forgelin", forgelin_version)
 
-  implementation("org.ow2.asm", "asm", "6.1")
-
-  runtimeOnly(deobf("mezz.jei", "jei_$mc_version", jei_version))
-
-  // maybe? not now
-  // testCompile("junit", "junit", "4.12")
+  runtimeOnly("mezz.jei", "jei_$mc_version", jei_version)
 }
 
-forgegradle {
-  minecraft.version = mc_version
-  mappings {
-    channel = "snapshot"
-    version = mappings_version
+tasks.withType<Jar> {
+  inputs.properties += "version" to project.version
+  inputs.properties += "mcversion" to project.minecraft.version
+
+  baseName = "quacklib"
+
+  filesMatching("/mcmod.info") {
+    expand(mapOf(
+      "version" to project.version,
+      "mcversion" to project.minecraft.version
+    ))
   }
 }
 
 java {
-  sourceCompatibility = JavaVersion.VERSION_1_8
-
   sourceSets {
     "api" {
       compileClasspath += "main"().compileClasspath
     }
-    "main" {
-      compileClasspath += "api"().output
-    }
+  }
+  manifest {
+    attributes(mapOf(
+      "FMLAT" to "quacklib_at.cfg"
+    ))
   }
 }
 
-tasks.withType<KotlinCompile> {
-  kotlinOptions.jvmTarget = "1.8"
-}
+fun DependencyHandler.deobfCompile(
+  group: String,
+  name: String,
+  version: String? = null,
+  configuration: String? = null,
+  classifier: String? = null,
+  ext: String? = null): ExternalModuleDependency =
+  create(group, name, version, configuration, classifier, ext).apply { add("deobfCompile", this) }
+
+fun DependencyHandler.deobfCompile(dependencyNotation: Any): Dependency? =
+  add("deobfCompile", dependencyNotation)
+
+fun minecraft(op: UserBaseExtension.() -> Unit) = configure(op)

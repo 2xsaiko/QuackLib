@@ -4,7 +4,7 @@ import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import therealfarfetchd.quacklib.api.core.modinterface.QuackLibAPI
-import therealfarfetchd.quacklib.tools.internal.ModContext
+import therealfarfetchd.quacklib.tools.ModContext
 
 const val ModID = "quacklib"
 
@@ -26,4 +26,8 @@ fun main(args: Array<String>) {
   QuackLib
 }
 
-object APIImpl : QuackLibAPI
+object APIImpl : QuackLibAPI {
+
+  override val modContext = ModContext
+
+}

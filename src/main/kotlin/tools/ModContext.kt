@@ -1,13 +1,14 @@
-package therealfarfetchd.quacklib.tools.internal
+package therealfarfetchd.quacklib.tools
 
 import com.google.common.collect.ListMultimap
 import net.minecraftforge.fml.common.LoadController
 import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.ModContainer
-import therealfarfetchd.quacklib.tools.access
-import therealfarfetchd.quacklib.tools.accessDelegate
+import therealfarfetchd.quacklib.api.tools.ModContext
+import therealfarfetchd.quacklib.api.tools.access
+import therealfarfetchd.quacklib.api.tools.accessDelegate
 
-object ModContext {
+object ModContext : ModContext {
 
   private val theLoader: Loader = Loader.instance()
   private val loadController: LoadController = theLoader.access("modController")
@@ -41,6 +42,6 @@ object ModContext {
     }
   }
 
-  fun currentMod() = Loader.instance().activeModContainer()
+  override fun currentMod(): ModContainer? = Loader.instance().activeModContainer()
 
 }

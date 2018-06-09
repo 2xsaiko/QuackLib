@@ -1,4 +1,4 @@
-package therealfarfetchd.quacklib.tools
+package therealfarfetchd.quacklib.api.tools
 
 import java.util.Random
 

@@ -10,6 +10,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import net.minecraftforge.fml.common.registry.EntityEntry
 import therealfarfetchd.quacklib.api.core.mod.BaseMod
 import therealfarfetchd.quacklib.api.core.mod.ModProxy
+import therealfarfetchd.quacklib.core.mod.init.InitializationContextImpl
 
 abstract class CommonProxy : ModProxy {
 
@@ -18,7 +19,7 @@ abstract class CommonProxy : ModProxy {
   override var customProxy: Any? = null
 
   override fun preInit(e: FMLPreInitializationEvent) {
-    mod.init(TODO())
+    mod.init(InitializationContextImpl(mod))
   }
 
   override fun init(e: FMLInitializationEvent) {
