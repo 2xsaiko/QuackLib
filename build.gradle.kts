@@ -27,7 +27,7 @@ buildscript {
 plugins { `java-library` }
 apply(plugin = "kotlin")
 apply(plugin = "net.minecraftforge.gradle-kotlin")
-apply(from = "components.gradle.kts")
+//apply(from = "components.gradle.kts")
 
 group = "therealfarfetchd.quacklib"
 version = mod_version
@@ -44,10 +44,13 @@ repositories {
 
 dependencies {
   implementation(kotlin("stdlib-jdk8", kotlin_version))
+  implementation(kotlin("reflect", kotlin_version))
 
   implementation(forge(forge_version))
   implementation(remap("net.minecraft", "minecraft", mc_version, classifier = "server-pure", mapping = "notch-mcp", remapTransitives = false))
   implementation(remap("net.minecraft", "minecraft", mc_version, classifier = "client", mapping = "notch-mcp", remapTransitives = false))
+
+  implementation("org.ow2.asm", "asm", "6.1")
 
   runtimeOnly(deobf("mezz.jei", "jei_$mc_version", jei_version))
 
@@ -65,6 +68,15 @@ forgegradle {
 
 java {
   sourceCompatibility = JavaVersion.VERSION_1_8
+
+  sourceSets {
+    "api" {
+      compileClasspath += "main"().compileClasspath
+    }
+    "main" {
+      compileClasspath += "api"().output
+    }
+  }
 }
 
 tasks.withType<KotlinCompile> {

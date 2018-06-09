@@ -41,4 +41,6 @@ object ModContext {
     }
   }
 
+  fun currentMod() = Loader.instance().activeModContainer()
+
 }
