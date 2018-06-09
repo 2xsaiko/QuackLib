@@ -1,4 +1,11 @@
 package therealfarfetchd.quacklib.api.core.init
 
-interface InitializationContext {
+@DslMarker
+annotation class InitDSL
+
+@InitDSL
+interface InitializationContext : BlockInitializationContext {
+
+  operator fun invoke(op: InitializationContext.() -> Unit): Unit = with(this, op)
+
 }

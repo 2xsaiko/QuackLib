@@ -1,7 +1,7 @@
 package therealfarfetchd.quacklib.api.core.mod
 
+import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.FMLCommonHandler
-import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
@@ -17,7 +17,8 @@ abstract class BaseMod {
   private val clientProxy = "therealfarfetchd.quacklib.core.mod.ClientProxy"
   private val serverProxy = "therealfarfetchd.quacklib.core.mod.ServerProxy"
 
-  private var proxy: ModProxy
+  var proxy: ModProxy
+    private set
 
   lateinit var modid: String
     private set
@@ -25,6 +26,7 @@ abstract class BaseMod {
   init {
     val proxyClass = if (FMLCommonHandler.instance().side == Side.CLIENT) clientProxy else serverProxy
     proxy = Class.forName(proxyClass).newInstance() as ModProxy
+    MinecraftForge.EVENT_BUS.register(proxy)
   }
 
   fun preInit(e: FMLPreInitializationEvent) {
