@@ -7,4 +7,4 @@ import therealfarfetchd.quacklib.api.core.modinterface.QuackLibAPI
 val isDebugMode: Boolean get() = Launch.blackboard["fml.deobfuscatedEnvironment"] as Boolean
 
 val Logger
-  get() = LogManager.getLogger(QuackLibAPI.impl.modContext.currentMod())
+  get() = LogManager.getLogger(QuackLibAPI.impl.modContext.currentMod()?.modId ?: "Unknown")

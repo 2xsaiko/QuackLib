@@ -6,8 +6,10 @@ interface QuackLibAPI {
 
   val modContext: ModContext
 
+  val qlVersion: String
+
   companion object {
     lateinit var impl: QuackLibAPI
   }
-  
+
 }

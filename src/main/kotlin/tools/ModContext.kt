@@ -32,15 +32,21 @@ object ModContext : ModContext {
     packageOwners.put(pkg, mod)
   }
 
-  fun <R> executeAsMod(name: String, op: () -> R): R {
+  override fun <R> lockMod(op: () -> R): R =
+    executeAsMod(currentMod(), op)
+
+  fun <R> executeAsMod(mod: ModContainer?, op: () -> R): R {
     val oldContainer = activeContainer
-    activeContainer = theLoader.indexedModList[name]!!
+    activeContainer = mod
     try {
       return op()
     } finally {
       activeContainer = oldContainer
     }
   }
+
+  fun <R> executeAsMod(name: String, op: () -> R): R =
+    executeAsMod(theLoader.indexedModList[name], op)
 
   override fun currentMod(): ModContainer? = Loader.instance().activeModContainer()
 

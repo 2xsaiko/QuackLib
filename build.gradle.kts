@@ -58,10 +58,10 @@ repositories {
 }
 
 dependencies {
-  implementation(kotlin("stdlib-jdk8", kotlin_version))
-  implementation(kotlin("reflect", kotlin_version))
+  //  implementation(kotlin("stdlib-jdk8", kotlin_version))
+  //  implementation(kotlin("reflect", kotlin_version))
 
-  runtimeOnly("net.shadowfacts", "Forgelin", forgelin_version)
+  deobfCompile("net.shadowfacts", "Forgelin", forgelin_version)
 
   runtimeOnly("mezz.jei", "jei_$mc_version", jei_version)
 }
@@ -81,16 +81,22 @@ tasks.withType<Jar> {
 }
 
 java {
-  sourceSets {
-    "api" {
-      compileClasspath += "main"().compileClasspath
-    }
-  }
   manifest {
     attributes(mapOf(
-      "FMLAT" to "quacklib_at.cfg"
+      "FMLAT" to "quacklib_at.cfg",
+      "FMLCorePlugin" to "therealfarfetchd.quacklib.hax.QuackLibPlugin",
+      "FMLCorePluginContainsMod" to "true"
     ))
   }
+
+  //  sourceSets {
+  //    "testmod" {
+  //      compileClasspath += "api"().output
+  //    }
+  //    "main" {
+  //      runtimeClasspath += "testmod"().output
+  //    }
+  //  }
 }
 
 fun DependencyHandler.deobfCompile(

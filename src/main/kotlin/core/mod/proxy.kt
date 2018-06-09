@@ -19,7 +19,7 @@ abstract class CommonProxy : ModProxy {
   override var customProxy: Any? = null
 
   override fun preInit(e: FMLPreInitializationEvent) {
-    mod.init(InitializationContextImpl(mod))
+    mod.initContent(InitializationContextImpl(mod))
   }
 
   override fun init(e: FMLInitializationEvent) {
@@ -47,6 +47,6 @@ abstract class CommonProxy : ModProxy {
 
 }
 
-class ClientProxy
+class ClientProxy : CommonProxy()
 
-class ServerProxy
+class ServerProxy : CommonProxy()
