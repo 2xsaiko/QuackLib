@@ -1,9 +1,7 @@
 package therealfarfetchd.quacklib.core.mod
 
 import net.minecraft.block.Block
-import net.minecraft.creativetab.CreativeTabs
 import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
 import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent
@@ -17,8 +15,9 @@ import therealfarfetchd.quacklib.block.impl.BlockQuackLib
 import therealfarfetchd.quacklib.core.init.BlockConfigurationScopeImpl
 import therealfarfetchd.quacklib.core.init.InitializationContextImpl
 import therealfarfetchd.quacklib.core.init.ItemConfigurationScopeImpl
-import therealfarfetchd.quacklib.core.init.TabConfigurationImpl
+import therealfarfetchd.quacklib.core.init.TabConfigurationScopeImpl
 import therealfarfetchd.quacklib.item.impl.ItemQuackLib
+import therealfarfetchd.quacklib.item.impl.TabQuackLib
 
 abstract class CommonProxy : ModProxy {
 
@@ -28,14 +27,14 @@ abstract class CommonProxy : ModProxy {
 
   private var blockTemplates: Set<BlockConfigurationScopeImpl> = emptySet()
   private var itemTemplates: Set<ItemConfigurationScopeImpl> = emptySet()
-  private var tabTemplates: Set<TabConfigurationImpl> = emptySet()
+  private var tabTemplates: Set<TabConfigurationScopeImpl> = emptySet()
+
+  var creativeTabs: List<TabQuackLib> = emptyList()
 
   override fun preInit(e: FMLPreInitializationEvent) {
     mod.initContent(InitializationContextImpl(mod))
     tabTemplates.forEach {
-      object : CreativeTabs("${it.modid}:${it.name}") {
-        override fun getTabIconItem(): ItemStack = it.icon.makeStack()
-      }
+      creativeTabs += TabQuackLib(it)
     }
   }
 
@@ -82,7 +81,7 @@ abstract class CommonProxy : ModProxy {
     itemTemplates += ic
   }
 
-  fun addTabTemplate(tc: TabConfigurationImpl) {
+  fun addTabTemplate(tc: TabConfigurationScopeImpl) {
     tabTemplates += tc
   }
 

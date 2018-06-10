@@ -6,7 +6,6 @@ import therealfarfetchd.quacklib.api.item.component.ItemComponent
 @InitDSL
 interface ItemConfigurationScope : ItemConfiguration {
 
-
   fun apply(component: ItemComponent)
 
 }

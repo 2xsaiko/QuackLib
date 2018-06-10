@@ -4,8 +4,8 @@ import therealfarfetchd.quacklib.api.item.ItemReference
 
 interface ItemInitializationContext {
 
-  fun item(name: String, op: ItemConfigurationScope.() -> Unit)
+  fun addItem(name: String, op: ItemConfigurationScope.() -> Unit = {})
 
-  fun tab(name: String, icon: ItemReference)
+  fun addTab(name: String, icon: ItemReference, op: TabConfigurationScope.() -> Unit = {})
 
 }
