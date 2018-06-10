@@ -8,11 +8,14 @@ import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
+import therealfarfetchd.math.Vec3
 import therealfarfetchd.quacklib.api.block.component.BlockComponentActivation
-import therealfarfetchd.quacklib.api.tools.Logger
-import therealfarfetchd.quacklib.core.init.BlockConfigurationScopeImpl
+import therealfarfetchd.quacklib.api.block.component.BlockComponentNeedTE
+import therealfarfetchd.quacklib.api.block.component.BlockComponentTickable
+import therealfarfetchd.quacklib.api.block.component.BlockData
+import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
 
-class BlockQuackLib(def: BlockConfigurationScopeImpl) : Block(def.material) {
+class BlockQuackLib(val def: BlockConfiguration) : Block(def.material) {
 
   val needsTool = def.needsTool
   val tools = def.validTools
@@ -21,19 +24,20 @@ class BlockQuackLib(def: BlockConfigurationScopeImpl) : Block(def.material) {
 
   val cActivate = getComponentsOfType<BlockComponentActivation>()
 
+  val needsTile = getComponentsOfType<BlockComponentNeedTE>().isNotEmpty()
+  val needsTick = getComponentsOfType<BlockComponentTickable>().isNotEmpty()
+
   init {
     registryName = def.rl
     unlocalizedName = def.rl.toString()
     def.hardness?.also {
       setHardness(it)
     } ?: setBlockUnbreakable()
-
-    if (tools.size > 1) Logger.warn("More than 1 harvest tool is currently not supported. Ignoring ${tools.size - 1} tools")
   }
 
   override fun onBlockActivated(worldIn: World, pos: BlockPos, state: IBlockState, playerIn: EntityPlayer, hand: EnumHand, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean {
     return cActivate
-      .map { it.onActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ) }
+      .map { it.onActivated(BlockData(worldIn, pos, state), playerIn, hand, facing, Vec3(hitX, hitY, hitZ)) }
       .any { it }
   }
 
@@ -50,6 +54,15 @@ class BlockQuackLib(def: BlockConfigurationScopeImpl) : Block(def.material) {
     if (!needsTool) return true
     return type in tools.map { it.toolName }
   }
+
+  override fun hasTileEntity(state: IBlockState): Boolean = needsTile
+
+  override fun createTileEntity(world: World, state: IBlockState): TileQuackLib? =
+    when {
+      needsTick -> TileQuackLib.Tickable(def)
+      needsTile -> TileQuackLib(def)
+      else -> null
+    }
 
   private inline fun <reified T : Any> getComponentsOfType(): List<T> =
     components.mapNotNull { it as? T }

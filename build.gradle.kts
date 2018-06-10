@@ -10,6 +10,7 @@ val mappings_version: String by extra
 val kotlin_version: String by extra
 val jei_version: String by extra
 val forgelin_version: String by extra
+val extmath_version: String by extra
 
 val Project.minecraft: UserBaseExtension
   get() = extensions.getByName<UserBaseExtension>("minecraft")
@@ -62,6 +63,8 @@ dependencies {
   //  implementation(kotlin("reflect", kotlin_version))
 
   deobfCompile("net.shadowfacts", "Forgelin", forgelin_version)
+
+  api("therealfarfetchd.extmath", "extmath", extmath_version)
 
   runtimeOnly("mezz.jei", "jei_$mc_version", jei_version)
 }

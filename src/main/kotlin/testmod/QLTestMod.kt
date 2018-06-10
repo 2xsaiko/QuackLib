@@ -4,10 +4,11 @@ import net.minecraft.block.material.Material
 import net.minecraft.init.Items
 import net.minecraft.item.ItemStack
 import net.minecraftforge.fml.common.Mod
-import therealfarfetchd.quacklib.api.block.Tool
 import therealfarfetchd.quacklib.api.core.init.InitializationContext
 import therealfarfetchd.quacklib.api.core.mod.BaseMod
 import therealfarfetchd.quacklib.api.core.mod.KotlinAdapter
+import therealfarfetchd.quacklib.api.core.modinterface.item
+import therealfarfetchd.quacklib.api.item.Tool
 
 @Mod(modid = "qltestmod", version = "1.0.0", name = "QuackLib Test Mod", dependencies = "required-after:quacklib", modLanguageAdapter = KotlinAdapter)
 object Mod : BaseMod() {
@@ -20,6 +21,12 @@ object Mod : BaseMod() {
 
       apply(ComponentTestItemDrop(ItemStack(Items.DIAMOND, 5)))
     }
+
+    item("test_item") {
+
+    }
+
+    tab("standard", item("test_item"))
   }
 
 }

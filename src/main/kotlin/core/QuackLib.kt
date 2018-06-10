@@ -1,6 +1,8 @@
 package therealfarfetchd.quacklib.core
 
 import com.google.common.collect.ListMultimap
+import core.APIImpl
+import net.minecraft.util.ResourceLocation
 import net.minecraftforge.fml.common.FMLModContainer
 import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.Mod
@@ -8,13 +10,15 @@ import net.minecraftforge.fml.common.event.FMLEvent
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
+import net.minecraftforge.fml.common.registry.GameRegistry
 import org.apache.logging.log4j.Logger
+import therealfarfetchd.math.Random
 import therealfarfetchd.quacklib.api.core.mod.BaseMod
 import therealfarfetchd.quacklib.api.core.mod.KotlinAdapter
 import therealfarfetchd.quacklib.api.core.modinterface.QuackLibAPI
-import therealfarfetchd.quacklib.api.tools.Random
 import therealfarfetchd.quacklib.api.tools.access
 import therealfarfetchd.quacklib.api.tools.isDebugMode
+import therealfarfetchd.quacklib.block.impl.TileQuackLib
 import therealfarfetchd.quacklib.tools.ModContext
 import java.lang.reflect.Method
 import kotlin.reflect.jvm.javaMethod
@@ -40,6 +44,8 @@ object QuackLib {
     Logger.info(javaClass.classLoader.getResourceAsStream("assets/quacklib/texts").reader().use { it.readLines() }.let { it[Random.nextInt(it.size)] })
     ModContext.dissociate("therealfarfetchd.quacklib.api", recursive = true)
     ModContext.dissociate("therealfarfetchd.quacklib.tools", recursive = true)
+
+    GameRegistry.registerTileEntity(TileQuackLib::class.java, ResourceLocation(ModID, "tile_quacklib"))
   }
 
   @Mod.EventHandler
@@ -61,13 +67,5 @@ object QuackLib {
         eventMethods.put(FMLPostInitializationEvent::class.java, BaseMod::postInit.javaMethod)
       }
   }
-
-}
-
-object APIImpl : QuackLibAPI {
-
-  override val modContext = ModContext
-
-  override var qlVersion: String = "unset"
 
 }
