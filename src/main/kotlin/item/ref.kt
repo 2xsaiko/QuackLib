@@ -11,6 +11,8 @@ data class ItemReferenceDirect(override val mcItem: Item) : ItemReference {
   override val rl: ResourceLocation
     get() = mcItem.registryName!!
 
+  override val exists: Boolean = true
+
 }
 
 data class ItemReferenceByRL(override val rl: ResourceLocation) : ItemReference {
@@ -18,16 +20,16 @@ data class ItemReferenceByRL(override val rl: ResourceLocation) : ItemReference 
   var item: Item? = null
 
   override val mcItem: Item
-    get() = item?.let {
-      it
-    } ?: run {
-      val i = ForgeRegistries.ITEMS.getValue(rl)
-      if (i != null) {
-        item = i
-        i
-      } else {
-        Items.AIR
-      }
+    get() =
+      item ?: ForgeRegistries.ITEMS.getValue(rl)
+        ?.takeIf { ForgeRegistries.ITEMS.containsKey(rl) }
+        ?.also { item = it }
+      ?: Items.AIR
+
+  override val exists: Boolean
+    get() {
+      mcItem
+      return item != null
     }
 
 }

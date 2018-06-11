@@ -11,17 +11,17 @@ import therealfarfetchd.quacklib.core.mod.CommonProxy
 class InitializationContextImpl(val mod: BaseMod) : InitializationContext {
 
   override fun addBlock(name: String, op: BlockConfigurationScope.() -> Unit) {
-    val conf = BlockConfigurationScopeImpl(mod.modid, name).also(op)
+    val conf = BlockConfigurationScopeImpl(mod.modid, name, this).also(op)
     (mod.proxy as CommonProxy).addBlockTemplate(conf)
   }
 
   override fun addItem(name: String, op: ItemConfigurationScope.() -> Unit) {
-    val conf = ItemConfigurationScopeImpl(mod.modid, name).also(op)
+    val conf = ItemConfigurationScopeImpl(mod.modid, name, this).also(op)
     (mod.proxy as CommonProxy).addItemTemplate(conf)
   }
 
   override fun addTab(name: String, icon: ItemReference, op: TabConfigurationScope.() -> Unit) {
-    val conf = TabConfigurationScopeImpl(mod.modid, name, icon).also(op)
+    val conf = TabConfigurationScopeImpl(mod.modid, name, icon, this).also(op)
     (mod.proxy as CommonProxy).addTabTemplate(conf)
   }
 

@@ -31,10 +31,14 @@ abstract class CommonProxy : ModProxy {
 
   var creativeTabs: List<TabQuackLib> = emptyList()
 
+  var failThings: List<String> = emptyList()
+
   override fun preInit(e: FMLPreInitializationEvent) {
     mod.initContent(InitializationContextImpl(mod))
     tabTemplates.forEach {
-      creativeTabs += TabQuackLib(it)
+      if (it.validate()) {
+        creativeTabs += TabQuackLib(it)
+      } else fatalInit(it.describe())
     }
   }
 
@@ -43,17 +47,19 @@ abstract class CommonProxy : ModProxy {
   }
 
   override fun postInit(e: FMLPostInitializationEvent) {
-
+    if (failThings.isNotEmpty()) {
+      error("Failed to add ${failThings.size} objects for mod '${mod.modid}'. Look in the message log for more information.")
+    }
   }
 
   @SubscribeEvent
   fun registerBlocks(e: RegistryEvent.Register<Block>) {
     blockTemplates.forEach {
       if (it.validate()) {
-        Logger.info("Adding Block ${it.name}")
+        Logger.info("Adding ${it.describe()}")
         val block = BlockQuackLib(it)
         e.registry.register(block)
-      } else fatalInit("Block ${it.name}")
+      } else fatalInit(it.describe())
     }
   }
 
@@ -61,10 +67,10 @@ abstract class CommonProxy : ModProxy {
   fun registerItems(e: RegistryEvent.Register<Item>) {
     itemTemplates.forEach {
       if (it.validate()) {
-        Logger.info("Adding Item ${it.name}")
+        Logger.info("Adding ${it.describe()}")
         val item = ItemQuackLib(it)
         e.registry.register(item)
-      } else fatalInit("Item ${it.name}")
+      } else fatalInit(it.describe())
     }
   }
 
@@ -85,8 +91,9 @@ abstract class CommonProxy : ModProxy {
     tabTemplates += tc
   }
 
-  private fun fatalInit(text: String): Nothing =
-    error("Failed to initialize: '$text'. Look in the message log for more information.")
+  private fun fatalInit(text: String) {
+    failThings += text
+  }
 
 }
 

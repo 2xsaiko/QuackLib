@@ -11,6 +11,8 @@ data class BlockReferenceDirect(override val mcBlock: Block) : BlockReference {
   override val rl: ResourceLocation
     get() = mcBlock.registryName!!
 
+  override val exists: Boolean = true
+
 }
 
 data class BlockReferenceByRL(override val rl: ResourceLocation) : BlockReference {
@@ -18,16 +20,16 @@ data class BlockReferenceByRL(override val rl: ResourceLocation) : BlockReferenc
   var block: Block? = null
 
   override val mcBlock: Block
-    get() = block?.let {
-      it
-    } ?: run {
-      val i = ForgeRegistries.BLOCKS.getValue(rl)
-      if (i != null) {
-        block = i
-        i
-      } else {
-        Blocks.AIR
-      }
+    get() =
+      block ?: ForgeRegistries.BLOCKS.getValue(rl)
+        ?.takeIf { ForgeRegistries.BLOCKS.containsKey(rl) }
+        ?.also { block = it }
+      ?: Blocks.AIR
+
+  override val exists: Boolean
+    get() {
+      mcBlock
+      return block != null
     }
 
 }

@@ -8,7 +8,7 @@ import therealfarfetchd.quacklib.api.block.render.BlockRenderer
 import therealfarfetchd.quacklib.api.item.Tool
 import kotlin.reflect.jvm.jvmName
 
-class BlockConfigurationScopeImpl(modid: String, override val name: String) : BlockConfigurationScope {
+class BlockConfigurationScopeImpl(modid: String, override val name: String, val init: InitializationContextImpl) : BlockConfigurationScope {
 
   override val rl: ResourceLocation = ResourceLocation(modid, name)
 

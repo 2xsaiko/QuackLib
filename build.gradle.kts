@@ -64,7 +64,7 @@ dependencies {
 
   deobfCompile("net.shadowfacts", "Forgelin", forgelin_version)
 
-  api("therealfarfetchd.extmath", "extmath", extmath_version)
+  compile("therealfarfetchd.extmath", "extmath", extmath_version)
 
   runtimeOnly("mezz.jei", "jei_$mc_version", jei_version)
 }

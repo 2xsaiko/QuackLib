@@ -20,7 +20,7 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material) {
   val needsTool = def.needsTool
   val tools = def.validTools
 
-  val components = def.components
+  val components = def.components.asReversed()
 
   val cActivate = getComponentsOfType<BlockComponentActivation>()
 

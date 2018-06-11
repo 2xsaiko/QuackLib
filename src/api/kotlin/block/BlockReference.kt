@@ -10,6 +10,8 @@ interface BlockReference {
 
   val rl: ResourceLocation
 
+  val exists: Boolean
+
   fun makeStack(amount: Int = 1, meta: Int = 0): ItemStack =
     ItemStack(mcBlock, amount, meta)
 

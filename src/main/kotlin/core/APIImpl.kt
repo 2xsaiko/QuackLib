@@ -4,10 +4,15 @@ import net.minecraft.block.Block
 import net.minecraft.item.Item
 import net.minecraft.util.ResourceLocation
 import therealfarfetchd.quacklib.api.block.BlockReference
+import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
 import therealfarfetchd.quacklib.api.core.modinterface.QuackLibAPI
+import therealfarfetchd.quacklib.api.core.modinterface.block
 import therealfarfetchd.quacklib.api.item.ItemReference
+import therealfarfetchd.quacklib.api.item.component.prefab.ComponentPlaceBlock
+import therealfarfetchd.quacklib.api.item.init.ItemConfigurationScope
 import therealfarfetchd.quacklib.block.BlockReferenceByRL
 import therealfarfetchd.quacklib.block.BlockReferenceDirect
+import therealfarfetchd.quacklib.core.init.BlockConfigurationScopeImpl
 import therealfarfetchd.quacklib.item.ItemReferenceByRL
 import therealfarfetchd.quacklib.item.ItemReferenceDirect
 import therealfarfetchd.quacklib.tools.ModContext
@@ -35,6 +40,16 @@ object APIImpl : QuackLibAPI {
 
   override fun getBlock(rl: ResourceLocation): BlockReference =
     BlockReferenceByRL(rl)
+
+  override fun addItemToBlock(configurationScope: BlockConfiguration, name: String, op: ItemConfigurationScope.() -> Unit) {
+    configurationScope as BlockConfigurationScopeImpl
+
+    configurationScope.init.addItem(name) {
+      apply(ComponentPlaceBlock(block(configurationScope.rl)))
+      op(this)
+    }
+    // TODO add stuff to block
+  }
 
   private fun getResourceFromName(name: String): ResourceLocation {
     val domain: String

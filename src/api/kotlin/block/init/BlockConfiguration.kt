@@ -3,9 +3,10 @@ package therealfarfetchd.quacklib.api.block.init
 import net.minecraft.block.material.Material
 import net.minecraft.util.ResourceLocation
 import therealfarfetchd.quacklib.api.block.component.BlockComponent
+import therealfarfetchd.quacklib.api.core.Describable
 import therealfarfetchd.quacklib.api.item.Tool
 
-interface BlockConfiguration {
+interface BlockConfiguration : Describable {
 
   /**
    *
@@ -41,5 +42,7 @@ interface BlockConfiguration {
    *
    */
   val components: List<BlockComponent>
+
+  override fun describe(): String = "Block $name"
 
 }

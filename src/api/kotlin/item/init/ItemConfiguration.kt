@@ -1,9 +1,10 @@
 package therealfarfetchd.quacklib.api.item.init
 
 import net.minecraft.util.ResourceLocation
+import therealfarfetchd.quacklib.api.core.Describable
 import therealfarfetchd.quacklib.api.item.component.ItemComponent
 
-interface ItemConfiguration {
+interface ItemConfiguration : Describable {
 
   /**
    *
@@ -19,5 +20,7 @@ interface ItemConfiguration {
    *
    */
   val components: List<ItemComponent>
+
+  override fun describe(): String = "Item $name"
 
 }

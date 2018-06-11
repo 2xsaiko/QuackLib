@@ -5,7 +5,7 @@ import therealfarfetchd.quacklib.api.item.component.ItemComponent
 import therealfarfetchd.quacklib.api.item.init.ItemConfigurationScope
 import kotlin.reflect.jvm.jvmName
 
-class ItemConfigurationScopeImpl(modid: String, override val name: String) : ItemConfigurationScope {
+class ItemConfigurationScopeImpl(modid: String, override val name: String, val init: InitializationContextImpl) : ItemConfigurationScope {
 
   override val rl: ResourceLocation = ResourceLocation(modid, name)
 

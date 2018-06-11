@@ -4,9 +4,15 @@ import net.minecraft.block.Block
 import net.minecraft.item.Item
 import net.minecraft.util.ResourceLocation
 import therealfarfetchd.quacklib.api.block.BlockReference
+import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
 import therealfarfetchd.quacklib.api.item.ItemReference
+import therealfarfetchd.quacklib.api.item.init.ItemConfigurationScope
 import therealfarfetchd.quacklib.api.tools.ModContext
 
+/**
+ * This is the "API", but this doesn't mean you should use it.
+ * There's probably better places to go for the stuff you need.
+ */
 interface QuackLibAPI {
 
   val modContext: ModContext
@@ -24,6 +30,8 @@ interface QuackLibAPI {
   fun getBlock(block: Block): BlockReference
 
   fun getBlock(rl: ResourceLocation): BlockReference
+
+  fun addItemToBlock(configurationScope: BlockConfiguration, name: String, op: ItemConfigurationScope.() -> Unit)
 
   companion object {
     lateinit var impl: QuackLibAPI
