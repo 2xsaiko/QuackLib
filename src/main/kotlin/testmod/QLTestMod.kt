@@ -26,7 +26,8 @@ object QLTestMod : BaseMod() {
     }
 
     addTab("standard", item("test_block")) {
-      include(item("test_block"))
+      include("test_block")
+      include("minecraft:diamond")
     }
   }
 

@@ -5,6 +5,7 @@ import net.minecraft.util.ResourceLocation
 import therealfarfetchd.quacklib.api.block.component.BlockComponent
 import therealfarfetchd.quacklib.api.block.init.BlockConfigurationScope
 import therealfarfetchd.quacklib.api.block.render.BlockRenderer
+import therealfarfetchd.quacklib.api.item.ItemReference
 import therealfarfetchd.quacklib.api.item.Tool
 import kotlin.reflect.jvm.jvmName
 
@@ -16,6 +17,7 @@ class BlockConfigurationScopeImpl(modid: String, override val name: String, val 
   override var hardness: Float? = 1.0f
   override var needsTool: Boolean = false
   override var validTools: Set<Tool> = emptySet()
+  override var item: ItemReference? = null
 
   override var components: List<BlockComponent> = emptyList()
 
@@ -30,6 +32,7 @@ class BlockConfigurationScopeImpl(modid: String, override val name: String, val 
     val vc = ValidationContextImpl("Block $name")
 
     if (validTools.size > 1) vc.warn("More than 1 harvest tool is currently not supported correctly.")
+    hardness?.also { if (it < 0) vc.error("Hardness value is out of bounds! Must be in range [0,∞)") }
 
     components.forEach {
       vc.additionalInfo = it::class.simpleName ?: it::class.qualifiedName ?: it::class.jvmName

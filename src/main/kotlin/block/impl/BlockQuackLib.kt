@@ -4,16 +4,19 @@ import net.minecraft.block.Block
 import net.minecraft.block.state.BlockStateContainer
 import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.item.Item
+import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand
+import net.minecraft.util.NonNullList
 import net.minecraft.util.math.BlockPos
+import net.minecraft.util.math.RayTraceResult
+import net.minecraft.world.IBlockAccess
 import net.minecraft.world.World
 import therealfarfetchd.math.Vec3
-import therealfarfetchd.quacklib.api.block.component.BlockComponentActivation
-import therealfarfetchd.quacklib.api.block.component.BlockComponentNeedTE
-import therealfarfetchd.quacklib.api.block.component.BlockComponentTickable
-import therealfarfetchd.quacklib.api.block.component.BlockData
+import therealfarfetchd.quacklib.api.block.component.*
 import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
+import java.util.*
 
 class BlockQuackLib(val def: BlockConfiguration) : Block(def.material) {
 
@@ -23,6 +26,8 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material) {
   val components = def.components.asReversed()
 
   val cActivate = getComponentsOfType<BlockComponentActivation>()
+  val cDrops = getComponentsOfType<BlockComponentDrops>()
+  val cPickBlock = getComponentsOfType<BlockComponentPickBlock>()
 
   val needsTile = getComponentsOfType<BlockComponentNeedTE>().isNotEmpty()
   val needsTick = getComponentsOfType<BlockComponentTickable>().isNotEmpty()
@@ -63,6 +68,20 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material) {
       needsTile -> TileQuackLib(def)
       else -> null
     }
+
+  // TODO
+  override fun getItemDropped(state: IBlockState?, rand: Random?, fortune: Int): Item? = null
+
+  override fun getDrops(drops: NonNullList<ItemStack>, world: IBlockAccess, pos: BlockPos, state: IBlockState, fortune: Int) {
+    // super.getDrops(drops, world, pos, state, fortune)
+    // FIXME don't just cast this to World
+    cDrops.forEach { drops += it.getDrops(BlockData(world as World, pos, state)) }
+  }
+
+  override fun getPickBlock(state: IBlockState, target: RayTraceResult, world: World, pos: BlockPos, player: EntityPlayer): ItemStack {
+    return cPickBlock.firstOrNull()?.getPickBlock(BlockData(world, pos, state))
+           ?: super.getPickBlock(state, target, world, pos, player)
+  }
 
   private inline fun <reified T : Any> getComponentsOfType(): List<T> =
     components.mapNotNull { it as? T }

@@ -4,6 +4,7 @@ import net.minecraft.block.material.Material
 import therealfarfetchd.quacklib.api.block.component.BlockComponent
 import therealfarfetchd.quacklib.api.block.render.BlockRenderer
 import therealfarfetchd.quacklib.api.core.init.InitDSL
+import therealfarfetchd.quacklib.api.item.ItemReference
 import therealfarfetchd.quacklib.api.item.Tool
 
 @InitDSL
@@ -28,6 +29,8 @@ interface BlockConfigurationScope : BlockConfiguration {
    *
    */
   override var validTools: Set<Tool>
+
+  override var item: ItemReference?
 
   /**
    *

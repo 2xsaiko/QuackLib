@@ -39,3 +39,10 @@ inline fun <reified T : Any, reified R> T.accessDelegate(name: String, type: KCl
   }
 
 }
+
+inline fun <T : Any, reified R> KClass<T>.access(name: String): R {
+  val field = java.getDeclaredField(name)
+  field.isAccessible = true
+  require(R::class.java.isAssignableFrom(field.type), { "Field $name is not of type ${R::class}" })
+  return field[null] as R
+}

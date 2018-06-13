@@ -1,7 +1,6 @@
 package therealfarfetchd.quacklib.core
 
 import com.google.common.collect.ListMultimap
-import core.APIImpl
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.fml.common.FMLModContainer
 import net.minecraftforge.fml.common.Loader

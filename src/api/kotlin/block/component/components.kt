@@ -2,6 +2,7 @@ package therealfarfetchd.quacklib.api.block.component
 
 import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand
 import net.minecraft.util.math.BlockPos
@@ -38,5 +39,17 @@ interface BlockComponentActivation : Base {
 interface BlockComponentTickable : TE {
 
   fun onTick(data: BlockData)
+
+}
+
+interface BlockComponentDrops : Base {
+
+  fun getDrops(data: BlockData): Set<ItemStack>
+
+}
+
+interface BlockComponentPickBlock : Base {
+
+  fun getPickBlock(data: BlockData): ItemStack
 
 }

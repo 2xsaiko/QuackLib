@@ -1,4 +1,4 @@
-package core
+package therealfarfetchd.quacklib.core
 
 import net.minecraft.block.Block
 import net.minecraft.item.Item
@@ -7,11 +7,13 @@ import therealfarfetchd.quacklib.api.block.BlockReference
 import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
 import therealfarfetchd.quacklib.api.core.modinterface.QuackLibAPI
 import therealfarfetchd.quacklib.api.core.modinterface.block
+import therealfarfetchd.quacklib.api.core.modinterface.item
 import therealfarfetchd.quacklib.api.item.ItemReference
 import therealfarfetchd.quacklib.api.item.component.prefab.ComponentPlaceBlock
 import therealfarfetchd.quacklib.api.item.init.ItemConfigurationScope
 import therealfarfetchd.quacklib.block.BlockReferenceByRL
 import therealfarfetchd.quacklib.block.BlockReferenceDirect
+import therealfarfetchd.quacklib.block.component.ComponentItemForBlock
 import therealfarfetchd.quacklib.core.init.BlockConfigurationScopeImpl
 import therealfarfetchd.quacklib.item.ItemReferenceByRL
 import therealfarfetchd.quacklib.item.ItemReferenceDirect
@@ -48,7 +50,8 @@ object APIImpl : QuackLibAPI {
       apply(ComponentPlaceBlock(block(configurationScope.rl)))
       op(this)
     }
-    // TODO add stuff to block
+
+    configurationScope.apply(ComponentItemForBlock(item(name)))
   }
 
   private fun getResourceFromName(name: String): ResourceLocation {

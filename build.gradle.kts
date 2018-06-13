@@ -45,6 +45,9 @@ minecraft {
   runDir = "run"
   mappings = "snapshot_$mappings_version"
   isUseDepAts = true
+
+  serverJvmArgs = serverJvmArgs + "-Dfml.coreMods.load=therealfarfetchd.quacklib.hax.QuackLibPlugin"
+  clientJvmArgs = clientJvmArgs + "-Dfml.coreMods.load=therealfarfetchd.quacklib.hax.QuackLibPlugin"
 }
 
 tasks.withType<JavaCompile> {
