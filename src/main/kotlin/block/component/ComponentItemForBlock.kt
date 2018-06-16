@@ -6,7 +6,7 @@ import net.minecraft.item.ItemStack
 import net.minecraftforge.registries.GameData
 import therealfarfetchd.quacklib.api.block.component.BlockComponentDrops
 import therealfarfetchd.quacklib.api.block.component.BlockComponentPickBlock
-import therealfarfetchd.quacklib.api.block.component.BlockData
+import therealfarfetchd.quacklib.api.block.data.BlockData
 import therealfarfetchd.quacklib.api.block.init.BlockConfigurationScope
 import therealfarfetchd.quacklib.api.core.init.ValidationContext
 import therealfarfetchd.quacklib.api.core.modinterface.block

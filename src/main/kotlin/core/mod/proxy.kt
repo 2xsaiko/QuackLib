@@ -19,7 +19,7 @@ import therealfarfetchd.quacklib.core.init.TabConfigurationScopeImpl
 import therealfarfetchd.quacklib.item.impl.ItemQuackLib
 import therealfarfetchd.quacklib.item.impl.TabQuackLib
 
-abstract class CommonProxy : ModProxy {
+sealed class CommonProxy : ModProxy {
 
   override lateinit var mod: BaseMod
 

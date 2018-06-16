@@ -1,9 +1,12 @@
 package therealfarfetchd.quacklib.core
 
+import block.data.ValuePropertiesImpl
 import net.minecraft.block.Block
 import net.minecraft.item.Item
 import net.minecraft.util.ResourceLocation
 import therealfarfetchd.quacklib.api.block.BlockReference
+import therealfarfetchd.quacklib.api.block.data.BlockDataPart
+import therealfarfetchd.quacklib.api.block.data.DataPartSerializationRegistry
 import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
 import therealfarfetchd.quacklib.api.core.modinterface.QuackLibAPI
 import therealfarfetchd.quacklib.api.core.modinterface.block
@@ -14,14 +17,23 @@ import therealfarfetchd.quacklib.api.item.init.ItemConfigurationScope
 import therealfarfetchd.quacklib.block.BlockReferenceByRL
 import therealfarfetchd.quacklib.block.BlockReferenceDirect
 import therealfarfetchd.quacklib.block.component.ComponentItemForBlock
+import therealfarfetchd.quacklib.block.data.DataPartSerializationRegistryImpl
+import therealfarfetchd.quacklib.block.data.get
+import therealfarfetchd.quacklib.block.data.set
 import therealfarfetchd.quacklib.core.init.BlockConfigurationScopeImpl
 import therealfarfetchd.quacklib.item.ItemReferenceByRL
 import therealfarfetchd.quacklib.item.ItemReferenceDirect
 import therealfarfetchd.quacklib.tools.ModContext
+import therealfarfetchd.quacklib.tools.getResourceFromName
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KClass
+import kotlin.reflect.KProperty
 
 object APIImpl : QuackLibAPI {
 
   override val modContext = ModContext
+
+  override val serializationRegistry: DataPartSerializationRegistry = DataPartSerializationRegistryImpl
 
   override var qlVersion: String = "unset"
 
@@ -54,20 +66,26 @@ object APIImpl : QuackLibAPI {
     configurationScope.apply(ComponentItemForBlock(item(name)))
   }
 
-  private fun getResourceFromName(name: String): ResourceLocation {
-    val domain: String
-    val iname: String
+  @Suppress("UNCHECKED_CAST")
+  override fun <T> createBlockDataDelegate(part: BlockDataPart, name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, render: Boolean, validValues: List<T>?): ReadWriteProperty<BlockDataPart, T> {
+    val delegate = object : ReadWriteProperty<BlockDataPart, T> {
 
-    if (name.contains(":")) {
-      val (d, n) = name.split(":")
-      domain = d
-      iname = n
-    } else {
-      domain = ModContext.currentMod()?.modId ?: "minecraft"
-      iname = name
+      @Suppress("UNCHECKED_CAST")
+      override fun getValue(thisRef: BlockDataPart, property: KProperty<*>): T {
+        return part.storage.get(name) as T
+      }
+
+      override fun setValue(thisRef: BlockDataPart, property: KProperty<*>, value: T) {
+        part.storage.set(name, value)
+      }
+
     }
 
-    return ResourceLocation(domain, iname)
+    if (name in part.defs) error("Duplicate name")
+
+    part.addDefinition(name, ValuePropertiesImpl(name, type as KClass<Any>, default, persistent, sync, render, validValues))
+
+    return delegate
   }
 
 }

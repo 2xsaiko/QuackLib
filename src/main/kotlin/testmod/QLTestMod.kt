@@ -1,8 +1,6 @@
 package therealfarfetchd.quacklib.testmod
 
 import net.minecraft.block.material.Material
-import net.minecraft.init.Items
-import net.minecraft.item.ItemStack
 import net.minecraftforge.fml.common.Mod
 import therealfarfetchd.quacklib.api.core.init.InitializationContext
 import therealfarfetchd.quacklib.api.core.mod.BaseMod
@@ -15,12 +13,14 @@ import therealfarfetchd.quacklib.api.item.Tool
 object QLTestMod : BaseMod() {
 
   override fun initContent(ctx: InitializationContext) = ctx {
+    //    registerComponent<ComponentTest>("test_component")
+
     addBlock("test_block") {
       material = Material.IRON
       hardness = 0.5f
       validTools = setOf(Tool("pickaxe", 2))
 
-      apply(ComponentTestItemDrop(ItemStack(Items.DIAMOND, 5)))
+      apply(ComponentTest())
 
       withPlacementItem()
     }
