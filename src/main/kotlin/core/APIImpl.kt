@@ -1,6 +1,5 @@
 package therealfarfetchd.quacklib.core
 
-import block.data.ValuePropertiesImpl
 import net.minecraft.block.Block
 import net.minecraft.item.Item
 import net.minecraft.util.ResourceLocation
@@ -14,10 +13,13 @@ import therealfarfetchd.quacklib.api.core.modinterface.item
 import therealfarfetchd.quacklib.api.item.ItemReference
 import therealfarfetchd.quacklib.api.item.component.prefab.ComponentPlaceBlock
 import therealfarfetchd.quacklib.api.item.init.ItemConfigurationScope
+import therealfarfetchd.quacklib.api.tools.Logger
+import therealfarfetchd.quacklib.api.tools.isDebugMode
 import therealfarfetchd.quacklib.block.BlockReferenceByRL
 import therealfarfetchd.quacklib.block.BlockReferenceDirect
 import therealfarfetchd.quacklib.block.component.ComponentItemForBlock
 import therealfarfetchd.quacklib.block.data.DataPartSerializationRegistryImpl
+import therealfarfetchd.quacklib.block.data.ValuePropertiesImpl
 import therealfarfetchd.quacklib.block.data.get
 import therealfarfetchd.quacklib.block.data.set
 import therealfarfetchd.quacklib.core.init.BlockConfigurationScopeImpl
@@ -25,6 +27,8 @@ import therealfarfetchd.quacklib.item.ItemReferenceByRL
 import therealfarfetchd.quacklib.item.ItemReferenceDirect
 import therealfarfetchd.quacklib.tools.ModContext
 import therealfarfetchd.quacklib.tools.getResourceFromName
+import java.io.PrintWriter
+import java.io.StringWriter
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
@@ -86,6 +90,17 @@ object APIImpl : QuackLibAPI {
     part.addDefinition(name, ValuePropertiesImpl(name, type as KClass<Any>, default, persistent, sync, render, validValues))
 
     return delegate
+  }
+
+  override fun logException(e: Throwable) {
+    Logger.error(e)
+    val sw = StringWriter()
+    val pw = PrintWriter(sw)
+    e.printStackTrace(pw)
+    sw.toString().lines().forEach {
+      if (isDebugMode) Logger.error(it)
+      else Logger.debug(it)
+    }
   }
 
 }

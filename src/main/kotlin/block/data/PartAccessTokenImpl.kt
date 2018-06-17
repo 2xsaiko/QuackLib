@@ -7,7 +7,7 @@ import therealfarfetchd.quacklib.block.impl.TileQuackLib
 class PartAccessTokenImpl<out T : BlockDataPart>(val rl: ResourceLocation) : PartAccessToken<T> {
 
   @Suppress("UNCHECKED_CAST")
-  override fun retrieve(data: BlockData): T {
+  override fun retrieve(data: BlockDataRO): T {
     val (world, pos, _) = data
     val te = world.getTileEntity(pos) as? TileQuackLib
              ?: error("Missing Tile Entity at $pos!")

@@ -8,10 +8,10 @@ class QuackLibTransformer : IClassTransformer {
     @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
     if ((name as java.lang.String?)?.startsWith("kotlin") != false)
       return basicClass
-    return transform0(name!!, transformedName!!, basicClass!!)
+    return transform0(name!!, transformedName!!, basicClass)
   }
 
-  fun transform0(name: String, transformedName: String, basicClass: ByteArray): ByteArray {
+  fun transform0(name: String, transformedName: String, basicClass: ByteArray?): ByteArray? {
     return basicClass
   }
 }

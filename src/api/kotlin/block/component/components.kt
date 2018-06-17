@@ -5,10 +5,13 @@ import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand
 import net.minecraft.util.ResourceLocation
+import net.minecraft.util.math.AxisAlignedBB
+import net.minecraft.util.math.RayTraceResult
 import net.minecraftforge.common.capabilities.Capability
 import therealfarfetchd.math.Vec3
 import therealfarfetchd.quacklib.api.block.data.BlockData
 import therealfarfetchd.quacklib.api.block.data.BlockDataPart
+import therealfarfetchd.quacklib.api.block.data.BlockDataRO
 import therealfarfetchd.quacklib.api.block.data.PartAccessToken
 import therealfarfetchd.quacklib.api.block.init.BlockConfigurationScope
 import therealfarfetchd.quacklib.api.core.init.Applyable
@@ -20,6 +23,8 @@ private typealias Reg = BlockComponentRegistered
 interface BlockComponent : Applyable<BlockConfigurationScope>
 
 interface BlockComponentNeedTE : Base
+
+interface BlockComponentInternal : Base
 
 interface BlockComponentRegistered : Base {
 
@@ -50,13 +55,13 @@ interface BlockComponentTickable : TE {
 
 interface BlockComponentDrops : Base {
 
-  fun getDrops(data: BlockData): Set<ItemStack>
+  fun getDrops(data: BlockDataRO): Set<ItemStack>
 
 }
 
 interface BlockComponentPickBlock : Base {
 
-  fun getPickBlock(data: BlockData): ItemStack
+  fun getPickBlock(data: BlockDataRO): ItemStack
 
 }
 
@@ -66,17 +71,38 @@ interface BlockComponentData<T : BlockDataPart> : TE, Reg {
 
   fun createPart(): T
 
-  fun createPart(version: Int): BlockDataPart = error("Updating not implemented")
+  fun createPart(version: Int): BlockDataPart =
+    createPart().takeIf { it.version == version }
+    ?: error("Updating not implemented")
 
-  fun update(version: Int, old: BlockDataPart, new: T): T = error("Updating not implemented")
+  fun update(old: BlockDataPart, new: T): T =
+    error("Updating not implemented")
 
-  val BlockData.part
+  val BlockDataRO.part
     get() = this@BlockComponentData.part.retrieve(this)
 
 }
 
 interface BlockComponentInfo : Base {
 
-  fun getInfo(data: BlockData): List<String>
+  fun getInfo(data: BlockDataRO): List<String>
+
+}
+
+interface BlockComponentCollision : Base {
+
+  fun getCollisionBoundingBoxes(data: BlockDataRO): List<AxisAlignedBB>
+
+}
+
+interface BlockComponentMouseOver : Base {
+
+  fun getRaytraceBoundingBoxes(data: BlockDataRO): List<AxisAlignedBB>
+
+}
+
+interface BlockComponentCustomMouseOver : Base {
+
+  fun raytrace(data: BlockDataRO, from: Vec3, to: Vec3): RayTraceResult
 
 }

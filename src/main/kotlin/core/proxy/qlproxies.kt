@@ -34,7 +34,7 @@ sealed class CommonProxy {
     MinecraftForge.EVENT_BUS.register(this)
     fixMods()
     APIImpl.qlVersion = e.modMetadata.version
-    if (isDebugMode) Logger.error("Don't forget to add '-Dfml.coreMods.load=therealfarfetchd.quacklib.hax.QuackLibPlugin' to the VM arguments!")
+    if (isDebugMode) Logger.warn("Don't forget to add '-Dfml.coreMods.load=therealfarfetchd.quacklib.hax.QuackLibPlugin' to the VM arguments!")
     Logger.info(javaClass.classLoader.getResourceAsStream("assets/quacklib/texts").reader().use { it.readLines() }.let { it[Random.nextInt(it.size)] })
     ModContext.dissociate("therealfarfetchd.quacklib.api", recursive = true)
     ModContext.dissociate("therealfarfetchd.quacklib.tools", recursive = true)

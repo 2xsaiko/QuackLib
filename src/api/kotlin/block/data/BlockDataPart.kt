@@ -42,5 +42,11 @@ abstract class BlockDataPart(val version: Int) {
 fun <T> BlockDataPart.data(name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, render: Boolean, validValues: List<T>?): ReadWriteProperty<BlockDataPart, T> =
   QuackLibAPI.impl.createBlockDataDelegate(this, name, type, default, persistent, sync, render, validValues)
 
-inline fun <reified T> BlockDataPart.data(name: String, default: T, persistent: Boolean = false, sync: Boolean = false, render: Boolean = false, validValues: Iterable<T>? = null): ReadWriteProperty<BlockDataPart, T> =
+inline fun <reified T> BlockDataPart.data(name: String, default: T, persistent: Boolean = true, sync: Boolean = false, render: Boolean = false, validValues: Iterable<T>? = null): ReadWriteProperty<BlockDataPart, T> =
   data(name, T::class, default, persistent, sync, render, validValues?.toList())
+
+inline fun <reified T> BlockDataPart.data(name: String, default: T, persistent: Boolean = true, sync: Boolean = false, render: Boolean = false, validValues: Array<T>): ReadWriteProperty<BlockDataPart, T> =
+  data(name, T::class, default, persistent, sync, render, validValues.toList())
+
+inline fun <reified T : Enum<T>> BlockDataPart.data(name: String, default: T, persistent: Boolean = true, sync: Boolean = false, render: Boolean = false): ReadWriteProperty<BlockDataPart, T> =
+  data(name, T::class, default, persistent, sync, render, T::class.java.enumConstants.toList())

@@ -3,26 +3,28 @@ package therealfarfetchd.quacklib.block.impl
 import net.minecraft.block.Block
 import net.minecraft.block.state.BlockStateContainer
 import net.minecraft.block.state.IBlockState
+import net.minecraft.entity.Entity
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand
 import net.minecraft.util.NonNullList
+import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.RayTraceResult
+import net.minecraft.util.math.Vec3d
 import net.minecraft.world.IBlockAccess
 import net.minecraft.world.World
 import net.minecraftforge.common.property.ExtendedBlockState
 import net.minecraftforge.common.property.IExtendedBlockState
 import net.minecraftforge.common.property.IUnlistedProperty
 import therealfarfetchd.math.Vec3
+import therealfarfetchd.math.getDistance
 import therealfarfetchd.quacklib.api.block.component.*
 import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
-import therealfarfetchd.quacklib.block.data.BlockDataImpl
-import therealfarfetchd.quacklib.block.data.PartAccessTokenImpl
-import therealfarfetchd.quacklib.block.data.PropertyResourceLocation
-import therealfarfetchd.quacklib.block.data.get
+import therealfarfetchd.quacklib.api.core.extensions.toVec3
+import therealfarfetchd.quacklib.block.data.*
 import therealfarfetchd.quacklib.block.data.render.PropertyData
 import therealfarfetchd.quacklib.block.data.render.PropertyDataExtended
 import java.util.*
@@ -40,6 +42,9 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
   val cDrops = getComponentsOfType<BlockComponentDrops>()
   val cPickBlock = getComponentsOfType<BlockComponentPickBlock>()
   val cPart = getComponentsOfType<BlockComponentData<*>>()
+  val cCollision = getComponentsOfType<BlockComponentCollision>()
+  val cMouseOver = getComponentsOfType<BlockComponentMouseOver>()
+  val cCustomMouseOver = getComponentsOfType<BlockComponentCustomMouseOver>()
 
   val needsTile = getComponentsOfType<BlockComponentNeedTE>().isNotEmpty()
   val needsTick = getComponentsOfType<BlockComponentTickable>().isNotEmpty()
@@ -60,9 +65,9 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
     cPart.forEach { it.part = PartAccessTokenImpl(it.rl) }
   }
 
-  override fun onBlockActivated(worldIn: World, pos: BlockPos, state: IBlockState, playerIn: EntityPlayer, hand: EnumHand, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean {
+  override fun onBlockActivated(world: World, pos: BlockPos, state: IBlockState, playerIn: EntityPlayer, hand: EnumHand, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean {
     return cActivate
-      .map { it.onActivated(BlockDataImpl(worldIn, pos, state), playerIn, hand, facing, Vec3(hitX, hitY, hitZ)) }
+      .map { it.onActivated(BlockDataImpl(world, pos, state), playerIn, hand, facing, Vec3(hitX, hitY, hitZ)) }
       .any { it }
   }
 
@@ -114,6 +119,68 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
     return extpropRetrievers.fold(state) { acc, op -> op(acc, world, pos, te) }
   }
 
+  // ray trace
+  override fun collisionRayTrace(state: IBlockState, world: World, pos: BlockPos, start: Vec3d, end: Vec3d): RayTraceResult? {
+    val data = BlockDataImpl(world, pos, state)
+
+    val startv = start.toVec3()
+    val endv = end.toVec3()
+
+    val boxes = if (cMouseOver.isNotEmpty()) {
+      cMouseOver
+        .flatMap { it.getRaytraceBoundingBoxes(data) }
+        .takeIf { it.isNotEmpty() }
+        .orEmpty()
+    } else listOf(FULL_BLOCK_AABB)
+
+    return (boxes.map { rayTrace(pos, start, end, it) } + cCustomMouseOver.map { it.raytrace(data, startv, endv) })
+      .asSequence()
+      .filterNotNull()
+      .sortedBy { getDistance(startv, it.hitVec.toVec3()) }
+      .firstOrNull()
+  }
+
+  // ray trace
+  override fun getBoundingBox(state: IBlockState, world: IBlockAccess, pos: BlockPos): AxisAlignedBB {
+    val data = BlockDataROImpl(world, pos, state)
+
+    return if (cMouseOver.isNotEmpty()) {
+      cMouseOver
+        .flatMap { it.getRaytraceBoundingBoxes(data) }
+        .also { if (it.isEmpty()) return NOPE_AABB }
+        .reduce(AxisAlignedBB::union)
+    } else FULL_BLOCK_AABB
+  }
+
+  // collision
+  override fun getCollisionBoundingBox(state: IBlockState, world: IBlockAccess, pos: BlockPos): AxisAlignedBB? {
+    val data = BlockDataROImpl(world, pos, state)
+
+    return if (cCollision.isNotEmpty()) {
+      cCollision
+        .flatMap { it.getCollisionBoundingBoxes(data) }
+        .also { if (it.isEmpty()) return null }
+        .reduce(AxisAlignedBB::union)
+    } else FULL_BLOCK_AABB
+  }
+
+  // collision
+  override fun addCollisionBoxToList(state: IBlockState, world: World, pos: BlockPos, entityBox: AxisAlignedBB, collidingBoxes: MutableList<AxisAlignedBB>, entityIn: Entity?, isActualState: Boolean) {
+    val data = BlockDataImpl(world, pos, state)
+
+    cCollision.takeIf { it.isNotEmpty() }?.flatMap { it.getCollisionBoundingBoxes(data) }
+    ?: setOf(FULL_BLOCK_AABB)
+      .map { it.offset(pos) }
+      .filter(entityBox::intersects)
+      .also { collidingBoxes.addAll(it) }
+  }
+
+  // outline
+  override fun getSelectedBoundingBox(state: IBlockState, world: World, pos: BlockPos): AxisAlignedBB {
+    // TODO
+    return super.getSelectedBoundingBox(state, world, pos)
+  }
+
   @Suppress("UNCHECKED_CAST")
   override fun addInformation(world: World, pos: BlockPos, state: IBlockState, player: EntityPlayer, left: MutableList<String>, right: MutableList<String>) {
     val state = getExtendedState(state, world, pos)
@@ -123,7 +190,7 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
         .asSequence()
         .filter { it.value.isPresent }
         .map { Pair(it.key as IUnlistedProperty<Any>, it.value.get()) }
-        .map { "${it.first.name}: ${it.first.valueToString(it.second)}" }
+        .map { "§7${it.first.name}: ${it.first.valueToString(it.second)}" }
     }
 
     left += ""
@@ -175,7 +242,7 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
   override fun getDrops(drops: NonNullList<ItemStack>, world: IBlockAccess, pos: BlockPos, state: IBlockState, fortune: Int) {
     // super.getDrops(drops, world, pos, state, fortune)
     // FIXME don't just cast this to World
-    cDrops.forEach { drops += it.getDrops(BlockDataImpl(world as World, pos, state)) }
+    cDrops.forEach { drops += it.getDrops(BlockDataROImpl(world, pos, state)) }
   }
 
   override fun getPickBlock(state: IBlockState, target: RayTraceResult, world: World, pos: BlockPos, player: EntityPlayer): ItemStack {
@@ -188,6 +255,8 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
 
   companion object {
     private lateinit var tempBlockConf: BlockConfiguration
+
+    val NOPE_AABB = AxisAlignedBB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
   }
 
 }

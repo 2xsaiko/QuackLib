@@ -41,6 +41,8 @@ interface QuackLibAPI {
 
   fun <T> createBlockDataDelegate(part: BlockDataPart, name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, render: Boolean, validValues: List<T>?): ReadWriteProperty<BlockDataPart, T>
 
+  fun logException(e: Throwable)
+
   companion object {
     lateinit var impl: QuackLibAPI
   }

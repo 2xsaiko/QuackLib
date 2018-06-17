@@ -8,6 +8,7 @@ import kotlin.reflect.full.isSubclassOf
 
 class PropertyData<T>(propName: PropertyResourceLocation, val def: BlockDataPart.ValueProperties<T>) : IProperty<PropertyData.Wrapper<T>> {
 
+  // TODO expand name if ambiguous
   val n: String = propName.property
     .replace(Regex("([a-z])([A-Z])"), "$1_$2").toLowerCase()
     .replace(Regex("[^a-z0-9_]"), "_")

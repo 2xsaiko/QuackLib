@@ -1,4 +1,4 @@
-package block.data
+package therealfarfetchd.quacklib.block.data
 
 import therealfarfetchd.quacklib.api.block.data.BlockDataPart
 import kotlin.reflect.KClass

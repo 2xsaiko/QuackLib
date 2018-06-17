@@ -1,6 +1,8 @@
 package therealfarfetchd.quacklib.block.impl
 
 import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.network.NetworkManager
+import net.minecraft.network.play.server.SPacketUpdateTileEntity
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.ITickable
@@ -13,6 +15,8 @@ import therealfarfetchd.quacklib.api.block.component.BlockComponentData
 import therealfarfetchd.quacklib.api.block.component.BlockComponentTickable
 import therealfarfetchd.quacklib.api.block.data.BlockDataPart
 import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
+import therealfarfetchd.quacklib.api.core.modinterface.logException
+import therealfarfetchd.quacklib.api.tools.Logger
 import therealfarfetchd.quacklib.block.data.*
 
 open class TileQuackLib() : TileEntity() {
@@ -50,6 +54,68 @@ open class TileQuackLib() : TileEntity() {
 
   override fun readFromNBT(nbt: NBTTagCompound) {
     super.readFromNBT(nbt)
+    loadData(nbt) { _, prop -> prop.persistent }
+  }
+
+  override fun writeToNBT(nbt: NBTTagCompound): NBTTagCompound {
+    super.writeToNBT(nbt)
+    saveData(nbt) { _, prop -> prop.persistent }
+    return nbt
+  }
+
+  override fun getUpdateTag(): NBTTagCompound {
+    val nbt = super.getUpdateTag()
+    saveData(nbt) { _, prop -> prop.render || prop.sync }
+    return nbt
+  }
+
+  override fun handleUpdateTag(nbt: NBTTagCompound) {
+    super.readFromNBT(nbt)
+    loadData(nbt) { _, prop -> prop.render || prop.sync }
+  }
+
+  override fun getUpdatePacket(): SPacketUpdateTileEntity {
+    // TODO only sync changed stuff
+    var renderUpdate = 0
+    val nbt = NBTTagCompound()
+    saveData(nbt) { _, prop ->
+      if (prop.render) renderUpdate = 1
+      prop.render || prop.sync
+    }
+    return SPacketUpdateTileEntity(getPos(), renderUpdate, nbt)
+  }
+
+  override fun onDataPacket(net: NetworkManager, pkt: SPacketUpdateTileEntity) {
+    loadData(pkt.nbtCompound) { _, prop -> prop.render || prop.sync }
+    if (pkt.tileEntityType == 1) {
+      getWorld().markBlockRangeForRenderUpdate(getPos(), getPos())
+    }
+  }
+
+  fun saveData(nbt: NBTTagCompound, filter: (BlockComponentData<BlockDataPart>, BlockDataPart.ValueProperties<Any?>) -> Boolean) {
+    if (!::def.isInitialized) return
+
+    nbt.setString("@type", def.rl.toString())
+    for (c in cPart) {
+      try {
+        val partNBT = NBTTagCompound()
+        val part = c.createPart()
+        partNBT.setInteger("@version", part.version)
+        val defs = part.defs.filterValues { filter(c, it) }
+        val storage = parts.getValue(c.rl).storage
+        for ((name, _) in defs) {
+          val v = storage.get(name)
+          DataPartSerializationRegistryImpl.save(partNBT, name, v)
+        }
+        if (!partNBT.hasNoTags()) nbt.setTag(c.rl.toString(), partNBT)
+      } catch (e: Exception) {
+        Logger.error("Could not serialize component ${c.rl} at ${getPos()}!")
+        logException(e)
+      }
+    }
+  }
+
+  fun loadData(nbt: NBTTagCompound, filter: (BlockComponentData<BlockDataPart>, BlockDataPart.ValueProperties<Any?>) -> Boolean) {
     if (!nbt.hasKey("@type")) return
     val type = ResourceLocation(nbt.getString("@type"))
     if (!::def.isInitialized || type != def.rl) {
@@ -58,45 +124,50 @@ open class TileQuackLib() : TileEntity() {
       setConfiguration(block.def)
     }
     for (c in cPart) {
-      val partNBT = nbt.getCompoundTag(c.rl.toString())
-      val version = partNBT.getInteger("@version")
-      val new = c.createPart()
-      val latest = new.version
-      val part = if (version == latest) new else c.createPart(version)
-      part.setStorage(StorageImpl(part))
-      new.setStorage(StorageImpl(new))
+      try {
+        val partNBT = nbt.getCompoundTag(c.rl.toString())
+        val version = partNBT.getInteger("@version")
+        val part = c.createPart(version)
+        val storage = StorageImpl(part)
+        val processed = mutableSetOf<String>()
+        part.setStorage(storage)
 
-      val defs = part.defs.filterValues { it.persistent }
-      for ((name, p) in defs) {
-        val load = DataPartSerializationRegistryImpl.load(partNBT, p.type, name)
-        val r = load.let { if (it == null) p.default else it.value }
+        val defs = part.defs.filterValues { filter(c, it) }
+        for ((name, p) in defs) {
+          val load = DataPartSerializationRegistryImpl.load(partNBT, p.type, name)
+          val r = load.let {
+            if (it == null) {
+              p.default
+            } else {
+              processed += name
+              it.value
+            }
+          }
 
-        if (p.isValid(r)) part.storage.set(name, r)
+          if (p.isValid(r)) storage.set(name, r)
+        }
+
+        val new = updatePart(c, part)
+        parts[c.rl]?.let { merge(new, updatePart(c, it), processed) }
+        parts += c.rl to new
+      } catch (e: Exception) {
+        Logger.error("Could not deserialize component ${c.rl} at ${getPos()}!")
+        logException(e)
       }
-
-      if (version != latest) c.update(version, part, new)
-      parts += c.rl to new
     }
   }
 
-  override fun writeToNBT(nbt: NBTTagCompound): NBTTagCompound {
-    super.writeToNBT(nbt)
-    if (!::def.isInitialized) return nbt
+  @Suppress("UNCHECKED_CAST")
+  private fun <T : BlockDataPart> updatePart(c: BlockComponentData<T>, old: BlockDataPart): T {
+    val new = c.createPart()
+    if (new.version == old.version) return old as T
+    new.setStorage(StorageImpl(new))
+    c.update(old, new)
+    return new
+  }
 
-    nbt.setString("@type", def.rl.toString())
-    for (c in cPart) {
-      val partNBT = NBTTagCompound()
-      val part = c.createPart()
-      partNBT.setInteger("@version", part.version)
-      val defs = part.defs.filterValues { it.persistent }
-      val storage = parts.getValue(c.rl).storage
-      for ((name, _) in defs) {
-        val v = storage.get(name)
-        DataPartSerializationRegistryImpl.save(partNBT, name, v)
-      }
-      if (!partNBT.hasNoTags()) nbt.setTag(c.rl.toString(), partNBT)
-    }
-    return nbt
+  private fun <T : BlockDataPart> merge(into: T, from: T, ignore: Set<String>) {
+    (from.defs.keys - ignore).forEach { into.storage.set(it, from.storage.get(it)) }
   }
 
   override fun hasCapability(capability: Capability<*>, facing: EnumFacing?): Boolean =

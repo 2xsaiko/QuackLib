@@ -10,6 +10,8 @@ import therealfarfetchd.quacklib.api.block.init.BlockConfigurationScope
 import therealfarfetchd.quacklib.api.item.ItemReference
 import therealfarfetchd.quacklib.api.item.init.ItemConfigurationScope
 
+inline fun <R> lockMod(noinline op: () -> R): R = QuackLibAPI.impl.modContext.lockMod(op)
+
 inline fun item(item: Item): ItemReference = QuackLibAPI.impl.getItem(item)
 
 inline fun item(name: String): ItemReference = QuackLibAPI.impl.getItem(name)
@@ -24,3 +26,6 @@ inline fun block(rl: ResourceLocation): BlockReference = QuackLibAPI.impl.getBlo
 
 inline fun BlockConfigurationScope.withPlacementItem(name: String = this.name, noinline op: ItemConfigurationScope.() -> Unit = {}) =
   QuackLibAPI.impl.addItemToBlock(this, name, op)
+
+inline fun logException(e: Throwable) =
+  lockMod { QuackLibAPI.impl.logException(e) }

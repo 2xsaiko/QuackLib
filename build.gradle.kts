@@ -1,5 +1,6 @@
 @file:Suppress("PropertyName")
 
+import net.minecraftforge.gradle.user.IReobfuscator
 import net.minecraftforge.gradle.user.UserBaseExtension
 import org.gradle.jvm.tasks.Jar
 
@@ -11,6 +12,8 @@ val kotlin_version: String by extra
 val jei_version: String by extra
 val forgelin_version: String by extra
 val extmath_version: String by extra
+val mcmp_version: String by extra
+val cbmp_version: String by extra
 
 val Project.minecraft: UserBaseExtension
   get() = extensions.getByName<UserBaseExtension>("minecraft")
@@ -68,6 +71,15 @@ dependencies {
   deobfCompile("net.shadowfacts", "Forgelin", forgelin_version)
 
   compile("therealfarfetchd.extmath", "extmath", extmath_version)
+
+  // MCMP
+  deobfCompile("MCMultiPart2", "MCMultiPart", mcmp_version)
+
+  // CBMP
+  deobfCompile("codechicken", "ForgeMultipart", "$mc_version-$cbmp_version", classifier = "universal")
+
+  // temp shit
+  runtimeOnly("codechicken", "ChickenASM", "1.12-1.0.2.9")
 
   runtimeOnly("mezz.jei", "jei_$mc_version", jei_version)
 }

@@ -1,5 +1,6 @@
 package therealfarfetchd.quacklib.block.data
 
+import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.nbt.NBTTagList
 import net.minecraftforge.common.util.Constants
@@ -213,6 +214,20 @@ object DataPartSerializationRegistryImpl : DataPartSerializationRegistry {
       }
     )
 
+    // ItemStack
+    register(
+      type = ItemStack::class,
+      save = { name, type ->
+        val nbt = NBTTagCompound()
+        type.writeToNBT(nbt)
+        setTag(name, nbt)
+      },
+      load = { name ->
+        val nbt = getCompoundTag(name)
+        ItemStack(nbt)
+      }
+    )
+
     // Serializable
     register(
       type = Serializable::class,
@@ -228,6 +243,20 @@ object DataPartSerializationRegistryImpl : DataPartSerializationRegistry {
         obj.readObject() as Serializable
       },
       priority = -100
+    )
+
+    // Enum
+    register(
+      type = Enum::class,
+      save = { name, type ->
+        setString("@${name}_enum", type.javaClass.getType())
+        setInteger(name, type.ordinal)
+      },
+      load = { name ->
+        val enumClass = loadClass(getString("@${name}_enum"))
+        enumClass?.enumConstants?.get(getInteger(name)) as? Enum<*>
+      },
+      priority = 1000
     )
   }
 
