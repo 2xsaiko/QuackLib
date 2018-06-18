@@ -4,7 +4,11 @@ import net.minecraft.block.Block
 import net.minecraft.item.Item
 import net.minecraft.util.ResourceLocation
 import therealfarfetchd.quacklib.api.block.BlockReference
+import therealfarfetchd.quacklib.api.block.component.BlockComponentDataExport
+import therealfarfetchd.quacklib.api.block.component.ExportedData
+import therealfarfetchd.quacklib.api.block.component.ExportedValue
 import therealfarfetchd.quacklib.api.block.data.BlockDataPart
+import therealfarfetchd.quacklib.api.block.data.BlockDataRO
 import therealfarfetchd.quacklib.api.block.data.DataPartSerializationRegistry
 import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
 import therealfarfetchd.quacklib.api.core.modinterface.QuackLibAPI
@@ -17,7 +21,8 @@ import therealfarfetchd.quacklib.api.tools.Logger
 import therealfarfetchd.quacklib.api.tools.isDebugMode
 import therealfarfetchd.quacklib.block.BlockReferenceByRL
 import therealfarfetchd.quacklib.block.BlockReferenceDirect
-import therealfarfetchd.quacklib.block.component.ComponentItemForBlock
+import therealfarfetchd.quacklib.block.component.ExportedValueImpl
+import therealfarfetchd.quacklib.block.component.prefab.ComponentItemForBlock
 import therealfarfetchd.quacklib.block.data.DataPartSerializationRegistryImpl
 import therealfarfetchd.quacklib.block.data.ValuePropertiesImpl
 import therealfarfetchd.quacklib.block.data.get
@@ -90,6 +95,10 @@ object APIImpl : QuackLibAPI {
     part.addDefinition(name, ValuePropertiesImpl(name, type as KClass<Any>, default, persistent, sync, render, validValues))
 
     return delegate
+  }
+
+  override fun <P : BlockComponentDataExport<P, T>, T : ExportedData<T, P>, R> createProvidedValue(target: T, op: (P, BlockDataRO) -> R): ExportedValue<T, R> {
+    return ExportedValueImpl(target, op)
   }
 
   override fun logException(e: Throwable) {

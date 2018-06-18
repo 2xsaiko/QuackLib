@@ -25,6 +25,21 @@ object QLTestMod : BaseMod() {
       withPlacementItem()
     }
 
+    addBlock("wallplate") {
+      material = Material.ROCK
+      hardness = 0.5f
+      validTools = setOf(Tool("pickaxe", 2))
+
+      val side = apply(ComponentSurfacePlacement())
+      val box = apply(ComponentBounds())
+
+      link {
+        box {
+          side.exports.facing provides facing
+        }
+      }
+    }
+
     addTab("standard", item("test_block")) {
       include("test_block")
       include("minecraft:diamond")

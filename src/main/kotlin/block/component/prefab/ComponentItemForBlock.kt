@@ -1,4 +1,4 @@
-package therealfarfetchd.quacklib.block.component
+package therealfarfetchd.quacklib.block.component.prefab
 
 import net.minecraft.block.Block
 import net.minecraft.item.Item

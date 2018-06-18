@@ -1,12 +1,15 @@
 package therealfarfetchd.quacklib.api.block.component
 
+import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.AxisAlignedBB
+import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.RayTraceResult
+import net.minecraft.world.IBlockAccess
 import net.minecraftforge.common.capabilities.Capability
 import therealfarfetchd.math.Vec3
 import therealfarfetchd.quacklib.api.block.data.BlockData
@@ -41,6 +44,42 @@ interface BlockComponentCapability : TE {
 
 }
 
+interface BlockComponentData<T : BlockDataPart> : TE, Reg {
+
+  var part: PartAccessToken<T>
+
+  fun createPart(): T
+
+  fun createPart(version: Int): BlockDataPart =
+    createPart().takeIf { it.version == version }
+    ?: error("Updating not implemented")
+
+  fun update(old: BlockDataPart, new: T): T =
+    error("Updating not implemented")
+
+  val BlockDataRO.part
+    get() = this@BlockComponentData.part.retrieve(this)
+
+}
+
+interface BlockComponentDataExport<Self : BlockComponentDataExport<Self, D>, D : ExportedData<D, Self>> : Base {
+
+  val exported: D
+
+}
+
+interface BlockComponentDataImport<Self : BlockComponentDataImport<Self, D>, D : ImportedData<D, Self>> : Base {
+
+  val imported: D
+
+}
+
+interface BlockComponentPlacement<T : BlockDataPart> : BlockComponentData<T> {
+
+  fun initialize(world: IBlockAccess, pos: BlockPos, part: T, placer: EntityLivingBase, hand: EnumHand)
+
+}
+
 interface BlockComponentActivation : Base {
 
   fun onActivated(data: BlockData, player: EntityPlayer, hand: EnumHand, facing: EnumFacing, hit: Vec3): Boolean
@@ -62,24 +101,6 @@ interface BlockComponentDrops : Base {
 interface BlockComponentPickBlock : Base {
 
   fun getPickBlock(data: BlockDataRO): ItemStack
-
-}
-
-interface BlockComponentData<T : BlockDataPart> : TE, Reg {
-
-  var part: PartAccessToken<T>
-
-  fun createPart(): T
-
-  fun createPart(version: Int): BlockDataPart =
-    createPart().takeIf { it.version == version }
-    ?: error("Updating not implemented")
-
-  fun update(old: BlockDataPart, new: T): T =
-    error("Updating not implemented")
-
-  val BlockDataRO.part
-    get() = this@BlockComponentData.part.retrieve(this)
 
 }
 
