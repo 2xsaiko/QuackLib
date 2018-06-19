@@ -43,6 +43,8 @@ apply {
 version = mod_version
 group = "therealfarfetchd.quacklib"
 
+apply(from = "publish.gradle")
+
 minecraft {
   version = "$mc_version-$forge_version"
   runDir = "run"
