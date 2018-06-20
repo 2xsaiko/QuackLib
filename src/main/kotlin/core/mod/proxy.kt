@@ -12,7 +12,7 @@ import therealfarfetchd.quacklib.api.core.mod.BaseMod
 import therealfarfetchd.quacklib.api.core.mod.ModProxy
 import therealfarfetchd.quacklib.api.tools.Logger
 import therealfarfetchd.quacklib.block.impl.BlockQuackLib
-import therealfarfetchd.quacklib.core.init.BlockConfigurationScopeImpl
+import therealfarfetchd.quacklib.block.init.BlockConfigurationScopeImpl
 import therealfarfetchd.quacklib.core.init.InitializationContextImpl
 import therealfarfetchd.quacklib.core.init.ItemConfigurationScopeImpl
 import therealfarfetchd.quacklib.core.init.TabConfigurationScopeImpl

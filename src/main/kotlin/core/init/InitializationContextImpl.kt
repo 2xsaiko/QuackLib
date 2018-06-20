@@ -7,6 +7,7 @@ import therealfarfetchd.quacklib.api.core.mod.BaseMod
 import therealfarfetchd.quacklib.api.item.ItemReference
 import therealfarfetchd.quacklib.api.item.init.ItemConfigurationScope
 import therealfarfetchd.quacklib.api.item.init.TabConfigurationScope
+import therealfarfetchd.quacklib.block.init.BlockConfigurationScopeImpl
 import therealfarfetchd.quacklib.core.mod.CommonProxy
 import kotlin.reflect.KClass
 

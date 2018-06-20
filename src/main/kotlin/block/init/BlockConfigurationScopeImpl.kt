@@ -1,4 +1,4 @@
-package therealfarfetchd.quacklib.core.init
+package therealfarfetchd.quacklib.block.init
 
 import net.minecraft.block.material.Material
 import net.minecraft.util.ResourceLocation
@@ -9,6 +9,9 @@ import therealfarfetchd.quacklib.api.block.init.BlockDataLinkScope
 import therealfarfetchd.quacklib.api.block.render.BlockRenderer
 import therealfarfetchd.quacklib.api.item.ItemReference
 import therealfarfetchd.quacklib.api.item.Tool
+import therealfarfetchd.quacklib.block.component.AppliedComponentImpl
+import therealfarfetchd.quacklib.core.init.InitializationContextImpl
+import therealfarfetchd.quacklib.core.init.ValidationContextImpl
 import kotlin.reflect.jvm.jvmName
 
 class BlockConfigurationScopeImpl(modid: String, override val name: String, val init: InitializationContextImpl) : BlockConfigurationScope {
@@ -26,11 +29,11 @@ class BlockConfigurationScopeImpl(modid: String, override val name: String, val 
   override fun <T : BlockComponent> apply(component: T): AppliedComponent<T> {
     components += component
     component.onApplied(this)
-    return TODO("not implemented")
+    return AppliedComponentImpl(component)
   }
 
   override fun link(op: BlockDataLinkScope.() -> Unit) {
-    TODO("not implemented")
+    BlockDataLinkScopeImpl().also(op)
   }
 
   override fun apply(renderer: BlockRenderer) {}

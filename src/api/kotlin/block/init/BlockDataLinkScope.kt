@@ -10,6 +10,6 @@ interface BlockDataLinkScope {
 
   val <T : BlockComponentDataExport<T, D>, D : ExportedData<D, T>> AppliedComponent<T>.exports: D
 
-  infix fun <T, E : ExportedValue<*, T>, I : ImportedValue<T>> E.provides(imported: I)
+  infix fun <T, C : BlockComponentDataExport<C, D>, D : ExportedData<D, C>, E : ExportedValue<D, T>, I : ImportedValue<T>> E.provides(imported: I)
 
 }

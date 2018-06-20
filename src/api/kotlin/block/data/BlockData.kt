@@ -4,12 +4,17 @@ import net.minecraft.block.state.IBlockState
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.IBlockAccess
 import net.minecraft.world.World
+import therealfarfetchd.quacklib.api.block.component.ImportedValue
 
 interface BlockDataRO {
 
   val world: IBlockAccess
   val pos: BlockPos
   val state: IBlockState
+
+  operator fun <T : BlockDataPart> get(token: PartAccessToken<T>): T
+
+  operator fun <T> get(value: ImportedValue<T>): T
 
 }
 

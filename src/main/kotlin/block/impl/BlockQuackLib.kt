@@ -22,6 +22,7 @@ import net.minecraftforge.common.property.IUnlistedProperty
 import therealfarfetchd.math.Vec3
 import therealfarfetchd.math.getDistance
 import therealfarfetchd.quacklib.api.block.component.*
+import therealfarfetchd.quacklib.api.block.data.BlockDataRO
 import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
 import therealfarfetchd.quacklib.api.core.extensions.toVec3
 import therealfarfetchd.quacklib.block.data.*
@@ -90,14 +91,14 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
           val prop = PropertyDataExtended(prl, def)
           extproperties += prl to prop
           extpropRetrievers += { state, _, _, te ->
-            val value = te.parts.getValue(prl.base).storage.get(prl.property)
+            val value = te.c.parts.getValue(prl.base).storage.get(prl.property)
             state.withProperty(prop, value)
           }
         } else {
           val prop = PropertyData(prl, def)
           properties += prl to prop
           propRetrievers += { state, _, _, te ->
-            val value = te.parts.getValue(prl.base).storage.get(prl.property)
+            val value = te.c.parts.getValue(prl.base).storage.get(prl.property)
             @Suppress("UNCHECKED_CAST")
             state.withProperty(prop, prop.wrap(value) as PropertyData.Wrapper<Any?>)
           }
@@ -155,7 +156,11 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
   // collision
   override fun getCollisionBoundingBox(state: IBlockState, world: IBlockAccess, pos: BlockPos): AxisAlignedBB? {
     val data = BlockDataROImpl(world, pos, state)
+    if (world.getTileEntity(pos) !is TileQuackLib) return null
+    return getCollisionBoundingBox(state, world, pos, data)
+  }
 
+  fun getCollisionBoundingBox(state: IBlockState, world: IBlockAccess, pos: BlockPos, data: BlockDataRO): AxisAlignedBB? {
     return if (cCollision.isNotEmpty()) {
       cCollision
         .flatMap { it.getCollisionBoundingBoxes(data) }
@@ -241,7 +246,6 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
 
   override fun getDrops(drops: NonNullList<ItemStack>, world: IBlockAccess, pos: BlockPos, state: IBlockState, fortune: Int) {
     // super.getDrops(drops, world, pos, state, fortune)
-    // FIXME don't just cast this to World
     cDrops.forEach { drops += it.getDrops(BlockDataROImpl(world, pos, state)) }
   }
 

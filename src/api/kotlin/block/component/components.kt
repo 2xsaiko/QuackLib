@@ -58,7 +58,7 @@ interface BlockComponentData<T : BlockDataPart> : TE, Reg {
     error("Updating not implemented")
 
   val BlockDataRO.part
-    get() = this@BlockComponentData.part.retrieve(this)
+    get() = this[this@BlockComponentData.part]
 
 }
 
@@ -76,7 +76,7 @@ interface BlockComponentDataImport<Self : BlockComponentDataImport<Self, D>, D :
 
 interface BlockComponentPlacement<T : BlockDataPart> : BlockComponentData<T> {
 
-  fun initialize(world: IBlockAccess, pos: BlockPos, part: T, placer: EntityLivingBase, hand: EnumHand)
+  fun initialize(world: IBlockAccess, pos: BlockPos, part: T, placer: EntityLivingBase, hand: EnumHand, facing: EnumFacing, hit: Vec3)
 
 }
 

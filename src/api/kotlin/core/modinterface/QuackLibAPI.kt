@@ -4,9 +4,7 @@ import net.minecraft.block.Block
 import net.minecraft.item.Item
 import net.minecraft.util.ResourceLocation
 import therealfarfetchd.quacklib.api.block.BlockReference
-import therealfarfetchd.quacklib.api.block.component.BlockComponentDataExport
-import therealfarfetchd.quacklib.api.block.component.ExportedData
-import therealfarfetchd.quacklib.api.block.component.ExportedValue
+import therealfarfetchd.quacklib.api.block.component.*
 import therealfarfetchd.quacklib.api.block.data.BlockDataPart
 import therealfarfetchd.quacklib.api.block.data.BlockDataRO
 import therealfarfetchd.quacklib.api.block.data.DataPartSerializationRegistry
@@ -45,7 +43,9 @@ interface QuackLibAPI {
 
   fun <T> createBlockDataDelegate(part: BlockDataPart, name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, render: Boolean, validValues: List<T>?): ReadWriteProperty<BlockDataPart, T>
 
-  fun <P : BlockComponentDataExport<P, T>, T : ExportedData<T, P>, R> createProvidedValue(target: T, op: (P, BlockDataRO) -> R): ExportedValue<T, R>
+  fun <T, C : BlockComponentDataImport<C, D>, D : ImportedData<D, C>> createImportedValue(target: C): ImportedValue<T>
+
+  fun <R, C : BlockComponentDataExport<C, D>, D : ExportedData<D, C>> createExportedValue(target: C, op: (C, BlockDataRO) -> R): ExportedValue<D, R>
 
   fun logException(e: Throwable)
 

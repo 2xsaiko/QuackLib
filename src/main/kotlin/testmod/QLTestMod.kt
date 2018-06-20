@@ -31,17 +31,20 @@ object QLTestMod : BaseMod() {
       validTools = setOf(Tool("pickaxe", 2))
 
       val side = apply(ComponentSurfacePlacement())
-      val box = apply(ComponentBounds())
+      val box = apply(ComponentBounds(2 / 16f))
 
       link {
         box {
           side.exports.facing provides facing
         }
       }
+
+      withPlacementItem()
     }
 
     addTab("standard", item("test_block")) {
       include("test_block")
+      include("wallplate")
       include("minecraft:diamond")
     }
   }
