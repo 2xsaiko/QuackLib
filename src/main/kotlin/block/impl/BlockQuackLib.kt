@@ -34,6 +34,8 @@ import kotlin.reflect.jvm.jvmName
 @Suppress("OverridingDeprecatedMember")
 class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tempBlockConf = def }), BlockExtraDebug {
 
+  private var initDone = false
+
   val needsTool = def.needsTool
   val tools = def.validTools
 
@@ -64,6 +66,7 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
     } ?: setBlockUnbreakable()
 
     cPart.forEach { it.part = PartAccessTokenImpl(it.rl) }
+    initDone = true
   }
 
   override fun onBlockActivated(world: World, pos: BlockPos, state: IBlockState, playerIn: EntityPlayer, hand: EnumHand, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean {
@@ -160,6 +163,7 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
     return getCollisionBoundingBox(state, world, pos, data)
   }
 
+  // collision
   fun getCollisionBoundingBox(state: IBlockState, world: IBlockAccess, pos: BlockPos, data: BlockDataRO): AxisAlignedBB? {
     return if (cCollision.isNotEmpty()) {
       cCollision
@@ -173,8 +177,8 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
   override fun addCollisionBoxToList(state: IBlockState, world: World, pos: BlockPos, entityBox: AxisAlignedBB, collidingBoxes: MutableList<AxisAlignedBB>, entityIn: Entity?, isActualState: Boolean) {
     val data = BlockDataImpl(world, pos, state)
 
-    cCollision.takeIf { it.isNotEmpty() }?.flatMap { it.getCollisionBoundingBoxes(data) }
-    ?: setOf(FULL_BLOCK_AABB)
+    (cCollision.takeIf { it.isNotEmpty() }?.flatMap { it.getCollisionBoundingBoxes(data) }
+     ?: setOf(FULL_BLOCK_AABB))
       .map { it.offset(pos) }
       .filter(entityBox::intersects)
       .also { collidingBoxes.addAll(it) }
@@ -240,6 +244,20 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
     }
 
   override fun getMetaFromState(state: IBlockState?): Int = 0
+
+  override fun isOpaqueCube(state: IBlockState): Boolean {
+    // TODO query model
+    return if (initDone) cCollision.isEmpty()
+    else tempBlockConf.components.none { it is BlockComponentCollision }
+  }
+
+  override fun isNormalCube(state: IBlockState): Boolean {
+    return cCollision.isEmpty()
+  }
+
+  override fun isFullCube(state: IBlockState): Boolean {
+    return cCollision.isEmpty()
+  }
 
   // TODO
   override fun getItemDropped(state: IBlockState?, rand: Random?, fortune: Int): Item? = null
