@@ -19,6 +19,7 @@ import net.minecraft.world.World
 import net.minecraftforge.common.property.ExtendedBlockState
 import net.minecraftforge.common.property.IExtendedBlockState
 import net.minecraftforge.common.property.IUnlistedProperty
+import scala.Tuple5
 import therealfarfetchd.math.Vec3
 import therealfarfetchd.math.getDistance
 import therealfarfetchd.quacklib.api.block.component.*
@@ -30,6 +31,11 @@ import therealfarfetchd.quacklib.block.data.render.PropertyData
 import therealfarfetchd.quacklib.block.data.render.PropertyDataExtended
 import java.util.*
 import kotlin.reflect.jvm.jvmName
+
+typealias SetPropertyRetrievers = Set<(IBlockState, IBlockAccess, BlockPos, TileQuackLib) -> IBlockState>
+typealias SetExtendedPropertyRetrievers = Set<(IExtendedBlockState, IBlockAccess, BlockPos, TileQuackLib) -> IExtendedBlockState>
+typealias MapProperties = Map<PropertyResourceLocation, PropertyData<*>>
+typealias MapExtendedProperties = Map<PropertyResourceLocation, PropertyDataExtended<*>>
 
 @Suppress("OverridingDeprecatedMember")
 class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tempBlockConf = def }), BlockExtraDebug {
@@ -44,19 +50,21 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
   val cActivate = getComponentsOfType<BlockComponentActivation>()
   val cDrops = getComponentsOfType<BlockComponentDrops>()
   val cPickBlock = getComponentsOfType<BlockComponentPickBlock>()
-  val cPart = getComponentsOfType<BlockComponentData<*>>()
   val cCollision = getComponentsOfType<BlockComponentCollision>()
   val cMouseOver = getComponentsOfType<BlockComponentMouseOver>()
   val cCustomMouseOver = getComponentsOfType<BlockComponentCustomMouseOver>()
+  val cNeighborListener = getComponentsOfType<BlockComponentNeighborListener>()
+  val cPlacementCheck = getComponentsOfType<BlockComponentPlacementCheck>()
+  val cData = getComponentsOfType<BlockComponentData<*>>()
 
   val needsTile = getComponentsOfType<BlockComponentNeedTE>().isNotEmpty()
   val needsTick = getComponentsOfType<BlockComponentTickable>().isNotEmpty()
 
-  lateinit var propRetrievers: Set<(IBlockState, IBlockAccess, BlockPos, TileQuackLib) -> IBlockState>
-  lateinit var extpropRetrievers: Set<(IExtendedBlockState, IBlockAccess, BlockPos, TileQuackLib) -> IExtendedBlockState>
+  lateinit var propRetrievers: SetPropertyRetrievers
+  lateinit var extpropRetrievers: SetExtendedPropertyRetrievers
 
-  lateinit var properties: Map<PropertyResourceLocation, PropertyData<*>>
-  lateinit var extproperties: Map<PropertyResourceLocation, PropertyDataExtended<*>>
+  lateinit var properties: MapProperties
+  lateinit var extproperties: MapExtendedProperties
 
   init {
     registryName = def.rl
@@ -65,8 +73,9 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
       setHardness(it)
     } ?: setBlockUnbreakable()
 
-    cPart.forEach { it.part = PartAccessTokenImpl(it.rl) }
     initDone = true
+    soundType = def.soundType
+    cData.forEach { it.part = PartAccessTokenImpl(it.rl) }
   }
 
   override fun onBlockActivated(world: World, pos: BlockPos, state: IBlockState, playerIn: EntityPlayer, hand: EnumHand, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean {
@@ -76,40 +85,14 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
   }
 
   override fun createBlockState(): BlockStateContainer {
-    val cPart = tempBlockConf.components.asReversed().mapNotNull { it as? BlockComponentData<*> }
+    val bs = createBlockState(this)
 
-    properties = emptyMap()
-    extproperties = emptyMap()
-    propRetrievers = emptySet()
-    extpropRetrievers = emptySet()
+    properties = bs._2()
+    extproperties = bs._3()
+    propRetrievers = bs._4()
+    extpropRetrievers = bs._5()
 
-    for (c in cPart) {
-      val defs = c.createPart().defs
-      for ((name, def) in defs) {
-        if (!def.render) continue
-
-        val prl = PropertyResourceLocation(c.rl, name)
-        val needsExt = def.validValues == null || def.validValues!!.size > 32
-        if (needsExt) {
-          val prop = PropertyDataExtended(prl, def)
-          extproperties += prl to prop
-          extpropRetrievers += { state, _, _, te ->
-            val value = te.c.parts.getValue(prl.base).storage.get(prl.property)
-            state.withProperty(prop, value)
-          }
-        } else {
-          val prop = PropertyData(prl, def)
-          properties += prl to prop
-          propRetrievers += { state, _, _, te ->
-            val value = te.c.parts.getValue(prl.base).storage.get(prl.property)
-            @Suppress("UNCHECKED_CAST")
-            state.withProperty(prop, prop.wrap(value) as PropertyData.Wrapper<Any?>)
-          }
-        }
-      }
-    }
-
-    return ExtendedBlockState(this, properties.values.toTypedArray(), extproperties.values.toTypedArray())
+    return bs._1()
   }
 
   override fun getActualState(state: IBlockState, world: IBlockAccess, pos: BlockPos): IBlockState {
@@ -160,11 +143,11 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
   override fun getCollisionBoundingBox(state: IBlockState, world: IBlockAccess, pos: BlockPos): AxisAlignedBB? {
     val data = BlockDataROImpl(world, pos, state)
     if (world.getTileEntity(pos) !is TileQuackLib) return null
-    return getCollisionBoundingBox(state, world, pos, data)
+    return getCollisionBoundingBox(data)
   }
 
   // collision
-  fun getCollisionBoundingBox(state: IBlockState, world: IBlockAccess, pos: BlockPos, data: BlockDataRO): AxisAlignedBB? {
+  fun getCollisionBoundingBox(data: BlockDataRO): AxisAlignedBB? {
     return if (cCollision.isNotEmpty()) {
       cCollision
         .flatMap { it.getCollisionBoundingBoxes(data) }
@@ -188,6 +171,22 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
   override fun getSelectedBoundingBox(state: IBlockState, world: World, pos: BlockPos): AxisAlignedBB {
     // TODO
     return super.getSelectedBoundingBox(state, world, pos)
+  }
+
+  override fun neighborChanged(state: IBlockState, world: World, pos: BlockPos, block: Block, fromPos: BlockPos) {
+    val facing = fromPos.subtract(pos).let { EnumFacing.getFacingFromVector(it.x.toFloat(), it.y.toFloat(), it.z.toFloat()) }
+    val data = BlockDataImpl(world, pos, state)
+    cNeighborListener.forEach { it.onNeighborChanged(data, facing) }
+  }
+
+  override fun canPlaceBlockOnSide(world: World, pos: BlockPos, side: EnumFacing): Boolean {
+    return super.canPlaceBlockAt(world, pos) &&
+           cPlacementCheck.fold(true) { b, comp -> b && comp.canPlaceBlockAt(world, pos, side) }
+  }
+
+  override fun canPlaceBlockAt(world: World, pos: BlockPos): Boolean {
+    return super.canPlaceBlockAt(world, pos) &&
+           cPlacementCheck.fold(true) { b, comp -> b && comp.canPlaceBlockAt(world, pos, null) }
   }
 
   @Suppress("UNCHECKED_CAST")
@@ -272,13 +271,57 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
            ?: super.getPickBlock(state, target, world, pos, player)
   }
 
-  private inline fun <reified T : Any> getComponentsOfType(): List<T> =
+  inline fun <reified T : BlockComponent> getComponentsOfType(): List<T> =
     components.mapNotNull { it as? T }
 
   companion object {
     private lateinit var tempBlockConf: BlockConfiguration
 
     val NOPE_AABB = AxisAlignedBB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+
+    // FIXME use custom tuple here, not scalas
+    fun createBlockState(block: Block?): Tuple5<BlockStateContainer, MapProperties, MapExtendedProperties, SetPropertyRetrievers, SetExtendedPropertyRetrievers> {
+      val cPart = tempBlockConf.components.asReversed().mapNotNull { it as? BlockComponentData<*> }
+
+      var properties: MapProperties = emptyMap()
+      var extproperties: MapExtendedProperties = emptyMap()
+      var propRetrievers: SetPropertyRetrievers = emptySet()
+      var extpropRetrievers: SetExtendedPropertyRetrievers = emptySet()
+
+      for (c in cPart) {
+        val defs = c.createPart().defs
+        for ((name, def) in defs) {
+          if (!def.render) continue
+
+          val prl = PropertyResourceLocation(c.rl, name)
+          val needsExt = def.validValues == null || def.validValues!!.size > 32
+          if (needsExt) {
+            val prop = PropertyDataExtended(prl, def)
+            extproperties += prl to prop
+            extpropRetrievers += { state, _, _, te ->
+              val value = te.c.parts.getValue(prl.base).storage.get(prl.property)
+              state.withProperty(prop, value)
+            }
+          } else {
+            val prop = PropertyData(prl, def)
+            properties += prl to prop
+            propRetrievers += { state, _, _, te ->
+              val value = te.c.parts.getValue(prl.base).storage.get(prl.property)
+              @Suppress("UNCHECKED_CAST")
+              state.withProperty(prop, prop.wrap(value) as PropertyData.Wrapper<Any?>)
+            }
+          }
+        }
+      }
+
+      return Tuple5(
+        ExtendedBlockState(block, properties.values.toTypedArray(), extproperties.values.toTypedArray()),
+        properties,
+        extproperties,
+        propRetrievers,
+        extpropRetrievers
+      )
+    }
   }
 
 }

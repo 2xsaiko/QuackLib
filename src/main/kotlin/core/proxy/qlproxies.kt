@@ -32,6 +32,7 @@ sealed class CommonProxy {
 
   open fun preInit(e: FMLPreInitializationEvent) {
     MinecraftForge.EVENT_BUS.register(this)
+    MinecraftForge.EVENT_BUS.register(APIImpl.multipartAPI)
     fixMods()
     APIImpl.qlVersion = e.modMetadata.version
     if (isDebugMode) Logger.warn("Don't forget to add '-Dfml.coreMods.load=therealfarfetchd.quacklib.hax.QuackLibPlugin' to the VM arguments!")
@@ -74,6 +75,9 @@ class ClientProxy : CommonProxy() {
     if (!mc.gameSettings.showDebugInfo) return
 
     e.left.add(min(e.left.size, 1), "QuackLib ${APIImpl.qlVersion}")
+
+    APIImpl.multipartAPI.onDrawOverlay(mc.world, mc.objectMouseOver, mc.player, e.left, e.right)
+
     if (mc.objectMouseOver?.typeOfHit == RayTraceResult.Type.BLOCK) {
       val pos = mc.objectMouseOver.blockPos
       val state = mc.world.getBlockState(pos)

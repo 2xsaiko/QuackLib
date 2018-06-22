@@ -13,11 +13,13 @@ import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand
 import net.minecraft.util.SoundCategory
 import net.minecraft.util.math.BlockPos
+import net.minecraft.world.IBlockAccess
 import net.minecraft.world.World
 import therealfarfetchd.math.Vec3
 import therealfarfetchd.quacklib.api.block.BlockReference
 import therealfarfetchd.quacklib.api.block.component.BlockComponentPlacement
 import therealfarfetchd.quacklib.api.block.data.BlockDataPart
+import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
 import therealfarfetchd.quacklib.api.core.init.ValidationContext
 import therealfarfetchd.quacklib.api.item.component.ItemComponentUse
 import therealfarfetchd.quacklib.api.item.init.ItemConfigurationScope
@@ -41,17 +43,14 @@ class ComponentPlaceBlock(val block: BlockReference) : ItemComponentUse {
 
     val stack = player.getHeldItem(hand)
 
-    val c = DataContainer()
-    c.setConfiguration(block.def)
-    val comps = c.getComponentsOfType<BlockComponentPlacement<BlockDataPart>>()
-    comps.forEach { it.initialize(world, pos, c.parts.getValue(it.rl), player, hand, hitSide, hitVec) }
+    val c = prepareDataContainer(world, pos, player, hand, hitSide, hitVec, block.def)
 
     if (stack.count > 0 && player.canPlayerEdit(pos, hitSide, stack) && world.mayPlace(block, pos, false, hitSide, null, c)) {
 
       val meta = 0
       var state = block.getStateForPlacement(world, pos, hitSide, hitVec.x, hitVec.y, hitVec.z, meta, player, hand)
 
-      if (placeBlockAt(stack, player, world, pos, hitSide, hitVec, state, c)) {
+      if (placeBlockAt(block, stack, player, world, pos, state, c)) {
         state = world.getBlockState(pos)
         val soundtype = state.block.getSoundType(state, world, pos, player)
         world.playSound(player, pos, soundtype.placeSound, SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F)
@@ -64,17 +63,6 @@ class ComponentPlaceBlock(val block: BlockReference) : ItemComponentUse {
     }
   }
 
-  private fun placeBlockAt(stack: ItemStack, player: EntityPlayer, world: World, pos: BlockPos, hitSide: EnumFacing, hitVec: Vec3, state: IBlockState, c: DataContainer): Boolean {
-    if (!world.setBlockState(pos, state, 11)) return false
-    if (state.block == block.mcBlock) {
-      ItemBlock.setTileEntityNBT(world, player, pos, stack)
-      (world.getTileEntity(pos) as? TileQuackLib)?.c?.import(c)
-      block.mcBlock.onBlockPlacedBy(world, pos, state, player, stack)
-      if (player is EntityPlayerMP)
-        CriteriaTriggers.PLACED_BLOCK.trigger(player, pos, stack)
-    }
-    return true
-  }
 
   override fun validate(target: ItemConfigurationScope, vc: ValidationContext) {
     super.validate(target, vc)
@@ -88,11 +76,33 @@ class ComponentPlaceBlock(val block: BlockReference) : ItemComponentUse {
     if (block !is BlockQuackLib) return mayPlace(block, pos, skipCollisionCheck, hitSide, placer)
 
     val state = getBlockState(pos)
-    val aabb = if (skipCollisionCheck) null else block.getCollisionBoundingBox(state, this, pos, BlockDataDirectRef(c, pos, state, this))
+    val aabb = if (skipCollisionCheck) null else block.getCollisionBoundingBox(BlockDataDirectRef(c, this, pos, state))
     return if (aabb != null && !checkNoEntityCollision(aabb.offset(pos), placer)) {
       false
     } else {
       state.block.isReplaceable(this, pos) && block.canPlaceBlockOnSide(this, pos, hitSide)
+    }
+  }
+
+  companion object {
+    fun placeBlockAt(block: Block, stack: ItemStack, player: EntityPlayer, world: World, pos: BlockPos, state: IBlockState, c: DataContainer): Boolean {
+      if (!world.setBlockState(pos, state, 11)) return false
+      if (state.block == block) {
+        ItemBlock.setTileEntityNBT(world, player, pos, stack)
+        (world.getTileEntity(pos) as? TileQuackLib)?.c?.import(c)
+        block.onBlockPlacedBy(world, pos, state, player, stack)
+        if (player is EntityPlayerMP)
+          CriteriaTriggers.PLACED_BLOCK.trigger(player, pos, stack)
+      }
+      return true
+    }
+
+    fun prepareDataContainer(world: IBlockAccess, pos: BlockPos, player: EntityPlayer, hand: EnumHand, hitSide: EnumFacing, hitVec: Vec3, def: BlockConfiguration): DataContainer {
+      val c = DataContainer()
+      c.setConfiguration(def)
+      val comps = c.getComponentsOfType<BlockComponentPlacement<BlockDataPart>>()
+      comps.forEach { it.initialize(world, pos, c.parts.getValue(it.rl), player, hand, hitSide, hitVec) }
+      return c
     }
   }
 

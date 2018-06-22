@@ -3,6 +3,7 @@
 import net.minecraftforge.gradle.user.IReobfuscator
 import net.minecraftforge.gradle.user.UserBaseExtension
 import org.gradle.jvm.tasks.Jar
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val mod_version: String by extra
 val mc_version: String by extra
@@ -58,6 +59,10 @@ minecraft {
 tasks.withType<JavaCompile> {
   sourceCompatibility = "1.8"
   targetCompatibility = "1.8"
+}
+
+tasks.withType<KotlinCompile> {
+  kotlinOptions.jvmTarget = "1.8"
 }
 
 repositories {

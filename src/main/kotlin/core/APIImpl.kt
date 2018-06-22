@@ -26,6 +26,7 @@ import therealfarfetchd.quacklib.block.data.ValuePropertiesImpl
 import therealfarfetchd.quacklib.block.data.get
 import therealfarfetchd.quacklib.block.data.set
 import therealfarfetchd.quacklib.block.init.BlockConfigurationScopeImpl
+import therealfarfetchd.quacklib.block.multipart.MultipartAPIInternal
 import therealfarfetchd.quacklib.item.ItemReferenceByRL
 import therealfarfetchd.quacklib.item.ItemReferenceDirect
 import therealfarfetchd.quacklib.item.component.prefab.ComponentPlaceBlock
@@ -36,12 +37,15 @@ import java.io.StringWriter
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
+import therealfarfetchd.quacklib.block.multipart.cbmp.MultipartAPIImpl as CBMPAPI
+import therealfarfetchd.quacklib.block.multipart.mcmp.MultipartAPIImpl as MCMPAPI
 
 object APIImpl : QuackLibAPI {
-
   override val modContext = ModContext
 
   override val serializationRegistry: DataPartSerializationRegistry = DataPartSerializationRegistryImpl
+
+  override val multipartAPI: MultipartAPIInternal = MCMPAPI
 
   override var qlVersion: String = "unset"
 
@@ -67,7 +71,8 @@ object APIImpl : QuackLibAPI {
     configurationScope as BlockConfigurationScopeImpl
 
     configurationScope.init.addItem(name) {
-      apply(ComponentPlaceBlock(block(configurationScope.rl)))
+      if (configurationScope.isMultipart) apply(multipartAPI.createPlacementComponent(configurationScope))
+      else apply(ComponentPlaceBlock(block(configurationScope.rl)))
       op(this)
     }
 

@@ -1,5 +1,6 @@
 package therealfarfetchd.quacklib.api.block.init
 
+import net.minecraft.block.SoundType
 import net.minecraft.block.material.Material
 import net.minecraft.util.ResourceLocation
 import therealfarfetchd.quacklib.api.block.component.BlockComponent
@@ -25,6 +26,11 @@ interface BlockConfiguration : Describable {
   val material: Material
 
   /**
+   *
+   */
+  val soundType: SoundType
+
+  /**
    * The hardness of the block. 'null' for unbreakable.
    */
   val hardness: Float?
@@ -48,6 +54,11 @@ interface BlockConfiguration : Describable {
    * The item this block is represented by.
    */
   val item: ItemReference?
+
+  /**
+   *
+   */
+  val isMultipart: Boolean
 
   override fun describe(): String = "Block $name"
 

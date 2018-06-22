@@ -39,6 +39,7 @@ object DataPartSerializationRegistryImpl : DataPartSerializationRegistry {
     registerRedirect(type, from, { it }, cast, priority)
   }
 
+  @Suppress("UNCHECKED_CAST")
   override fun <T : Any, S : Any> registerRedirect(type: KClass<T>, from: KClass<S>, castIn: (T) -> S, castOut: (S) -> T, priority: Int) {
     if (type in savemap) error("Serialization impl for $type already registered!")
     if (from !in savemap) error("No serialization impl for $from found")

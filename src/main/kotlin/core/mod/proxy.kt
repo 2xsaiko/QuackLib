@@ -8,11 +8,13 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.registry.EntityEntry
+import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
 import therealfarfetchd.quacklib.api.core.mod.BaseMod
 import therealfarfetchd.quacklib.api.core.mod.ModProxy
 import therealfarfetchd.quacklib.api.tools.Logger
 import therealfarfetchd.quacklib.block.impl.BlockQuackLib
 import therealfarfetchd.quacklib.block.init.BlockConfigurationScopeImpl
+import therealfarfetchd.quacklib.core.APIImpl
 import therealfarfetchd.quacklib.core.init.InitializationContextImpl
 import therealfarfetchd.quacklib.core.init.ItemConfigurationScopeImpl
 import therealfarfetchd.quacklib.core.init.TabConfigurationScopeImpl
@@ -58,9 +60,14 @@ sealed class CommonProxy : ModProxy {
   fun registerBlocks(e: RegistryEvent.Register<Block>) {
     blockTemplates.forEach {
       Logger.info("Adding ${it.describe()}")
-      val block = BlockQuackLib(it)
-      e.registry.register(block)
+      if (it.isMultipart) APIImpl.multipartAPI.registerBlock(e, it)
+      else registerBlock(e, it)
     }
+  }
+
+  private fun registerBlock(e: RegistryEvent.Register<Block>, def: BlockConfiguration) {
+    val block = BlockQuackLib(def)
+    e.registry.register(block)
   }
 
   @SubscribeEvent

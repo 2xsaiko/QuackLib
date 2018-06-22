@@ -123,7 +123,7 @@ class DataContainer {
     (from.defs.keys - ignore).forEach { into.storage.set(it, from.storage.get(it)) }
   }
 
-  inline fun <reified T : Any> getComponentsOfType(): List<T> =
+  inline fun <reified T : BlockComponent> getComponentsOfType(): List<T> =
     components.mapNotNull { it as? T }
 
 }

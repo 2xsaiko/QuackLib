@@ -17,6 +17,7 @@ import therealfarfetchd.quacklib.api.block.data.BlockDataPart
 import therealfarfetchd.quacklib.api.block.data.BlockDataRO
 import therealfarfetchd.quacklib.api.block.data.PartAccessToken
 import therealfarfetchd.quacklib.api.block.init.BlockConfigurationScope
+import therealfarfetchd.quacklib.api.block.multipart.PartSlot
 import therealfarfetchd.quacklib.api.core.init.Applyable
 
 private typealias Base = BlockComponent
@@ -80,6 +81,12 @@ interface BlockComponentPlacement<T : BlockDataPart> : BlockComponentData<T> {
 
 }
 
+interface BlockComponentPlacementCheck : Base {
+
+  fun canPlaceBlockAt(world: IBlockAccess, pos: BlockPos, side: EnumFacing?): Boolean
+
+}
+
 interface BlockComponentActivation : Base {
 
   fun onActivated(data: BlockData, player: EntityPlayer, hand: EnumHand, facing: EnumFacing, hit: Vec3): Boolean
@@ -125,5 +132,19 @@ interface BlockComponentMouseOver : Base {
 interface BlockComponentCustomMouseOver : Base {
 
   fun raytrace(data: BlockDataRO, from: Vec3, to: Vec3): RayTraceResult
+
+}
+
+interface BlockComponentNeighborListener : Base {
+
+  fun onNeighborChanged(data: BlockData, side: EnumFacing)
+
+}
+
+interface BlockComponentMultipart : Base {
+
+  fun getSlot(data: BlockDataRO): PartSlot
+
+  fun getExtraSlots(data: BlockDataRO): List<PartSlot> = emptyList()
 
 }

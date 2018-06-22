@@ -9,6 +9,7 @@ import therealfarfetchd.quacklib.api.block.data.BlockDataPart
 import therealfarfetchd.quacklib.api.block.data.BlockDataRO
 import therealfarfetchd.quacklib.api.block.data.DataPartSerializationRegistry
 import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
+import therealfarfetchd.quacklib.api.block.multipart.MultipartAPI
 import therealfarfetchd.quacklib.api.item.ItemReference
 import therealfarfetchd.quacklib.api.item.init.ItemConfigurationScope
 import therealfarfetchd.quacklib.api.tools.ModContext
@@ -24,6 +25,8 @@ interface QuackLibAPI {
   val modContext: ModContext
 
   val serializationRegistry: DataPartSerializationRegistry
+
+  val multipartAPI: MultipartAPI
 
   val qlVersion: String
 

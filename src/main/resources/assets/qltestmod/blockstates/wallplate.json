@@ -6,7 +6,8 @@
       "particle": "#texture"
     },
     "model": "qltestmod:cover",
-    "transform": "forge:default-block"
+    "transform": "forge:default-block",
+    "uvlock": true
   },
   "variants": {
     "facing": {

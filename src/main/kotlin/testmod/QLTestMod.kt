@@ -13,17 +13,15 @@ import therealfarfetchd.quacklib.api.item.Tool
 object QLTestMod : BaseMod() {
 
   override fun initContent(ctx: InitializationContext) = ctx {
-    //    registerComponent<ComponentTest>("test_component")
-
-    addBlock("test_block") {
-      material = Material.IRON
-      hardness = 0.5f
-      validTools = setOf(Tool("pickaxe", 2))
-
-      apply(ComponentTest())
-
-      withPlacementItem()
-    }
+    // addBlock("test_block") {
+    //   material = Material.IRON
+    //   hardness = 0.5f
+    //   validTools = setOf(Tool("pickaxe", 2))
+    //
+    //   apply(ComponentTest())
+    //
+    //   withPlacementItem()
+    // }
 
     addBlock("wallplate") {
       material = Material.ROCK
@@ -33,16 +31,17 @@ object QLTestMod : BaseMod() {
       val side = apply(ComponentSurfacePlacement())
       val box = apply(ComponentBounds(2 / 16f))
 
+      val part = apply(SidedMultipart())
+
       link {
-        box {
-          side.exports.facing provides facing
-        }
+        box { side.exports.facing provides facing }
+        part { side.exports.facing provides facing }
       }
 
       withPlacementItem()
     }
 
-    addTab("standard", item("test_block")) {
+    addTab("standard", item("minecraft:stone")) {
       include("test_block")
       include("wallplate")
       include("minecraft:diamond")

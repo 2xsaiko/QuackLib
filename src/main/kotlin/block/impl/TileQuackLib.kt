@@ -10,7 +10,7 @@ import net.minecraftforge.common.capabilities.Capability
 import therealfarfetchd.quacklib.api.block.component.BlockComponentCapability
 import therealfarfetchd.quacklib.api.block.component.BlockComponentTickable
 import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
-import therealfarfetchd.quacklib.block.data.BlockDataImpl
+import therealfarfetchd.quacklib.block.data.BlockDataDirectRef
 
 open class TileQuackLib() : TileEntity() {
 
@@ -25,13 +25,17 @@ open class TileQuackLib() : TileEntity() {
 
   open fun setConfiguration(def: BlockConfiguration) {
     c.setConfiguration(def)
+    updateComponents()
+  }
 
+  fun updateComponents() {
     cCapability = c.getComponentsOfType()
   }
 
   override fun readFromNBT(nbt: NBTTagCompound) {
     super.readFromNBT(nbt)
     c.loadData(nbt) { _, prop -> prop.persistent }
+    updateComponents()
   }
 
   override fun writeToNBT(nbt: NBTTagCompound): NBTTagCompound {
@@ -49,6 +53,7 @@ open class TileQuackLib() : TileEntity() {
   override fun handleUpdateTag(nbt: NBTTagCompound) {
     super.readFromNBT(nbt)
     c.loadData(nbt) { _, prop -> prop.render || prop.sync }
+    updateComponents()
   }
 
   override fun getUpdatePacket(): SPacketUpdateTileEntity {
@@ -77,7 +82,7 @@ open class TileQuackLib() : TileEntity() {
     cCapability.firstOrNull { it.hasCapability(getBlockData(), capability, facing) }?.getCapability(getBlockData(), capability, facing)
     ?: super.getCapability(capability, facing)
 
-  protected fun getBlockData() = BlockDataImpl(world, pos, world.getBlockState(pos))
+  protected fun getBlockData() = BlockDataDirectRef(c, world, pos)
 
   class Tickable() : TileQuackLib(), ITickable {
 

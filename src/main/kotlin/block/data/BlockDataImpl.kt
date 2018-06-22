@@ -29,11 +29,11 @@ abstract class BlockDataBase : BlockDataRO {
 
 }
 
-data class BlockDataImpl(override val world: World, override val pos: BlockPos, override val state: IBlockState) : BlockDataBase(), BlockData
+data class BlockDataImpl(override val world: World, override val pos: BlockPos, override val state: IBlockState = world.getBlockState(pos)) : BlockDataBase(), BlockData
 
-data class BlockDataROImpl(override val world: IBlockAccess, override val pos: BlockPos, override val state: IBlockState) : BlockDataBase()
+data class BlockDataROImpl(override val world: IBlockAccess, override val pos: BlockPos, override val state: IBlockState = world.getBlockState(pos)) : BlockDataBase()
 
-data class BlockDataDirectRef(val container: DataContainer, override val pos: BlockPos, override val state: IBlockState, override val world: World) : BlockData {
+data class BlockDataDirectRef(val container: DataContainer, override val world: World, override val pos: BlockPos, override val state: IBlockState = world.getBlockState(pos)) : BlockData {
 
   override fun <T : BlockDataPart> get(token: PartAccessToken<T>): T {
     token as? PartAccessTokenImpl ?: error("Invalid token: $token")

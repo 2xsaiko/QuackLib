@@ -1,9 +1,11 @@
 package therealfarfetchd.quacklib.block.init
 
+import net.minecraft.block.SoundType
 import net.minecraft.block.material.Material
 import net.minecraft.util.ResourceLocation
 import therealfarfetchd.quacklib.api.block.component.AppliedComponent
 import therealfarfetchd.quacklib.api.block.component.BlockComponent
+import therealfarfetchd.quacklib.api.block.component.BlockComponentMultipart
 import therealfarfetchd.quacklib.api.block.init.BlockConfigurationScope
 import therealfarfetchd.quacklib.api.block.init.BlockDataLinkScope
 import therealfarfetchd.quacklib.api.block.render.BlockRenderer
@@ -19,6 +21,7 @@ class BlockConfigurationScopeImpl(modid: String, override val name: String, val 
   override val rl: ResourceLocation = ResourceLocation(modid, name)
 
   override var material: Material = Material.ROCK
+  override var soundType: SoundType = SoundType.STONE
   override var hardness: Float? = 1.0f
   override var needsTool: Boolean = false
   override var validTools: Set<Tool> = emptySet()
@@ -26,9 +29,13 @@ class BlockConfigurationScopeImpl(modid: String, override val name: String, val 
 
   override var components: List<BlockComponent> = emptyList()
 
+  override var isMultipart: Boolean = false
+    private set
+
   override fun <T : BlockComponent> apply(component: T): AppliedComponent<T> {
     components += component
     component.onApplied(this)
+    if (component is BlockComponentMultipart) isMultipart = true
     return AppliedComponentImpl(component)
   }
 
