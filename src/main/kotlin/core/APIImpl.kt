@@ -9,6 +9,7 @@ import therealfarfetchd.quacklib.api.block.data.BlockDataPart
 import therealfarfetchd.quacklib.api.block.data.BlockDataRO
 import therealfarfetchd.quacklib.api.block.data.DataPartSerializationRegistry
 import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
+import therealfarfetchd.quacklib.api.core.Unsafe
 import therealfarfetchd.quacklib.api.core.modinterface.QuackLibAPI
 import therealfarfetchd.quacklib.api.core.modinterface.block
 import therealfarfetchd.quacklib.api.core.modinterface.item
@@ -107,6 +108,14 @@ object APIImpl : QuackLibAPI {
 
   override fun <R, C : BlockComponentDataExport<C, D>, D : ExportedData<D, C>> createExportedValue(target: C, op: (C, BlockDataRO) -> R): ExportedValue<D, R> {
     return ExportedValueImpl { data -> op(target, data) }
+  }
+
+  override fun <T : Any> registerCapability(type: KClass<T>) {
+    therealfarfetchd.quacklib.tools.registerCapability(type)
+  }
+
+  override fun <R> unsafeOps(op: (Unsafe) -> R): R {
+    return op(UnsafeImpl)
   }
 
   override fun logException(e: Throwable) {

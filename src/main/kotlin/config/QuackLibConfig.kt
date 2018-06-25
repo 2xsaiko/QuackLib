@@ -8,4 +8,8 @@ object QuackLibConfig : Configuration() {
 
   var alwaysShowMultipartDebug = true
 
+  init {
+    save()
+  }
+
 }

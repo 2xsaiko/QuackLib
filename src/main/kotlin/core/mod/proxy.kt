@@ -1,7 +1,10 @@
 package therealfarfetchd.quacklib.core.mod
 
 import net.minecraft.block.Block
+import net.minecraft.client.renderer.block.model.ModelResourceLocation
 import net.minecraft.item.Item
+import net.minecraftforge.client.event.ModelRegistryEvent
+import net.minecraftforge.client.model.ModelLoader
 import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent
@@ -11,6 +14,7 @@ import net.minecraftforge.fml.common.registry.EntityEntry
 import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
 import therealfarfetchd.quacklib.api.core.mod.BaseMod
 import therealfarfetchd.quacklib.api.core.mod.ModProxy
+import therealfarfetchd.quacklib.api.core.modinterface.item
 import therealfarfetchd.quacklib.api.tools.Logger
 import therealfarfetchd.quacklib.block.impl.BlockQuackLib
 import therealfarfetchd.quacklib.block.init.BlockConfigurationScopeImpl
@@ -27,9 +31,9 @@ sealed class CommonProxy : ModProxy {
 
   override var customProxy: Any? = null
 
-  private var blockTemplates: Set<BlockConfigurationScopeImpl> = emptySet()
-  private var itemTemplates: Set<ItemConfigurationScopeImpl> = emptySet()
-  private var tabTemplates: Set<TabConfigurationScopeImpl> = emptySet()
+  protected var blockTemplates: Set<BlockConfigurationScopeImpl> = emptySet()
+  protected var itemTemplates: Set<ItemConfigurationScopeImpl> = emptySet()
+  protected var tabTemplates: Set<TabConfigurationScopeImpl> = emptySet()
 
   var creativeTabs: List<TabQuackLib> = emptyList()
 
@@ -102,6 +106,15 @@ sealed class CommonProxy : ModProxy {
 
 }
 
-class ClientProxy : CommonProxy()
+class ClientProxy : CommonProxy() {
+
+  @SubscribeEvent
+  fun registerModels(e: ModelRegistryEvent) {
+    itemTemplates.forEach {
+      ModelLoader.setCustomModelResourceLocation(item(it.rl).mcItem, 0, ModelResourceLocation(it.rl, "inventory"))
+    }
+  }
+
+}
 
 class ServerProxy : CommonProxy()

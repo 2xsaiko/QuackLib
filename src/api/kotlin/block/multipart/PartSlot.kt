@@ -40,7 +40,6 @@ enum class PartSlot(
   CORNER_PPN(EnumFacing.EAST, EnumFacing.UP, EnumFacing.NORTH),
   CORNER_PPP(EnumFacing.EAST, EnumFacing.UP, EnumFacing.SOUTH);
 
-
   companion object {
     val Values = values().toList()
 

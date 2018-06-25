@@ -14,7 +14,7 @@ import net.minecraft.util.EnumHand
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import therealfarfetchd.math.Vec3
-import therealfarfetchd.quacklib.api.block.component.BlockComponentCollision
+import therealfarfetchd.quacklib.api.block.component.BlockComponentOcclusion
 import therealfarfetchd.quacklib.api.block.component.BlockComponentPlacement
 import therealfarfetchd.quacklib.api.block.data.BlockDataPart
 import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
@@ -39,9 +39,9 @@ class ComponentPlaceMultipart(val def: BlockConfiguration) : ItemComponentUse {
 
       comps.forEach { it.initialize(world, pos, c.parts.getValue(it.rl), player, hand, EnumFacing.getFront(side), Vec3(vhit.x.toFloat(), vhit.y.toFloat(), vhit.z.toFloat())) }
 
-      val cCollision = c.getComponentsOfType<BlockComponentCollision>()
+      val cOcclusion = c.getComponentsOfType<BlockComponentOcclusion>()
       val data = BlockDataDirectRef(c, world, pos)
-      MultipartQuackLib.placementBoxes.set((cCollision.takeIf { it.isNotEmpty() }?.flatMap { it.getCollisionBoundingBoxes(data) }
+      MultipartQuackLib.placementBoxes.set((cOcclusion.takeIf { it.isNotEmpty() }?.flatMap { it.getOcclusionBoundingBoxes(data) }
                                             ?: setOf(Block.FULL_BLOCK_AABB)).map(::Cuboid6))
 
       return MultipartQuackLib(def).also { it.c.import(c) }

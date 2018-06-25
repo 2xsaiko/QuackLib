@@ -15,6 +15,7 @@ import net.minecraft.world.IBlockAccess
 import net.minecraft.world.World
 import therealfarfetchd.math.Vec3
 import therealfarfetchd.quacklib.api.block.component.BlockComponentMultipart
+import therealfarfetchd.quacklib.api.block.component.BlockComponentOcclusion
 import therealfarfetchd.quacklib.block.data.BlockDataDirectRef
 import therealfarfetchd.quacklib.block.data.BlockDataROImpl
 import therealfarfetchd.quacklib.block.impl.BlockQuackLib
@@ -24,6 +25,7 @@ import therealfarfetchd.quacklib.block.impl.TileQuackLib
 class MultipartQuackLib(private val block: BlockQuackLib) : IMultipart {
 
   val cMultipart = block.getComponentsOfType<BlockComponentMultipart>().first()
+  val cOcclusion = block.getComponentsOfType<BlockComponentOcclusion>()
 
   override fun getBlock(): BlockQuackLib = block
 
@@ -50,10 +52,10 @@ class MultipartQuackLib(private val block: BlockQuackLib) : IMultipart {
   override fun getOcclusionBoxes(part: IPartInfo): List<AxisAlignedBB> {
     val data = getBlockData(part)
 
-    return if (block.cMouseOver.isNotEmpty()) {
-      block.cMouseOver
-        .flatMap { it.getRaytraceBoundingBoxes(data) }
-        .also { if (it.isEmpty()) return listOf(BlockQuackLib.NOPE_AABB) }
+    return if (cOcclusion.isNotEmpty()) {
+      cOcclusion
+        .flatMap { it.getOcclusionBoundingBoxes(data) }
+        .also { if (it.isEmpty()) return emptyList() }
     } else listOf(Block.FULL_BLOCK_AABB)
   }
 
@@ -69,6 +71,7 @@ class MultipartQuackLib(private val block: BlockQuackLib) : IMultipart {
   }
 
   companion object {
+    // Used to set data when placing block.
     val data = ThreadLocal<DataContainer?>()
   }
 

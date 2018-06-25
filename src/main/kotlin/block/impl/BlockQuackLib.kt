@@ -3,6 +3,8 @@ package therealfarfetchd.quacklib.block.impl
 import net.minecraft.block.Block
 import net.minecraft.block.state.BlockStateContainer
 import net.minecraft.block.state.IBlockState
+import net.minecraft.client.particle.ParticleDigging
+import net.minecraft.client.particle.ParticleManager
 import net.minecraft.entity.Entity
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.Item
@@ -30,6 +32,7 @@ import therealfarfetchd.quacklib.block.data.*
 import therealfarfetchd.quacklib.block.data.render.PropertyData
 import therealfarfetchd.quacklib.block.data.render.PropertyDataExtended
 import java.util.*
+import kotlin.math.roundToInt
 import kotlin.reflect.jvm.jvmName
 
 typealias SetPropertyRetrievers = Set<(IBlockState, IBlockAccess, BlockPos, TileQuackLib) -> IBlockState>
@@ -55,6 +58,7 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
   val cCustomMouseOver = getComponentsOfType<BlockComponentCustomMouseOver>()
   val cNeighborListener = getComponentsOfType<BlockComponentNeighborListener>()
   val cPlacementCheck = getComponentsOfType<BlockComponentPlacementCheck>()
+  val cRedstone = getComponentsOfType<BlockComponentRedstone>()
   val cData = getComponentsOfType<BlockComponentData<*>>()
 
   val needsTile = getComponentsOfType<BlockComponentNeedTE>().isNotEmpty()
@@ -189,6 +193,30 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
            cPlacementCheck.fold(true) { b, comp -> b && comp.canPlaceBlockAt(world, pos, null) }
   }
 
+  override fun getStrongPower(state: IBlockState, world: IBlockAccess, pos: BlockPos, side: EnumFacing): Int {
+    val data = BlockDataROImpl(world, pos, state)
+    val realSide = side.opposite
+    return cRedstone.fold(0) { acc, a -> acc + a.strongPowerLevel(data, realSide) }
+  }
+
+  override fun getWeakPower(state: IBlockState, world: IBlockAccess, pos: BlockPos, side: EnumFacing): Int {
+    val data = BlockDataROImpl(world, pos, state)
+    val realSide = side.opposite
+    return cRedstone.fold(0) { acc, a -> acc + a.weakPowerLevel(data, realSide) }
+  }
+
+  override fun canProvidePower(state: IBlockState): Boolean {
+    return cRedstone.isNotEmpty()
+  }
+
+  override fun canConnectRedstone(state: IBlockState, world: IBlockAccess, pos: BlockPos, side: EnumFacing?): Boolean {
+    if (side == null) return false
+
+    val data = BlockDataROImpl(world, pos, state)
+
+    return cRedstone.any { it.canConnectRedstone(data, side) }
+  }
+
   @Suppress("UNCHECKED_CAST")
   override fun addInformation(world: World, pos: BlockPos, state: IBlockState, player: EntityPlayer, left: MutableList<String>, right: MutableList<String>) {
     val state = getExtendedState(state, world, pos)
@@ -271,14 +299,45 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
            ?: super.getPickBlock(state, target, world, pos, player)
   }
 
+  override fun addDestroyEffects(world: World, pos: BlockPos, manager: ParticleManager): Boolean {
+    val state = world.getBlockState(pos)
+    val bb = state.getBoundingBox(world, pos)
+    val particlesX = maxOf(1, (4 * (bb.maxX - bb.minX)).roundToInt())
+    val particlesY = maxOf(1, (4 * (bb.maxY - bb.minY)).roundToInt())
+    val particlesZ = maxOf(1, (4 * (bb.maxZ - bb.minZ)).roundToInt())
+
+    for (i in 0 until particlesX) {
+      for (j in 0 until particlesY) {
+        for (k in 0 until particlesZ) {
+          val xOff = (i + 0.5) / 4.0
+          val yOff = (j + 0.5) / 4.0
+          val zOff = (k + 0.5) / 4.0
+          val x = bb.minX + pos.x + (xOff * (bb.maxX - bb.minX))
+          val y = bb.minY + pos.y + (yOff * (bb.maxY - bb.minY))
+          val z = bb.minZ + pos.z + (zOff * (bb.maxZ - bb.minZ))
+          val xVel = bb.minX + (xOff - 0.5) * (bb.maxX - bb.minX) / 2
+          val yVel = bb.minY + (yOff - 0.5) * (bb.maxY - bb.minY) / 2
+          val zVel = bb.minZ + (zOff - 0.5) * (bb.maxZ - bb.minZ) / 2
+          manager.addEffect(object : ParticleDigging(world, x, y, z, xVel, yVel, zVel, state) {}.setBlockPos(pos))
+        }
+      }
+    }
+
+    return true
+  }
+
+  override fun toString(): String {
+    return "Block '${def.rl}' (${components.size} components)"
+  }
+
   inline fun <reified T : BlockComponent> getComponentsOfType(): List<T> =
     components.mapNotNull { it as? T }
 
   companion object {
+
     private lateinit var tempBlockConf: BlockConfiguration
 
     val NOPE_AABB = AxisAlignedBB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-
     // FIXME use custom tuple here, not scalas
     fun createBlockState(block: Block?): Tuple5<BlockStateContainer, MapProperties, MapExtendedProperties, SetPropertyRetrievers, SetExtendedPropertyRetrievers> {
       val cPart = tempBlockConf.components.asReversed().mapNotNull { it as? BlockComponentData<*> }
@@ -322,6 +381,7 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
         extpropRetrievers
       )
     }
+
   }
 
 }

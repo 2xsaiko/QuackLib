@@ -72,10 +72,10 @@ repositories {
 }
 
 dependencies {
-  //  implementation(kotlin("stdlib-jdk8", kotlin_version))
-  //  implementation(kotlin("reflect", kotlin_version))
+  implementation(kotlin("stdlib-jdk8", kotlin_version))
+  implementation(kotlin("reflect", kotlin_version))
 
-  deobfCompile("net.shadowfacts", "Forgelin", forgelin_version)
+  runtimeOnly("net.shadowfacts", "Forgelin", forgelin_version)
 
   compile("therealfarfetchd.extmath", "extmath", extmath_version)
 

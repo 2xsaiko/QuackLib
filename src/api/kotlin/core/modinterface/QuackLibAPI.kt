@@ -10,6 +10,7 @@ import therealfarfetchd.quacklib.api.block.data.BlockDataRO
 import therealfarfetchd.quacklib.api.block.data.DataPartSerializationRegistry
 import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
 import therealfarfetchd.quacklib.api.block.multipart.MultipartAPI
+import therealfarfetchd.quacklib.api.core.Unsafe
 import therealfarfetchd.quacklib.api.item.ItemReference
 import therealfarfetchd.quacklib.api.item.init.ItemConfigurationScope
 import therealfarfetchd.quacklib.api.tools.ModContext
@@ -49,6 +50,10 @@ interface QuackLibAPI {
   fun <T, C : BlockComponentDataImport<C, D>, D : ImportedData<D, C>> createImportedValue(target: C): ImportedValue<T>
 
   fun <R, C : BlockComponentDataExport<C, D>, D : ExportedData<D, C>> createExportedValue(target: C, op: (C, BlockDataRO) -> R): ExportedValue<D, R>
+
+  fun <T : Any> registerCapability(type: KClass<T>)
+
+  fun <R> unsafeOps(op: (Unsafe) -> R): R
 
   fun logException(e: Throwable)
 

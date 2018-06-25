@@ -24,4 +24,8 @@ class TabQuackLib(val def: TabConfiguration) : CreativeTabs(def.rl.toString()) {
     }
   }
 
+  override fun toString(): String {
+    return "Creative Tab '${def.rl}'"
+  }
+
 }

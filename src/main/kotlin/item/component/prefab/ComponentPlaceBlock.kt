@@ -63,7 +63,6 @@ class ComponentPlaceBlock(val block: BlockReference) : ItemComponentUse {
     }
   }
 
-
   override fun validate(target: ItemConfigurationScope, vc: ValidationContext) {
     super.validate(target, vc)
 

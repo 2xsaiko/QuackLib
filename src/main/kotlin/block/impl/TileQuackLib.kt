@@ -103,4 +103,8 @@ open class TileQuackLib() : TileEntity() {
 
   }
 
+  override fun toString(): String {
+    return "Tile '${c.def.rl}' (${c.def.components.size} components)"
+  }
+
 }

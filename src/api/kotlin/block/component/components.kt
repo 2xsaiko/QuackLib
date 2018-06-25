@@ -148,3 +148,25 @@ interface BlockComponentMultipart : Base {
   fun getExtraSlots(data: BlockDataRO): List<PartSlot> = emptyList()
 
 }
+
+interface BlockComponentOcclusion : Base {
+
+  fun getOcclusionBoundingBoxes(data: BlockDataRO): List<AxisAlignedBB>
+
+}
+
+interface BlockComponentRedstone : Base {
+
+  fun strongPowerLevel(data: BlockDataRO, side: EnumFacing): Int
+
+  fun weakPowerLevel(data: BlockDataRO, side: EnumFacing): Int
+
+  fun canConnectRedstone(data: BlockDataRO, side: EnumFacing): Boolean
+
+}
+
+interface BlockComponentRedstoneFace : BlockComponentRedstone {
+
+  fun side(data: BlockDataRO): EnumFacing
+
+}

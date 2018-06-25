@@ -24,6 +24,7 @@ import therealfarfetchd.quacklib.core.APIImpl
 import therealfarfetchd.quacklib.core.ModID
 import therealfarfetchd.quacklib.core.QuackLib.Logger
 import therealfarfetchd.quacklib.tools.ModContext
+import therealfarfetchd.quacklib.tools.registerAnnotatedCapabilities
 import java.lang.reflect.Method
 import kotlin.math.min
 import kotlin.reflect.jvm.javaMethod
@@ -41,6 +42,8 @@ sealed class CommonProxy {
     ModContext.dissociate("therealfarfetchd.quacklib.tools", recursive = true)
 
     GameRegistry.registerTileEntity(TileQuackLib::class.java, ResourceLocation(ModID, "tile_quacklib"))
+
+    registerAnnotatedCapabilities(e.asmData)
   }
 
   open fun init(e: FMLInitializationEvent) {}

@@ -17,6 +17,9 @@ import therealfarfetchd.math.Vec3
 import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
 import therealfarfetchd.quacklib.api.core.modinterface.block
 import therealfarfetchd.quacklib.api.item.component.ItemComponentUse
+import therealfarfetchd.quacklib.block.data.BlockDataDirectRef
+import therealfarfetchd.quacklib.block.impl.BlockQuackLib
+import therealfarfetchd.quacklib.block.impl.DataContainer
 import therealfarfetchd.quacklib.item.component.prefab.ComponentPlaceBlock
 
 class ComponentPlaceMultipart(val def: BlockConfiguration) : ItemComponentUse {
@@ -27,6 +30,9 @@ class ComponentPlaceMultipart(val def: BlockConfiguration) : ItemComponentUse {
   override fun onUse(stack: ItemStack, player: EntityPlayer, world: World, pos: BlockPos, hand: EnumHand, hitSide: EnumFacing, hitVec: Vec3): EnumActionResult {
     val block = block.mcBlock
     val part = MultipartRegistry.INSTANCE.getPart(block)
+
+
+
     return ItemBlockMultipart.place(player, world, pos, hand, hitSide, hitVec.x, hitVec.y, hitVec.z, stack.item,
       IBlockPlacementInfo(block::getStateForPlacement),
       part,
@@ -37,6 +43,9 @@ class ComponentPlaceMultipart(val def: BlockConfiguration) : ItemComponentUse {
 
   fun placeBlockAtTested(stack: ItemStack, player: EntityPlayer, hand: EnumHand, world: World, pos: BlockPos, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float, newState: IBlockState): Boolean {
     val c = ComponentPlaceBlock.prepareDataContainer(world, pos, player, hand, facing, Vec3(hitX, hitY, hitZ), def)
+
+    if (!checkCollision(c, world, pos)) return false
+
     return player.canPlayerEdit(pos, facing, stack) &&
            world.getBlockState(pos).block.isReplaceable(world, pos) &&
            block.mcBlock.canPlaceBlockAt(world, pos) &&
@@ -49,6 +58,9 @@ class ComponentPlaceMultipart(val def: BlockConfiguration) : ItemComponentUse {
 
     val hitVec = Vec3(hitX, hitY, hitZ)
     val c = ComponentPlaceBlock.prepareDataContainer(world, pos, player, hand, facing, hitVec, def)
+
+    if (checkCollision(c, world, pos)) return false
+
     val slot = multipartBlock.getSlotForPlacement(world, pos, state, facing, hitVec, player, c)
 
     return if (multipartBlock.canPlacePartAt(world, pos) && multipartBlock.canPlacePartOnSide(world, pos, facing, slot)) {
@@ -65,6 +77,15 @@ class ComponentPlaceMultipart(val def: BlockConfiguration) : ItemComponentUse {
         true
       } else false
     } else false
+  }
+
+  fun checkCollision(c: DataContainer, world: World, pos: BlockPos): Boolean {
+    val data = BlockDataDirectRef(c, world, pos)
+    val block = block.mcBlock as BlockQuackLib
+
+    val box = block.getCollisionBoundingBox(data) ?: return false
+
+    return world.checkNoEntityCollision(box.offset(pos))
   }
 
 }
