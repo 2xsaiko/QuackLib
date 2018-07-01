@@ -6,9 +6,8 @@ import net.minecraft.block.Block
 import net.minecraft.item.Item
 import net.minecraft.util.ResourceLocation
 import therealfarfetchd.quacklib.api.block.BlockReference
-import therealfarfetchd.quacklib.api.block.init.BlockConfigurationScope
 import therealfarfetchd.quacklib.api.item.ItemReference
-import therealfarfetchd.quacklib.api.item.init.ItemConfigurationScope
+import java.io.InputStream
 
 inline fun <R> lockMod(noinline op: () -> R): R = QuackLibAPI.impl.modContext.lockMod(op)
 
@@ -24,8 +23,8 @@ inline fun block(name: String): BlockReference = QuackLibAPI.impl.getBlock(name)
 
 inline fun block(rl: ResourceLocation): BlockReference = QuackLibAPI.impl.getBlock(rl)
 
-inline fun BlockConfigurationScope.withPlacementItem(name: String = this.name, noinline op: ItemConfigurationScope.() -> Unit = {}) =
-  QuackLibAPI.impl.addItemToBlock(this, name, op)
-
 inline fun logException(e: Throwable) =
   lockMod { QuackLibAPI.impl.logException(e) }
+
+inline fun openResource(rl: ResourceLocation, respectResourcePack: Boolean = false): InputStream? =
+  QuackLibAPI.impl.openResource(rl, respectResourcePack)

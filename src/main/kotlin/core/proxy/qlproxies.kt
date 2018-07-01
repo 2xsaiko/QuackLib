@@ -16,15 +16,21 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.registry.GameRegistry
 import therealfarfetchd.math.Random
 import therealfarfetchd.quacklib.api.core.mod.BaseMod
+import therealfarfetchd.quacklib.api.core.modinterface.block
 import therealfarfetchd.quacklib.api.tools.access
 import therealfarfetchd.quacklib.api.tools.isDebugMode
 import therealfarfetchd.quacklib.block.impl.BlockExtraDebug
 import therealfarfetchd.quacklib.block.impl.TileQuackLib
 import therealfarfetchd.quacklib.core.APIImpl
 import therealfarfetchd.quacklib.core.ModID
+import therealfarfetchd.quacklib.core.QuackLib
 import therealfarfetchd.quacklib.core.QuackLib.Logger
+import therealfarfetchd.quacklib.core.init.ValidationContextImpl
+import therealfarfetchd.quacklib.render.vanilla.VanillaLoader
 import therealfarfetchd.quacklib.tools.ModContext
 import therealfarfetchd.quacklib.tools.registerAnnotatedCapabilities
+import java.io.IOException
+import java.io.InputStream
 import java.lang.reflect.Method
 import kotlin.math.min
 import kotlin.reflect.jvm.javaMethod
@@ -48,7 +54,12 @@ sealed class CommonProxy {
 
   open fun init(e: FMLInitializationEvent) {}
 
-  open fun postInit(e: FMLPostInitializationEvent) {}
+  open fun postInit(e: FMLPostInitializationEvent) {
+    val block = block("qltestmod:wallplate").mcBlock.blockState
+    val vc = ValidationContextImpl("Model for 'qltestmod:wallplate'")
+    VanillaLoader.load(ResourceLocation("qltestmod", "wallplate"), block, vc)
+    vc.printMessages()
+  }
 
   private fun fixMods() {
     Loader.instance().activeModList
@@ -60,6 +71,11 @@ sealed class CommonProxy {
         eventMethods.put(FMLInitializationEvent::class.java, BaseMod::init.javaMethod)
         eventMethods.put(FMLPostInitializationEvent::class.java, BaseMod::postInit.javaMethod)
       }
+  }
+
+  open fun openResource(rl: ResourceLocation, respectResourcePack: Boolean): InputStream? {
+    val cls = ModContext.currentMod()?.mod?.javaClass ?: QuackLib::class.java
+    return cls.classLoader.getResourceAsStream("/assets/${rl.resourceDomain}/${rl.resourcePath}")
   }
 
 }
@@ -91,8 +107,16 @@ class ClientProxy : CommonProxy() {
     }
   }
 
+  override fun openResource(rl: ResourceLocation, respectResourcePack: Boolean): InputStream? {
+    if (!respectResourcePack) return super.openResource(rl, respectResourcePack)
+
+    return try {
+      mc.resourceManager.getResource(rl).inputStream
+    } catch (e: IOException) {
+      null
+    }
+  }
+
 }
 
-class ServerProxy : CommonProxy() {
-
-}
+class ServerProxy : CommonProxy()

@@ -8,12 +8,11 @@ import therealfarfetchd.quacklib.api.block.component.*
 import therealfarfetchd.quacklib.api.block.data.BlockDataPart
 import therealfarfetchd.quacklib.api.block.data.BlockDataRO
 import therealfarfetchd.quacklib.api.block.data.DataPartSerializationRegistry
-import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
 import therealfarfetchd.quacklib.api.block.multipart.MultipartAPI
 import therealfarfetchd.quacklib.api.core.Unsafe
 import therealfarfetchd.quacklib.api.item.ItemReference
-import therealfarfetchd.quacklib.api.item.init.ItemConfigurationScope
 import therealfarfetchd.quacklib.api.tools.ModContext
+import java.io.InputStream
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
 
@@ -43,8 +42,6 @@ interface QuackLibAPI {
 
   fun getBlock(rl: ResourceLocation): BlockReference
 
-  fun addItemToBlock(configurationScope: BlockConfiguration, name: String, op: ItemConfigurationScope.() -> Unit)
-
   fun <T> createBlockDataDelegate(part: BlockDataPart, name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, render: Boolean, validValues: List<T>?): ReadWriteProperty<BlockDataPart, T>
 
   fun <T, C : BlockComponentDataImport<C, D>, D : ImportedData<D, C>> createImportedValue(target: C): ImportedValue<T>
@@ -56,6 +53,8 @@ interface QuackLibAPI {
   fun <R> unsafeOps(op: (Unsafe) -> R): R
 
   fun logException(e: Throwable)
+
+  fun openResource(rl: ResourceLocation, respectResourcePack: Boolean): InputStream?
 
   companion object {
     lateinit var impl: QuackLibAPI
