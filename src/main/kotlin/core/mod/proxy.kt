@@ -31,9 +31,14 @@ sealed class CommonProxy : ModProxy {
 
   override var customProxy: Any? = null
 
-  protected var blockTemplates: Set<BlockConfigurationScopeImpl> = emptySet()
-  protected var itemTemplates: Set<ItemConfigurationScopeImpl> = emptySet()
-  protected var tabTemplates: Set<TabConfigurationScopeImpl> = emptySet()
+  var blockTemplates: Set<BlockConfigurationScopeImpl> = emptySet()
+    protected set
+
+  var itemTemplates: Set<ItemConfigurationScopeImpl> = emptySet()
+    protected set
+
+  var tabTemplates: Set<TabConfigurationScopeImpl> = emptySet()
+    protected set
 
   var creativeTabs: List<TabQuackLib> = emptyList()
 

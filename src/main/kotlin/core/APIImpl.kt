@@ -62,18 +62,6 @@ object APIImpl : QuackLibAPI {
   override fun getBlock(rl: ResourceLocation): BlockReference =
     BlockReferenceByRL(rl)
 
-  override fun addItemToBlock(configurationScope: BlockConfiguration, name: String, op: ItemConfigurationScope.() -> Unit) {
-    configurationScope as BlockConfigurationScopeImpl
-
-    configurationScope.init.addItem(name) {
-      if (configurationScope.isMultipart) apply(multipartAPI.createPlacementComponent(configurationScope))
-      else apply(ComponentPlaceBlock(block(configurationScope.rl)))
-      op(this)
-    }
-
-    configurationScope.apply(ComponentItemForBlock(item(name)))
-  }
-
   @Suppress("UNCHECKED_CAST")
   override fun <T> createBlockDataDelegate(part: BlockDataPart, name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, render: Boolean, validValues: List<T>?): ReadWriteProperty<BlockDataPart, T> {
     val delegate = object : ReadWriteProperty<BlockDataPart, T> {

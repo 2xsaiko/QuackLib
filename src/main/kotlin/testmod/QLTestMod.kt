@@ -6,7 +6,6 @@ import therealfarfetchd.quacklib.api.core.init.InitializationContext
 import therealfarfetchd.quacklib.api.core.mod.BaseMod
 import therealfarfetchd.quacklib.api.core.mod.KotlinAdapter
 import therealfarfetchd.quacklib.api.core.modinterface.item
-import therealfarfetchd.quacklib.api.core.modinterface.withPlacementItem
 import therealfarfetchd.quacklib.api.item.Tool
 import therealfarfetchd.quacklib.api.tools.isDebugMode
 
@@ -16,17 +15,15 @@ object QLTestMod : BaseMod() {
   override fun initContent(ctx: InitializationContext) = ctx {
     if (!isDebugMode) return@ctx
 
-    // addBlock("test_block") {
+    // val testBlock = addBlock("test_block") {
     //   material = Material.IRON
     //   hardness = 0.5f
     //   validTools = setOf(Tool("pickaxe", 2))
     //
     //   apply(ComponentTest())
-    //
-    //   withPlacementItem()
     // }
 
-    addBlock("wallplate") {
+    val wallplate = addBlock("wallplate") {
       material = Material.ROCK
       hardness = 0.5f
       validTools = setOf(Tool("pickaxe", 2))
@@ -42,13 +39,13 @@ object QLTestMod : BaseMod() {
         part { side.exports.facing provides facing }
         rs { side.exports.facing provides facing }
       }
-
-      withPlacementItem()
     }
 
+    val wallplateItem = addPlacementItem(wallplate)
+
     addTab("standard", item("minecraft:stone")) {
-      include("test_block")
-      include("wallplate")
+      // include(testBlock)
+      include(wallplateItem)
       include("minecraft:diamond")
     }
   }
