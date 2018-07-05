@@ -10,7 +10,11 @@ import therealfarfetchd.math.Vec3
 import therealfarfetchd.quacklib.api.block.component.BlockComponentActivation
 import therealfarfetchd.quacklib.api.block.component.BlockComponentData
 import therealfarfetchd.quacklib.api.block.component.BlockComponentInfo
-import therealfarfetchd.quacklib.api.block.data.*
+import therealfarfetchd.quacklib.api.block.data.BlockDataPart
+import therealfarfetchd.quacklib.api.block.data.PartAccessToken
+import therealfarfetchd.quacklib.api.block.data.data
+import therealfarfetchd.quacklib.api.objects.block.Block
+import therealfarfetchd.quacklib.api.tools.Facing
 
 class ComponentTest : BlockComponentActivation, BlockComponentData<ComponentTest.Data>, BlockComponentInfo {
 
@@ -18,18 +22,19 @@ class ComponentTest : BlockComponentActivation, BlockComponentData<ComponentTest
 
   override lateinit var part: PartAccessToken<Data>
 
-  override fun onActivated(data: BlockData, player: EntityPlayer, hand: EnumHand, facing: EnumFacing, hit: Vec3): Boolean {
-    if (!data.world.isRemote) {
+  override fun onActivated(data: Block, player: EntityPlayer, hand: EnumHand, facing: Facing, hit: Vec3): Boolean {
+    data.worldMutable?.also { world ->
+      if (world.isClient) return@also
       data.part.counter = (data.part.counter + 1) % 11
       data.part.code = (0 until 5).map { 'A' + Random.nextInt(26) }.joinToString("")
       data.part.facing = facing
       data.part.item = player.getHeldItem(hand).copy()
-      data.world.notifyBlockUpdate(data.pos, data.state, data.state, 3)
+      world.syncClient(data.pos)
     }
     return true
   }
 
-  override fun getInfo(data: BlockDataRO): List<String> =
+  override fun getInfo(data: Block): List<String> =
     listOf("counter: ${data.part.counter}")
 
   override fun createPart() = Data()

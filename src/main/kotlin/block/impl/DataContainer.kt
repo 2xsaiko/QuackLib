@@ -6,8 +6,8 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries
 import therealfarfetchd.quacklib.api.block.component.BlockComponent
 import therealfarfetchd.quacklib.api.block.component.BlockComponentData
 import therealfarfetchd.quacklib.api.block.data.BlockDataPart
-import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
 import therealfarfetchd.quacklib.api.core.modinterface.logException
+import therealfarfetchd.quacklib.api.objects.block.BlockType
 import therealfarfetchd.quacklib.api.tools.Logger
 import therealfarfetchd.quacklib.block.data.DataPartSerializationRegistryImpl
 import therealfarfetchd.quacklib.block.data.StorageImpl
@@ -16,7 +16,8 @@ import therealfarfetchd.quacklib.block.data.set
 
 class DataContainer {
 
-  lateinit var def: BlockConfiguration
+  lateinit var type: BlockType
+    @JvmName("setType0") private set
 
   var components: List<BlockComponent> = emptyList()
 
@@ -24,9 +25,9 @@ class DataContainer {
 
   var parts: Map<ResourceLocation, BlockDataPart> = emptyMap()
 
-  fun setConfiguration(def: BlockConfiguration) {
-    this.def = def
-    components = def.components
+  fun setType(type: BlockType) {
+    this.type = type
+    components = type.components
 
     cPart = getComponentsOfType()
 
@@ -41,14 +42,14 @@ class DataContainer {
   }
 
   fun import(other: DataContainer) {
-    if (other.def != def) setConfiguration(other.def)
+    if (other.type != type) setType(other.type)
     parts = other.parts
   }
 
   fun saveData(nbt: NBTTagCompound, filter: (BlockComponentData<BlockDataPart>, BlockDataPart.ValueProperties<Any?>) -> Boolean) {
-    if (!::def.isInitialized) return
+    if (!::type.isInitialized) return
 
-    nbt.setString("@type", def.rl.toString())
+    nbt.setString("@type", type.registryName.toString())
     for (c in cPart) {
       try {
         val partNBT = NBTTagCompound()
@@ -70,11 +71,11 @@ class DataContainer {
 
   fun loadData(nbt: NBTTagCompound, filter: (BlockComponentData<BlockDataPart>, BlockDataPart.ValueProperties<Any?>) -> Boolean) {
     if (!nbt.hasKey("@type")) return
-    val type = ResourceLocation(nbt.getString("@type"))
-    if (!::def.isInitialized || type != def.rl) {
-      if (!ForgeRegistries.BLOCKS.containsKey(type)) return
-      val block = ForgeRegistries.BLOCKS.getValue(type) as? BlockQuackLib ?: return
-      setConfiguration(block.def)
+    val typePath = ResourceLocation(nbt.getString("@type"))
+    if (!::type.isInitialized || typePath != type.registryName) {
+      if (!ForgeRegistries.BLOCKS.containsKey(typePath)) return
+      val block = ForgeRegistries.BLOCKS.getValue(typePath) as? BlockQuackLib ?: return
+      setType(block.type)
     }
     for (c in cPart) {
       try {

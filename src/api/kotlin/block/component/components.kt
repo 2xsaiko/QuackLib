@@ -2,23 +2,23 @@ package therealfarfetchd.quacklib.api.block.component
 
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.ItemStack
-import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.AxisAlignedBB
-import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.RayTraceResult
-import net.minecraft.world.IBlockAccess
 import net.minecraftforge.common.capabilities.Capability
 import therealfarfetchd.math.Vec3
-import therealfarfetchd.quacklib.api.block.data.BlockData
 import therealfarfetchd.quacklib.api.block.data.BlockDataPart
-import therealfarfetchd.quacklib.api.block.data.BlockDataRO
 import therealfarfetchd.quacklib.api.block.data.PartAccessToken
 import therealfarfetchd.quacklib.api.block.init.BlockConfigurationScope
 import therealfarfetchd.quacklib.api.block.multipart.PartSlot
+import therealfarfetchd.quacklib.api.block.redstone.ConnectionMask
 import therealfarfetchd.quacklib.api.core.init.Applyable
+import therealfarfetchd.quacklib.api.objects.block.Block
+import therealfarfetchd.quacklib.api.objects.item.Item
+import therealfarfetchd.quacklib.api.objects.world.World
+import therealfarfetchd.quacklib.api.tools.Facing
+import therealfarfetchd.quacklib.api.tools.PositionGrid
 
 private typealias Base = BlockComponent
 private typealias TE = BlockComponentNeedTE
@@ -38,10 +38,10 @@ interface BlockComponentRegistered : Base {
 
 interface BlockComponentCapability : TE {
 
-  fun <T> hasCapability(data: BlockData, capability: Capability<T>, facing: EnumFacing?): Boolean =
-    getCapability(data, capability, facing) != null
+  fun <T> hasCapability(block: Block, capability: Capability<T>, facing: Facing?): Boolean =
+    getCapability(block, capability, facing) != null
 
-  fun <T> getCapability(data: BlockData, capability: Capability<T>, facing: EnumFacing?): T?
+  fun <T> getCapability(block: Block, capability: Capability<T>, facing: Facing?): T?
 
 }
 
@@ -58,7 +58,7 @@ interface BlockComponentData<T : BlockDataPart> : TE, Reg {
   fun update(old: BlockDataPart, new: T): T =
     error("Updating not implemented")
 
-  val BlockDataRO.part
+  val Block.part
     get() = this[this@BlockComponentData.part]
 
 }
@@ -77,96 +77,102 @@ interface BlockComponentDataImport<Self : BlockComponentDataImport<Self, D>, D :
 
 interface BlockComponentPlacement<T : BlockDataPart> : BlockComponentData<T> {
 
-  fun initialize(world: IBlockAccess, pos: BlockPos, part: T, placer: EntityLivingBase, hand: EnumHand, facing: EnumFacing, hit: Vec3)
+  fun initialize(block: Block, placer: EntityLivingBase, hand: EnumHand, facing: Facing, hit: Vec3)
 
 }
 
 interface BlockComponentPlacementCheck : Base {
 
-  fun canPlaceBlockAt(world: IBlockAccess, pos: BlockPos, side: EnumFacing?): Boolean
+  fun canPlaceBlockAt(world: World, pos: PositionGrid, side: Facing?): Boolean
 
 }
 
 interface BlockComponentActivation : Base {
 
-  fun onActivated(data: BlockData, player: EntityPlayer, hand: EnumHand, facing: EnumFacing, hit: Vec3): Boolean
+  fun onActivated(block: Block, player: EntityPlayer, hand: EnumHand, facing: Facing, hit: Vec3): Boolean
 
 }
 
 interface BlockComponentTickable : TE {
 
-  fun onTick(data: BlockData)
+  fun onTick(block: Block)
 
 }
 
 interface BlockComponentDrops : Base {
 
-  fun getDrops(data: BlockDataRO): Set<ItemStack>
+  fun getDrops(block: Block): Set<Item>
 
 }
 
 interface BlockComponentPickBlock : Base {
 
-  fun getPickBlock(data: BlockDataRO): ItemStack
+  fun getPickBlock(block: Block): Item
 
 }
 
 interface BlockComponentInfo : Base {
 
-  fun getInfo(data: BlockDataRO): List<String>
+  fun getInfo(block: Block): List<String>
 
 }
 
 interface BlockComponentCollision : Base {
 
-  fun getCollisionBoundingBoxes(data: BlockDataRO): List<AxisAlignedBB>
+  fun getCollisionBoundingBoxes(block: Block): List<AxisAlignedBB>
 
 }
 
 interface BlockComponentMouseOver : Base {
 
-  fun getRaytraceBoundingBoxes(data: BlockDataRO): List<AxisAlignedBB>
+  fun getRaytraceBoundingBoxes(block: Block): List<AxisAlignedBB>
 
 }
 
 interface BlockComponentCustomMouseOver : Base {
 
-  fun raytrace(data: BlockDataRO, from: Vec3, to: Vec3): RayTraceResult
+  fun raytrace(block: Block, from: Vec3, to: Vec3): RayTraceResult
 
 }
 
 interface BlockComponentNeighborListener : Base {
 
-  fun onNeighborChanged(data: BlockData, side: EnumFacing)
+  fun onNeighborChanged(block: Block, side: Facing)
 
 }
 
 interface BlockComponentMultipart : Base {
 
-  fun getSlot(data: BlockDataRO): PartSlot
+  fun getSlot(block: Block): PartSlot
 
-  fun getExtraSlots(data: BlockDataRO): List<PartSlot> = emptyList()
+  fun getExtraSlots(block: Block): List<PartSlot> = emptyList()
 
 }
 
 interface BlockComponentOcclusion : Base {
 
-  fun getOcclusionBoundingBoxes(data: BlockDataRO): List<AxisAlignedBB>
+  fun getOcclusionBoundingBoxes(block: Block): List<AxisAlignedBB>
 
 }
 
 interface BlockComponentRedstone : Base {
 
-  fun strongPowerLevel(data: BlockDataRO, side: EnumFacing): Int
+  fun strongPowerLevel(block: Block, side: Facing): Int
 
-  fun weakPowerLevel(data: BlockDataRO, side: EnumFacing): Int
+  fun weakPowerLevel(block: Block, side: Facing): Int
 
-  fun canConnectRedstone(data: BlockDataRO, side: EnumFacing): Boolean
+  fun canConnectRedstone(block: Block, side: Facing): Boolean
 
 }
 
 interface BlockComponentRedstoneFace : BlockComponentRedstone {
 
-  fun side(data: BlockDataRO): EnumFacing
+  fun side(block: Block): Facing
+
+}
+
+interface BlockComponentRedstoneMask : BlockComponentRedstone {
+
+  fun connectionMask(block: Block): Set<ConnectionMask>
 
 }

@@ -1,22 +1,27 @@
 package therealfarfetchd.quacklib.core.proxy
 
 import com.google.common.collect.ListMultimap
+import net.minecraft.block.Block
 import net.minecraft.client.Minecraft
+import net.minecraft.item.Item
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.RayTraceResult
 import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.common.MinecraftForge
+import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.fml.common.FMLModContainer
 import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.event.FMLEvent
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
+import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.registry.GameRegistry
 import therealfarfetchd.math.Random
 import therealfarfetchd.quacklib.api.core.mod.BaseMod
 import therealfarfetchd.quacklib.api.core.modinterface.block
+import therealfarfetchd.quacklib.api.core.unsafe
 import therealfarfetchd.quacklib.api.tools.access
 import therealfarfetchd.quacklib.api.tools.isDebugMode
 import therealfarfetchd.quacklib.block.impl.BlockExtraDebug
@@ -26,6 +31,12 @@ import therealfarfetchd.quacklib.core.ModID
 import therealfarfetchd.quacklib.core.QuackLib
 import therealfarfetchd.quacklib.core.QuackLib.Logger
 import therealfarfetchd.quacklib.core.init.ValidationContextImpl
+import therealfarfetchd.quacklib.objects.block.BlockTypeImpl
+import therealfarfetchd.quacklib.objects.block.CreatedBlockTypeImpl
+import therealfarfetchd.quacklib.objects.block.DeferredBlockTypeImpl
+import therealfarfetchd.quacklib.objects.item.CreatedItemTypeImpl
+import therealfarfetchd.quacklib.objects.item.DeferredItemTypeImpl
+import therealfarfetchd.quacklib.objects.item.ItemTypeImpl
 import therealfarfetchd.quacklib.render.vanilla.VanillaLoader
 import therealfarfetchd.quacklib.tools.ModContext
 import therealfarfetchd.quacklib.tools.registerAnnotatedCapabilities
@@ -52,13 +63,53 @@ sealed class CommonProxy {
     registerAnnotatedCapabilities(e.asmData)
   }
 
+  @SubscribeEvent(priority = EventPriority.LOWEST)
+  fun resolveItems(e: RegistryEvent.Register<Item>) {
+    val vc = ValidationContextImpl("Deferred objects")
+    DeferredItemTypeImpl.instances.forEach {
+      val type = ItemTypeImpl.getItem(it.registryName)
+      if (type == null) vc.error("Item ${it.registryName} does not exist!")
+      else it.realInstance = type
+    }
+    DeferredItemTypeImpl.isInit = false
+
+    CreatedItemTypeImpl.instances.forEach {
+      val type = ItemTypeImpl.getItem(it.registryName)
+      if (type == null) vc.error("Item ${it.registryName} does not exist for created item! Something is horribly wrong...")
+      else it.realInstance = type
+    }
+    vc.printMessages()
+    if (!vc.isValid()) error("Could not resolve some deferred objects, can't proceed")
+  }
+
+  @SubscribeEvent(priority = EventPriority.LOWEST)
+  fun resolveBlocks(e: RegistryEvent.Register<Block>) {
+    val vc = ValidationContextImpl("Deferred objects")
+    DeferredBlockTypeImpl.instances.forEach {
+      val type = BlockTypeImpl.getBlock(it.registryName)
+      if (type == null) vc.error("Block ${it.registryName} does not exist!")
+      else it.realInstance = type
+    }
+    DeferredBlockTypeImpl.isInit = false
+
+    CreatedBlockTypeImpl.instances.forEach {
+      val type = BlockTypeImpl.getBlock(it.registryName)
+      if (type == null) vc.error("Block ${it.registryName} does not exist for created block! Something is horribly wrong...")
+      else it.realInstance = type
+    }
+    vc.printMessages()
+    if (!vc.isValid()) error("Could not resolve some deferred objects, can't proceed")
+  }
+
   open fun init(e: FMLInitializationEvent) {}
 
   open fun postInit(e: FMLPostInitializationEvent) {
-    val block = block("qltestmod:wallplate").mcBlock.blockState
-    val vc = ValidationContextImpl("Model for 'qltestmod:wallplate'")
-    VanillaLoader.load(ResourceLocation("qltestmod", "wallplate"), block, vc)
-    vc.printMessages()
+    run {
+      val block = unsafe { block("qltestmod:wallplate").mc.blockState }
+      val vc = ValidationContextImpl("Model for 'qltestmod:wallplate'")
+      VanillaLoader.load(ResourceLocation("qltestmod", "wallplate"), block, vc)
+      vc.printMessages()
+    }
   }
 
   private fun fixMods() {

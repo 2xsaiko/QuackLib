@@ -24,7 +24,7 @@ object ModContext : ModContext {
   }
 
   fun associate(pkg: String, name: String) {
-    require(Loader.isModLoaded(name), { "Mod '$name' does not exist!" })
+    require(Loader.isModLoaded(name)) { "Mod '$name' does not exist!" }
     packageOwners.put(pkg, Loader.instance().indexedModList[name])
   }
 

@@ -1,107 +1,83 @@
 package therealfarfetchd.quacklib.item.component.prefab
 
 import net.minecraft.advancements.CriteriaTriggers
-import net.minecraft.block.Block
-import net.minecraft.block.state.IBlockState
-import net.minecraft.entity.Entity
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.entity.player.EntityPlayerMP
 import net.minecraft.item.ItemBlock
-import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumActionResult
-import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand
 import net.minecraft.util.SoundCategory
-import net.minecraft.util.math.BlockPos
-import net.minecraft.world.IBlockAccess
-import net.minecraft.world.World
 import therealfarfetchd.math.Vec3
-import therealfarfetchd.quacklib.api.block.BlockReference
-import therealfarfetchd.quacklib.api.block.component.BlockComponentPlacement
-import therealfarfetchd.quacklib.api.block.data.BlockDataPart
-import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
-import therealfarfetchd.quacklib.api.core.init.ValidationContext
+import therealfarfetchd.quacklib.api.core.extensions.toMCVec3i
+import therealfarfetchd.quacklib.api.core.unsafe
 import therealfarfetchd.quacklib.api.item.component.ItemComponentUse
-import therealfarfetchd.quacklib.api.item.init.ItemConfigurationScope
-import therealfarfetchd.quacklib.block.data.BlockDataDirectRef
-import therealfarfetchd.quacklib.block.impl.BlockQuackLib
-import therealfarfetchd.quacklib.block.impl.DataContainer
-import therealfarfetchd.quacklib.block.impl.TileQuackLib
+import therealfarfetchd.quacklib.api.objects.block.Block
+import therealfarfetchd.quacklib.api.objects.block.BlockType
+import therealfarfetchd.quacklib.api.objects.block.orEmpty
+import therealfarfetchd.quacklib.api.objects.item.Item
+import therealfarfetchd.quacklib.api.objects.item.toItem
+import therealfarfetchd.quacklib.api.objects.world.WorldMutable
+import therealfarfetchd.quacklib.api.tools.Facing
+import therealfarfetchd.quacklib.api.tools.PositionGrid
+import therealfarfetchd.quacklib.api.tools.offset
 
-class ComponentPlaceBlock(val block: BlockReference) : ItemComponentUse {
+class ComponentPlaceBlock(val block: BlockType) : ItemComponentUse {
 
   @Suppress("NAME_SHADOWING")
-  override fun onUse(stack: ItemStack, player: EntityPlayer, world: World, pos: BlockPos, hand: EnumHand, hitSide: EnumFacing, hitVec: Vec3): EnumActionResult {
-    val block = this.block.mcBlock as? BlockQuackLib
-                ?: return ItemBlock(block.mcBlock).onItemUse(player, world, pos, hand, hitSide, hitVec.x, hitVec.y, hitVec.z)
-
-    val wstate = world.getBlockState(pos)
-    val wblock = wstate.block
+  override fun onUse(stack: Item, player: EntityPlayer, world: WorldMutable, pos: PositionGrid, hand: EnumHand, hitSide: Facing, hitVec: Vec3): EnumActionResult {
+    val wblock = world.getBlock(pos).orEmpty()
     var pos = pos
 
-    if (!wblock.isReplaceable(world, pos)) pos = pos.offset(hitSide)
+    if (!wblock.isReplacable()) pos = pos.offset(hitSide)
 
-    val stack = player.getHeldItem(hand)
+    val stack = player.getHeldItem(hand).toItem()
 
-    val c = prepareDataContainer(world, pos, player, hand, hitSide, hitVec, block.def)
+    val newBlock = prepareBlock(block, world, pos, player, hand, hitSide, hitVec)
 
-    if (stack.count > 0 && player.canPlayerEdit(pos, hitSide, stack) && world.mayPlace(block, pos, false, hitSide, null, c)) {
-
-      val meta = 0
-      var state = block.getStateForPlacement(world, pos, hitSide, hitVec.x, hitVec.y, hitVec.z, meta, player, hand)
-
-      if (placeBlockAt(block, stack, player, world, pos, state, c)) {
-        state = world.getBlockState(pos)
-        val soundtype = state.block.getSoundType(state, world, pos, player)
+    return if (stack.count > 0 && player.canPlayerEdit(pos.toMCVec3i(), hitSide, unsafe { stack.mc }) && world.canPlaceBlockAt(newBlock, pos, hitSide, null, true)) {
+      if (placeBlockAt(newBlock, stack, player, world, pos)) {
+        val b = world.getBlock(pos).orEmpty()
+        val soundtype = b.getSoundType(player)
         world.playSound(player, pos, soundtype.placeSound, SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F)
-        stack.shrink(1)
+        stack.count--
       }
 
-      return EnumActionResult.SUCCESS
+      EnumActionResult.SUCCESS
     } else {
-      return EnumActionResult.FAIL
+      EnumActionResult.FAIL
     }
   }
 
-  override fun validate(target: ItemConfigurationScope, vc: ValidationContext) {
-    super.validate(target, vc)
-
-    if (!block.exists) {
-      vc.error("Referenced block ${block.rl} does not exist!")
-    }
-  }
-
-  private fun World.mayPlace(block: Block, pos: BlockPos, skipCollisionCheck: Boolean, hitSide: EnumFacing, placer: Entity?, c: DataContainer): Boolean {
-    if (block !is BlockQuackLib) return mayPlace(block, pos, skipCollisionCheck, hitSide, placer)
-
-    val state = getBlockState(pos)
-    val aabb = if (skipCollisionCheck) null else block.getCollisionBoundingBox(BlockDataDirectRef(c, this, pos, state))
-    return if (aabb != null && !checkNoEntityCollision(aabb.offset(pos), placer)) {
-      false
-    } else {
-      state.block.isReplaceable(this, pos) && block.canPlaceBlockOnSide(this, pos, hitSide)
-    }
-  }
+  //  private fun MCWorldMutable.mayPlace(block: BlockType, pos: PositionGrid, skipCollisionCheck: Boolean, hitSide: Facing, placer: Entity?, c: DataContainer): Boolean {
+  //    if (block !is BlockQuackLib) return mayPlace(block, pos, skipCollisionCheck, hitSide, placer)
+  //
+  //    val state = getBlockState(pos)
+  //    val aabb = if (skipCollisionCheck) null else block.getCollisionBoundingBox(BlockDataDirectRef(c, this, pos, state))
+  //    return if (aabb != null && !checkNoEntityCollision(aabb.offset(pos), placer)) {
+  //      false
+  //    } else {
+  //      state.block.isReplaceable(this, pos) && block.canPlaceBlockOnSide(this, pos, hitSide)
+  //    }
+  //  }
 
   companion object {
-    fun placeBlockAt(block: Block, stack: ItemStack, player: EntityPlayer, world: World, pos: BlockPos, state: IBlockState, c: DataContainer): Boolean {
-      if (!world.setBlockState(pos, state, 11)) return false
-      if (state.block == block) {
-        ItemBlock.setTileEntityNBT(world, player, pos, stack)
-        (world.getTileEntity(pos) as? TileQuackLib)?.c?.import(c)
-        block.onBlockPlacedBy(world, pos, state, player, stack)
+    fun placeBlockAt(block: Block, item: Item, player: EntityPlayer, world: WorldMutable, pos: PositionGrid): Boolean {
+      if (!world.setBlock(pos, block)) return false
+      unsafe {
+        val mcPos = pos.toMCVec3i()
+        ItemBlock.setTileEntityNBT(world.mc, player, mcPos, item.mc)
+        block.onPlaced(player, item)
         if (player is EntityPlayerMP)
-          CriteriaTriggers.PLACED_BLOCK.trigger(player, pos, stack)
+          CriteriaTriggers.PLACED_BLOCK.trigger(player, mcPos, item.mc)
       }
       return true
     }
 
-    fun prepareDataContainer(world: IBlockAccess, pos: BlockPos, player: EntityPlayer, hand: EnumHand, hitSide: EnumFacing, hitVec: Vec3, def: BlockConfiguration): DataContainer {
-      val c = DataContainer()
-      c.setConfiguration(def)
-      val comps = c.getComponentsOfType<BlockComponentPlacement<BlockDataPart>>()
-      comps.forEach { it.initialize(world, pos, c.parts.getValue(it.rl), player, hand, hitSide, hitVec) }
-      return c
+    fun prepareBlock(block: BlockType, world: WorldMutable, pos: PositionGrid, player: EntityPlayer, hand: EnumHand, hitSide: Facing, hitVec: Vec3): Block {
+      val nb = block.create()
+      unsafe { nb.useRef(world, pos, true) }
+      nb.behavior.initialize(nb, player, hand, hitSide, hitVec)
+      return nb
     }
   }
 

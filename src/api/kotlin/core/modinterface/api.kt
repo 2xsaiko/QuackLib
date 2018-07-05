@@ -2,26 +2,26 @@
 
 package therealfarfetchd.quacklib.api.core.modinterface
 
-import net.minecraft.block.Block
-import net.minecraft.item.Item
 import net.minecraft.util.ResourceLocation
-import therealfarfetchd.quacklib.api.block.BlockReference
-import therealfarfetchd.quacklib.api.item.ItemReference
+import therealfarfetchd.quacklib.api.objects.block.BlockType
+import therealfarfetchd.quacklib.api.objects.block.MCBlockType
+import therealfarfetchd.quacklib.api.objects.item.ItemType
+import therealfarfetchd.quacklib.api.objects.item.MCItemType
 import java.io.InputStream
 
 inline fun <R> lockMod(noinline op: () -> R): R = QuackLibAPI.impl.modContext.lockMod(op)
 
-inline fun item(item: Item): ItemReference = QuackLibAPI.impl.getItem(item)
+inline fun item(item: MCItemType): ItemType = QuackLibAPI.impl.getItem(item)
 
-inline fun item(name: String): ItemReference = QuackLibAPI.impl.getItem(name)
+inline fun item(name: String): ItemType = QuackLibAPI.impl.getItem(name)
 
-inline fun item(rl: ResourceLocation): ItemReference = QuackLibAPI.impl.getItem(rl)
+inline fun item(rl: ResourceLocation): ItemType = QuackLibAPI.impl.getItem(rl)
 
-inline fun block(block: Block): BlockReference = QuackLibAPI.impl.getBlock(block)
+inline fun block(block: MCBlockType): BlockType = QuackLibAPI.impl.getBlock(block)
 
-inline fun block(name: String): BlockReference = QuackLibAPI.impl.getBlock(name)
+inline fun block(name: String): BlockType = QuackLibAPI.impl.getBlock(name)
 
-inline fun block(rl: ResourceLocation): BlockReference = QuackLibAPI.impl.getBlock(rl)
+inline fun block(rl: ResourceLocation): BlockType = QuackLibAPI.impl.getBlock(rl)
 
 inline fun logException(e: Throwable) =
   lockMod { QuackLibAPI.impl.logException(e) }

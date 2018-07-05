@@ -1,8 +1,18 @@
 package therealfarfetchd.quacklib.api.core.extensions
 
-import net.minecraft.util.math.Vec3d
+import net.minecraft.util.math.BlockPos
 import therealfarfetchd.math.Vec3
+import therealfarfetchd.math.Vec3i
+import net.minecraft.util.math.Vec3d as MCVec3d
+import net.minecraft.util.math.Vec3i as MCVec3i
 
-fun Vec3d.toVec3() = Vec3(x.toFloat(), y.toFloat(), z.toFloat())
+fun MCVec3d.toVec3() = Vec3(x.toFloat(), y.toFloat(), z.toFloat())
 
-fun Vec3.toVec3d() = Vec3d(x.toDouble(), y.toDouble(), z.toDouble())
+fun Vec3.toMCVec3d() = MCVec3d(x.toDouble(), y.toDouble(), z.toDouble())
+
+fun MCVec3i.toVec3i() = Vec3i(x, y, z)
+
+fun Vec3i.toMCVec3i() = BlockPos(x, y, z)
+
+fun MCVec3i.toVec3(offsetCenter: Boolean = false) =
+  Vec3(x, y, z).let { if (offsetCenter) it + Vec3(0.5f, 0.5f, 0.5f) else it }

@@ -1,5 +1,7 @@
 package therealfarfetchd.quacklib.tools
 
+import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.ResourceLocation
 
 fun getResourceFromName(name: String): ResourceLocation {
@@ -7,7 +9,7 @@ fun getResourceFromName(name: String): ResourceLocation {
   val iname: String
 
   if (name.contains(":")) {
-    val (d, n) = name.split(":")
+    val (d, n) = name.split(":", limit = 2)
     domain = d
     iname = n
   } else {
@@ -16,4 +18,8 @@ fun getResourceFromName(name: String): ResourceLocation {
   }
 
   return ResourceLocation(domain, iname)
+}
+
+fun TileEntity.copy(): TileEntity? {
+  return TileEntity.create(world, NBTTagCompound().let(this::writeToNBT))
 }

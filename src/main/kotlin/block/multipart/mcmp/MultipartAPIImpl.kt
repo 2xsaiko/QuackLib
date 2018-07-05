@@ -16,15 +16,16 @@ import net.minecraft.world.World
 import net.minecraftforge.event.AttachCapabilitiesEvent
 import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
 import therealfarfetchd.quacklib.api.block.multipart.PartSlot
 import therealfarfetchd.quacklib.api.item.component.ItemComponent
+import therealfarfetchd.quacklib.api.objects.block.BlockType
 import therealfarfetchd.quacklib.block.impl.BlockExtraDebug
 import therealfarfetchd.quacklib.block.impl.BlockQuackLib
 import therealfarfetchd.quacklib.block.impl.TileQuackLib
 import therealfarfetchd.quacklib.block.multipart.MultipartAPIInternal
 import therealfarfetchd.quacklib.config.QuackLibConfig
 import therealfarfetchd.quacklib.core.ModID
+import therealfarfetchd.quacklib.objects.block.BlockTypeImpl
 import therealfarfetchd.quacklib.tools.getTextState
 import mcmultipart.api.slot.IPartSlot as MCMPPartSlot
 
@@ -40,13 +41,14 @@ object MultipartAPIImpl : MultipartAPIInternal {
 
   val slotMapRev: Map<MCMPPartSlot, PartSlot> = slotMap.entries.associate { it.value to it.key }
 
-  override fun createPlacementComponent(def: BlockConfiguration): ItemComponent {
-    return ComponentPlaceMultipart(def)
+  override fun createPlacementComponent(type: BlockType): ItemComponent {
+    return ComponentPlaceMultipart(type)
   }
 
-  override fun registerBlock(e: RegistryEvent.Register<Block>, def: BlockConfiguration) {
-    val block = BlockQuackLib(def)
+  override fun registerBlock(e: RegistryEvent.Register<Block>, type: BlockTypeImpl) {
+    val block = BlockQuackLib(type)
     val part = MultipartQuackLib(block)
+    BlockTypeImpl.associateBlock(type, block)
     e.registry.register(block)
     MultipartRegistry.INSTANCE.registerPartWrapper(block, part)
   }

@@ -72,8 +72,8 @@ repositories {
 }
 
 dependencies {
-  implementation(kotlin("stdlib-jdk8", kotlin_version))
-  implementation(kotlin("reflect", kotlin_version))
+  compile(kotlin("stdlib-jdk8", kotlin_version))
+  compile(kotlin("reflect", kotlin_version))
 
   runtimeOnly("net.shadowfacts", "Forgelin", forgelin_version)
 

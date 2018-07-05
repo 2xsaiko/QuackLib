@@ -1,14 +1,14 @@
 package therealfarfetchd.quacklib.api.item.init
 
-import therealfarfetchd.quacklib.api.block.BlockReference
-import therealfarfetchd.quacklib.api.item.ItemReference
+import therealfarfetchd.quacklib.api.objects.block.BlockType
+import therealfarfetchd.quacklib.api.objects.item.ItemType
 
 interface ItemInitializationContext {
 
-  fun addItem(name: String, op: ItemConfigurationScope.() -> Unit = {}): ItemReference
+  fun addItem(name: String, op: ItemConfigurationScope.() -> Unit = {}): ItemType
 
-  fun addPlacementItem(block: BlockReference, name: String = block.rl.resourcePath, op: ItemConfigurationScope.() -> Unit = {}): ItemReference
+  fun addPlacementItem(block: BlockType, name: String = block.registryName.resourcePath, op: ItemConfigurationScope.() -> Unit = {}): ItemType
 
-  fun addTab(name: String, icon: ItemReference, op: TabConfigurationScope.() -> Unit = {})
+  fun addTab(name: String, icon: ItemType, op: TabConfigurationScope.() -> Unit = {})
 
 }

@@ -4,8 +4,8 @@ import net.minecraft.util.EnumFacing
 import therealfarfetchd.quacklib.api.block.component.BlockComponentDataImport
 import therealfarfetchd.quacklib.api.block.component.BlockComponentMultipart
 import therealfarfetchd.quacklib.api.block.component.ImportedData
-import therealfarfetchd.quacklib.api.block.data.BlockDataRO
 import therealfarfetchd.quacklib.api.block.multipart.PartSlot
+import therealfarfetchd.quacklib.api.objects.block.Block
 import therealfarfetchd.quacklib.testmod.SidedMultipart.Imported
 
 class SidedMultipart : BlockComponentMultipart,
@@ -13,8 +13,8 @@ class SidedMultipart : BlockComponentMultipart,
 
   override val imported = Imported(this)
 
-  override fun getSlot(data: BlockDataRO): PartSlot {
-    return PartSlot.getFace(data[imported.facing])
+  override fun getSlot(block: Block): PartSlot {
+    return PartSlot.getFace(block[imported.facing])
   }
 
   class Imported(target: SidedMultipart) : ImportedData<Imported, SidedMultipart>(target) {

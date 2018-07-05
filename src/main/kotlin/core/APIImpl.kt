@@ -1,20 +1,19 @@
 package therealfarfetchd.quacklib.core
 
-import net.minecraft.block.Block
-import net.minecraft.item.Item
+//import therealfarfetchd.quacklib.block.multipart.cbmp.MultipartAPIImpl as CBMPAPI
 import net.minecraft.util.ResourceLocation
-import therealfarfetchd.quacklib.api.block.BlockReference
 import therealfarfetchd.quacklib.api.block.component.*
 import therealfarfetchd.quacklib.api.block.data.BlockDataPart
-import therealfarfetchd.quacklib.api.block.data.BlockDataRO
 import therealfarfetchd.quacklib.api.block.data.DataPartSerializationRegistry
-import therealfarfetchd.quacklib.api.core.Unsafe
+import therealfarfetchd.quacklib.api.core.UnsafeScope
 import therealfarfetchd.quacklib.api.core.modinterface.QuackLibAPI
-import therealfarfetchd.quacklib.api.item.ItemReference
+import therealfarfetchd.quacklib.api.objects.block.Block
+import therealfarfetchd.quacklib.api.objects.block.BlockType
+import therealfarfetchd.quacklib.api.objects.block.MCBlockType
+import therealfarfetchd.quacklib.api.objects.block.orEmpty
+import therealfarfetchd.quacklib.api.objects.item.*
 import therealfarfetchd.quacklib.api.tools.Logger
 import therealfarfetchd.quacklib.api.tools.isDebugMode
-import therealfarfetchd.quacklib.block.BlockReferenceByRL
-import therealfarfetchd.quacklib.block.BlockReferenceDirect
 import therealfarfetchd.quacklib.block.component.ExportedValueImpl
 import therealfarfetchd.quacklib.block.component.ImportedValueImpl
 import therealfarfetchd.quacklib.block.data.DataPartSerializationRegistryImpl
@@ -22,8 +21,11 @@ import therealfarfetchd.quacklib.block.data.ValuePropertiesImpl
 import therealfarfetchd.quacklib.block.data.get
 import therealfarfetchd.quacklib.block.data.set
 import therealfarfetchd.quacklib.block.multipart.MultipartAPIInternal
-import therealfarfetchd.quacklib.item.ItemReferenceByRL
-import therealfarfetchd.quacklib.item.ItemReferenceDirect
+import therealfarfetchd.quacklib.objects.block.BlockTypeImpl
+import therealfarfetchd.quacklib.objects.block.DeferredBlockTypeImpl
+import therealfarfetchd.quacklib.objects.item.DeferredItemTypeImpl
+import therealfarfetchd.quacklib.objects.item.ItemImpl
+import therealfarfetchd.quacklib.objects.item.ItemTypeImpl
 import therealfarfetchd.quacklib.tools.ModContext
 import therealfarfetchd.quacklib.tools.getResourceFromName
 import java.io.InputStream
@@ -32,10 +34,10 @@ import java.io.StringWriter
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
-import therealfarfetchd.quacklib.block.multipart.cbmp.MultipartAPIImpl as CBMPAPI
 import therealfarfetchd.quacklib.block.multipart.mcmp.MultipartAPIImpl as MCMPAPI
 
 object APIImpl : QuackLibAPI {
+
   override val modContext = ModContext
 
   override val serializationRegistry: DataPartSerializationRegistry = DataPartSerializationRegistryImpl
@@ -44,23 +46,25 @@ object APIImpl : QuackLibAPI {
 
   override var qlVersion: String = "unset"
 
-  override fun getItem(name: String): ItemReference =
-    ItemReferenceByRL(getResourceFromName(name))
+  override fun getItem(name: String): ItemType =
+    getItem(getResourceFromName(name))
 
-  override fun getItem(item: Item): ItemReference =
-    ItemReferenceDirect(item)
+  override fun getItem(item: MCItemType): ItemType =
+    ItemTypeImpl.getItem(item)
 
-  override fun getItem(rl: ResourceLocation): ItemReference =
-    ItemReferenceByRL(rl)
+  override fun getItem(rl: ResourceLocation): ItemType =
+    if (DeferredItemTypeImpl.isInit) DeferredItemTypeImpl(rl) else ItemTypeImpl.getItem(rl).orEmpty()
 
-  override fun getBlock(name: String): BlockReference =
-    BlockReferenceByRL(getResourceFromName(name))
+  override fun getBlock(name: String): BlockType =
+    getBlock(getResourceFromName(name))
 
-  override fun getBlock(block: Block): BlockReference =
-    BlockReferenceDirect(block)
+  override fun getBlock(block: MCBlockType): BlockType =
+    BlockTypeImpl.getBlock(block)
 
-  override fun getBlock(rl: ResourceLocation): BlockReference =
-    BlockReferenceByRL(rl)
+  override fun getBlock(rl: ResourceLocation): BlockType =
+    if (DeferredBlockTypeImpl.isInit) DeferredBlockTypeImpl(rl) else BlockTypeImpl.getBlock(rl).orEmpty()
+
+  override fun convertItem(item: MCItem): Item = ItemImpl(item)
 
   @Suppress("UNCHECKED_CAST")
   override fun <T> createBlockDataDelegate(part: BlockDataPart, name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, render: Boolean, validValues: List<T>?): ReadWriteProperty<BlockDataPart, T> {
@@ -88,7 +92,7 @@ object APIImpl : QuackLibAPI {
     return ImportedValueImpl()
   }
 
-  override fun <R, C : BlockComponentDataExport<C, D>, D : ExportedData<D, C>> createExportedValue(target: C, op: (C, BlockDataRO) -> R): ExportedValue<D, R> {
+  override fun <R, C : BlockComponentDataExport<C, D>, D : ExportedData<D, C>> createExportedValue(target: C, op: (C, Block) -> R): ExportedValue<D, R> {
     return ExportedValueImpl { data -> op(target, data) }
   }
 
@@ -100,7 +104,7 @@ object APIImpl : QuackLibAPI {
     return QuackLib.proxy.openResource(rl, respectResourcePack)
   }
 
-  override fun <R> unsafeOps(op: (Unsafe) -> R): R {
+  override fun <R> unsafeOps(op: (UnsafeScope) -> R): R {
     return op(UnsafeImpl)
   }
 

@@ -2,7 +2,7 @@ package therealfarfetchd.quacklib.api.item.init
 
 import net.minecraft.util.ResourceLocation
 import therealfarfetchd.quacklib.api.core.Describable
-import therealfarfetchd.quacklib.api.item.ItemReference
+import therealfarfetchd.quacklib.api.objects.item.ItemType
 
 interface TabConfiguration : Describable {
 
@@ -10,9 +10,9 @@ interface TabConfiguration : Describable {
 
   val rl: ResourceLocation
 
-  val icon: ItemReference
+  val icon: ItemType
 
-  val items: List<ItemReference>
+  val items: List<ItemType>
 
   override fun describe(): String = "Tab $name"
 

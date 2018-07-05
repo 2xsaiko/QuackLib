@@ -1,16 +1,18 @@
 package therealfarfetchd.quacklib.api.core.modinterface
 
-import net.minecraft.block.Block
-import net.minecraft.item.Item
 import net.minecraft.util.ResourceLocation
-import therealfarfetchd.quacklib.api.block.BlockReference
 import therealfarfetchd.quacklib.api.block.component.*
 import therealfarfetchd.quacklib.api.block.data.BlockDataPart
-import therealfarfetchd.quacklib.api.block.data.BlockDataRO
 import therealfarfetchd.quacklib.api.block.data.DataPartSerializationRegistry
 import therealfarfetchd.quacklib.api.block.multipart.MultipartAPI
-import therealfarfetchd.quacklib.api.core.Unsafe
-import therealfarfetchd.quacklib.api.item.ItemReference
+import therealfarfetchd.quacklib.api.core.UnsafeScope
+import therealfarfetchd.quacklib.api.objects.block.Block
+import therealfarfetchd.quacklib.api.objects.block.BlockType
+import therealfarfetchd.quacklib.api.objects.block.MCBlockType
+import therealfarfetchd.quacklib.api.objects.item.Item
+import therealfarfetchd.quacklib.api.objects.item.ItemType
+import therealfarfetchd.quacklib.api.objects.item.MCItem
+import therealfarfetchd.quacklib.api.objects.item.MCItemType
 import therealfarfetchd.quacklib.api.tools.ModContext
 import java.io.InputStream
 import kotlin.properties.ReadWriteProperty
@@ -30,27 +32,29 @@ interface QuackLibAPI {
 
   val qlVersion: String
 
-  fun getItem(name: String): ItemReference
+  fun getItem(name: String): ItemType
 
-  fun getItem(item: Item): ItemReference
+  fun getItem(item: MCItemType): ItemType
 
-  fun getItem(rl: ResourceLocation): ItemReference
+  fun getItem(rl: ResourceLocation): ItemType
 
-  fun getBlock(name: String): BlockReference
+  fun getBlock(name: String): BlockType
 
-  fun getBlock(block: Block): BlockReference
+  fun getBlock(block: MCBlockType): BlockType
 
-  fun getBlock(rl: ResourceLocation): BlockReference
+  fun getBlock(rl: ResourceLocation): BlockType
+
+  fun convertItem(item: MCItem): Item
 
   fun <T> createBlockDataDelegate(part: BlockDataPart, name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, render: Boolean, validValues: List<T>?): ReadWriteProperty<BlockDataPart, T>
 
   fun <T, C : BlockComponentDataImport<C, D>, D : ImportedData<D, C>> createImportedValue(target: C): ImportedValue<T>
 
-  fun <R, C : BlockComponentDataExport<C, D>, D : ExportedData<D, C>> createExportedValue(target: C, op: (C, BlockDataRO) -> R): ExportedValue<D, R>
+  fun <R, C : BlockComponentDataExport<C, D>, D : ExportedData<D, C>> createExportedValue(target: C, op: (C, Block) -> R): ExportedValue<D, R>
 
   fun <T : Any> registerCapability(type: KClass<T>)
 
-  fun <R> unsafeOps(op: (Unsafe) -> R): R
+  fun <R> unsafeOps(op: (UnsafeScope) -> R): R
 
   fun logException(e: Throwable)
 

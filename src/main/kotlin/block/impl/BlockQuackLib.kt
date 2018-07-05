@@ -1,64 +1,61 @@
 package therealfarfetchd.quacklib.block.impl
 
-import net.minecraft.block.Block
 import net.minecraft.block.state.BlockStateContainer
-import net.minecraft.block.state.IBlockState
 import net.minecraft.client.particle.ParticleDigging
 import net.minecraft.client.particle.ParticleManager
 import net.minecraft.entity.Entity
 import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
-import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand
 import net.minecraft.util.NonNullList
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.RayTraceResult
 import net.minecraft.util.math.Vec3d
-import net.minecraft.world.IBlockAccess
-import net.minecraft.world.World
 import net.minecraftforge.common.property.ExtendedBlockState
 import net.minecraftforge.common.property.IExtendedBlockState
 import net.minecraftforge.common.property.IUnlistedProperty
 import scala.Tuple5
 import therealfarfetchd.math.Vec3
-import therealfarfetchd.math.getDistance
 import therealfarfetchd.quacklib.api.block.component.*
-import therealfarfetchd.quacklib.api.block.data.BlockDataRO
-import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
 import therealfarfetchd.quacklib.api.core.extensions.toVec3
-import therealfarfetchd.quacklib.block.data.*
+import therealfarfetchd.quacklib.api.core.extensions.toVec3i
+import therealfarfetchd.quacklib.api.core.unsafe
+import therealfarfetchd.quacklib.api.objects.block.Block
+import therealfarfetchd.quacklib.api.objects.block.BlockType
+import therealfarfetchd.quacklib.api.objects.block.MCBlock
+import therealfarfetchd.quacklib.api.objects.block.MCBlockType
+import therealfarfetchd.quacklib.api.objects.hasComponent
+import therealfarfetchd.quacklib.api.objects.item.MCItem
+import therealfarfetchd.quacklib.api.objects.item.MCItemType
+import therealfarfetchd.quacklib.api.objects.world.MCWorld
+import therealfarfetchd.quacklib.api.objects.world.MCWorldMutable
+import therealfarfetchd.quacklib.api.tools.Facing
+import therealfarfetchd.quacklib.block.data.PartAccessTokenImpl
+import therealfarfetchd.quacklib.block.data.PropertyResourceLocation
+import therealfarfetchd.quacklib.block.data.get
 import therealfarfetchd.quacklib.block.data.render.PropertyData
 import therealfarfetchd.quacklib.block.data.render.PropertyDataExtended
+import therealfarfetchd.quacklib.objects.block.BlockImpl
+import therealfarfetchd.quacklib.objects.world.toWorld
 import java.util.*
 import kotlin.math.roundToInt
 import kotlin.reflect.jvm.jvmName
 
-typealias SetPropertyRetrievers = Set<(IBlockState, IBlockAccess, BlockPos, TileQuackLib) -> IBlockState>
-typealias SetExtendedPropertyRetrievers = Set<(IExtendedBlockState, IBlockAccess, BlockPos, TileQuackLib) -> IExtendedBlockState>
-typealias MapProperties = Map<PropertyResourceLocation, PropertyData<*>>
-typealias MapExtendedProperties = Map<PropertyResourceLocation, PropertyDataExtended<*>>
+private typealias SetPropertyRetrievers = Set<(MCBlock, MCWorld, BlockPos, TileQuackLib) -> MCBlock>
+private typealias SetExtendedPropertyRetrievers = Set<(IExtendedBlockState, MCWorld, BlockPos, TileQuackLib) -> IExtendedBlockState>
+private typealias MapProperties = Map<PropertyResourceLocation, PropertyData<*>>
+private typealias MapExtendedProperties = Map<PropertyResourceLocation, PropertyDataExtended<*>>
 
 @Suppress("OverridingDeprecatedMember")
-class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tempBlockConf = def }), BlockExtraDebug {
+class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { tempBlockConf = type }), BlockExtraDebug {
 
   private var initDone = false
 
-  val needsTool = def.needsTool
-  val tools = def.validTools
+  val needsTool = type.needsTool
+  val tools = type.validTools
 
-  val components = def.components.asReversed()
+  val components = type.components.asReversed()
 
-  val cActivate = getComponentsOfType<BlockComponentActivation>()
-  val cDrops = getComponentsOfType<BlockComponentDrops>()
-  val cPickBlock = getComponentsOfType<BlockComponentPickBlock>()
-  val cCollision = getComponentsOfType<BlockComponentCollision>()
-  val cMouseOver = getComponentsOfType<BlockComponentMouseOver>()
-  val cCustomMouseOver = getComponentsOfType<BlockComponentCustomMouseOver>()
-  val cNeighborListener = getComponentsOfType<BlockComponentNeighborListener>()
-  val cPlacementCheck = getComponentsOfType<BlockComponentPlacementCheck>()
-  val cRedstone = getComponentsOfType<BlockComponentRedstone>()
   val cData = getComponentsOfType<BlockComponentData<*>>()
 
   val needsTile = getComponentsOfType<BlockComponentNeedTE>().isNotEmpty()
@@ -71,21 +68,22 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
   lateinit var extproperties: MapExtendedProperties
 
   init {
-    registryName = def.rl
-    unlocalizedName = def.rl.toString()
-    def.hardness?.also {
+    registryName = type.registryName
+    unlocalizedName = type.registryName.toString()
+    type.hardness?.also {
       setHardness(it)
     } ?: setBlockUnbreakable()
 
     initDone = true
-    soundType = def.soundType
+    soundType = type.soundType
     cData.forEach { it.part = PartAccessTokenImpl(it.rl) }
   }
 
-  override fun onBlockActivated(world: World, pos: BlockPos, state: IBlockState, playerIn: EntityPlayer, hand: EnumHand, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean {
-    return cActivate
-      .map { it.onActivated(BlockDataImpl(world, pos, state), playerIn, hand, facing, Vec3(hitX, hitY, hitZ)) }
-      .any { it }
+  fun getBlockImpl(world: MCWorld, pos: BlockPos): Block =
+    BlockImpl.createExistingFromWorld(world.toWorld(), pos.toVec3i())
+
+  override fun onBlockActivated(world: MCWorldMutable, pos: BlockPos, state: MCBlock, playerIn: EntityPlayer, hand: EnumHand, facing: Facing, hitX: Float, hitY: Float, hitZ: Float): Boolean {
+    return getBlockImpl(world, pos).onActivated(playerIn, hand, facing, Vec3(hitX, hitY, hitZ))
   }
 
   override fun createBlockState(): BlockStateContainer {
@@ -99,126 +97,76 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
     return bs._1()
   }
 
-  override fun getActualState(state: IBlockState, world: IBlockAccess, pos: BlockPos): IBlockState {
+  override fun getActualState(state: MCBlock, world: MCWorld, pos: BlockPos): MCBlock {
     val te = world.getTileEntity(pos) as? TileQuackLib ?: return state
     return propRetrievers.fold(state) { acc, op -> op(acc, world, pos, te) }
   }
 
-  override fun getExtendedState(state: IBlockState, world: IBlockAccess, pos: BlockPos): IBlockState {
+  override fun getExtendedState(state: MCBlock, world: MCWorld, pos: BlockPos): MCBlock {
     val te = world.getTileEntity(pos) as? TileQuackLib ?: return state
     state as? IExtendedBlockState ?: return state
     return extpropRetrievers.fold(state) { acc, op -> op(acc, world, pos, te) }
   }
 
   // ray trace
-  override fun collisionRayTrace(state: IBlockState, world: World, pos: BlockPos, start: Vec3d, end: Vec3d): RayTraceResult? {
-    val data = BlockDataImpl(world, pos, state)
-
-    val startv = start.toVec3()
-    val endv = end.toVec3()
-
-    val boxes = if (cMouseOver.isNotEmpty()) {
-      cMouseOver
-        .flatMap { it.getRaytraceBoundingBoxes(data) }
-        .takeIf { it.isNotEmpty() }
-        .orEmpty()
-    } else listOf(FULL_BLOCK_AABB)
-
-    return (boxes.map { rayTrace(pos, start, end, it) } + cCustomMouseOver.map { it.raytrace(data, startv, endv) })
-      .asSequence()
-      .filterNotNull()
-      .sortedBy { getDistance(startv, it.hitVec.toVec3()) }
-      .firstOrNull()
+  override fun collisionRayTrace(state: MCBlock, world: MCWorldMutable, pos: BlockPos, start: Vec3d, end: Vec3d): RayTraceResult? {
+    return getBlockImpl(world, pos).raytrace(start.toVec3(), end.toVec3())
   }
 
   // ray trace
-  override fun getBoundingBox(state: IBlockState, world: IBlockAccess, pos: BlockPos): AxisAlignedBB {
-    val data = BlockDataROImpl(world, pos, state)
-
-    return if (cMouseOver.isNotEmpty()) {
-      cMouseOver
-        .flatMap { it.getRaytraceBoundingBoxes(data) }
-        .also { if (it.isEmpty()) return NOPE_AABB }
-        .reduce(AxisAlignedBB::union)
-    } else FULL_BLOCK_AABB
+  override fun getBoundingBox(state: MCBlock, world: MCWorld, pos: BlockPos): AxisAlignedBB {
+    return getBlockImpl(world, pos).getRaytraceBoundingBox() ?: NOPE_AABB
   }
 
   // collision
-  override fun getCollisionBoundingBox(state: IBlockState, world: IBlockAccess, pos: BlockPos): AxisAlignedBB? {
-    val data = BlockDataROImpl(world, pos, state)
-    if (world.getTileEntity(pos) !is TileQuackLib) return null
-    return getCollisionBoundingBox(data)
+  override fun getCollisionBoundingBox(state: MCBlock, world: MCWorld, pos: BlockPos): AxisAlignedBB? {
+    return getBlockImpl(world, pos).getCollisionBoundingBox()
   }
 
   // collision
-  fun getCollisionBoundingBox(data: BlockDataRO): AxisAlignedBB? {
-    return if (cCollision.isNotEmpty()) {
-      cCollision
-        .flatMap { it.getCollisionBoundingBoxes(data) }
-        .also { if (it.isEmpty()) return null }
-        .reduce(AxisAlignedBB::union)
-    } else FULL_BLOCK_AABB
-  }
-
-  // collision
-  override fun addCollisionBoxToList(state: IBlockState, world: World, pos: BlockPos, entityBox: AxisAlignedBB, collidingBoxes: MutableList<AxisAlignedBB>, entityIn: Entity?, isActualState: Boolean) {
-    val data = BlockDataImpl(world, pos, state)
-
-    (cCollision.takeIf { it.isNotEmpty() }?.flatMap { it.getCollisionBoundingBoxes(data) }
-     ?: setOf(FULL_BLOCK_AABB))
-      .map { it.offset(pos) }
-      .filter(entityBox::intersects)
-      .also { collidingBoxes.addAll(it) }
+  override fun addCollisionBoxToList(state: MCBlock, world: MCWorldMutable, pos: BlockPos, entityBox: AxisAlignedBB, collidingBoxes: MutableList<AxisAlignedBB>, entityIn: Entity?, isActualState: Boolean) {
+    collidingBoxes.addAll(getBlockImpl(world, pos).getCollisionBoundingBoxes().filter { it.intersects(entityBox) })
   }
 
   // outline
-  override fun getSelectedBoundingBox(state: IBlockState, world: World, pos: BlockPos): AxisAlignedBB {
+  override fun getSelectedBoundingBox(state: MCBlock, world: MCWorldMutable, pos: BlockPos): AxisAlignedBB {
     // TODO
     return super.getSelectedBoundingBox(state, world, pos)
   }
 
-  override fun neighborChanged(state: IBlockState, world: World, pos: BlockPos, block: Block, fromPos: BlockPos) {
-    val facing = fromPos.subtract(pos).let { EnumFacing.getFacingFromVector(it.x.toFloat(), it.y.toFloat(), it.z.toFloat()) }
-    val data = BlockDataImpl(world, pos, state)
-    cNeighborListener.forEach { it.onNeighborChanged(data, facing) }
+  override fun neighborChanged(state: MCBlock, world: MCWorldMutable, pos: BlockPos, block: MCBlockType, fromPos: BlockPos) {
+    val facing = fromPos.subtract(pos).let { Facing.getFacingFromVector(it.x.toFloat(), it.y.toFloat(), it.z.toFloat()) }
+    getBlockImpl(world, pos).onNeighborChanged(facing)
   }
 
-  override fun canPlaceBlockOnSide(world: World, pos: BlockPos, side: EnumFacing): Boolean {
-    return super.canPlaceBlockAt(world, pos) &&
-           cPlacementCheck.fold(true) { b, comp -> b && comp.canPlaceBlockAt(world, pos, side) }
+  override fun canPlaceBlockOnSide(world: MCWorldMutable, pos: BlockPos, side: Facing): Boolean {
+    return super.canPlaceBlockAt(world, pos) && type.behavior.canPlaceBlockAt(world.toWorld(), pos.toVec3i(), side)
   }
 
-  override fun canPlaceBlockAt(world: World, pos: BlockPos): Boolean {
-    return super.canPlaceBlockAt(world, pos) &&
-           cPlacementCheck.fold(true) { b, comp -> b && comp.canPlaceBlockAt(world, pos, null) }
+  override fun canPlaceBlockAt(world: MCWorldMutable, pos: BlockPos): Boolean {
+    return super.canPlaceBlockAt(world, pos) && type.behavior.canPlaceBlockAt(world.toWorld(), pos.toVec3i(), null)
   }
 
-  override fun getStrongPower(state: IBlockState, world: IBlockAccess, pos: BlockPos, side: EnumFacing): Int {
-    val data = BlockDataROImpl(world, pos, state)
-    val realSide = side.opposite
-    return cRedstone.fold(0) { acc, a -> acc + a.strongPowerLevel(data, realSide) }
+  override fun getStrongPower(state: MCBlock, world: MCWorld, pos: BlockPos, side: Facing): Int {
+    return getBlockImpl(world, pos).getStrongPower(side.opposite)
   }
 
-  override fun getWeakPower(state: IBlockState, world: IBlockAccess, pos: BlockPos, side: EnumFacing): Int {
-    val data = BlockDataROImpl(world, pos, state)
-    val realSide = side.opposite
-    return cRedstone.fold(0) { acc, a -> acc + a.weakPowerLevel(data, realSide) }
+  override fun getWeakPower(state: MCBlock, world: MCWorld, pos: BlockPos, side: Facing): Int {
+    return getBlockImpl(world, pos).getWeakPower(side.opposite)
   }
 
-  override fun canProvidePower(state: IBlockState): Boolean {
-    return cRedstone.isNotEmpty()
+  override fun canProvidePower(state: MCBlock): Boolean {
+    return type.hasComponent<BlockComponentRedstone>()
   }
 
-  override fun canConnectRedstone(state: IBlockState, world: IBlockAccess, pos: BlockPos, side: EnumFacing?): Boolean {
+  override fun canConnectRedstone(state: MCBlock, world: MCWorld, pos: BlockPos, side: Facing?): Boolean {
     if (side == null) return false
 
-    val data = BlockDataROImpl(world, pos, state)
-
-    return cRedstone.any { it.canConnectRedstone(data, side) }
+    return getBlockImpl(world, pos).canConnectRedstone(side.opposite)
   }
 
   @Suppress("UNCHECKED_CAST")
-  override fun addInformation(world: World, pos: BlockPos, state: IBlockState, player: EntityPlayer, left: MutableList<String>, right: MutableList<String>) {
+  override fun addInformation(world: MCWorldMutable, pos: BlockPos, state: MCBlock, player: EntityPlayer, left: MutableList<String>, right: MutableList<String>) {
     val state = getExtendedState(state, world, pos)
 
     if (state is IExtendedBlockState) {
@@ -238,7 +186,9 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
     left += components.flatMap { getComponentInfo(world, pos, state, it) }
   }
 
-  private fun getComponentInfo(world: World, pos: BlockPos, state: IBlockState, c: BlockComponent): List<String> {
+  private fun getComponentInfo(world: MCWorldMutable, pos: BlockPos, state: MCBlock, c: BlockComponent): List<String> {
+    val bi = getBlockImpl(world, pos)
+
     var descString = " - "
     descString += c::class.simpleName ?: c::class.qualifiedName ?: c::class.jvmName
     if (c is BlockComponentRegistered) descString += " (${c.rl})"
@@ -246,60 +196,66 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
 
     var list = listOf(descString)
     if (c is BlockComponentInfo) {
-      list += c.getInfo(BlockDataImpl(world, pos, state)).map { it.prependIndent("     ") }
+      list += c.getInfo(bi).map { it.prependIndent("     ") }
     }
     return list
   }
 
-  override fun getHarvestLevel(state: IBlockState): Int {
+  override fun getHarvestLevel(state: MCBlock): Int {
     if (tools.isEmpty()) return -1
     return tools.first().level
   }
 
-  override fun isToolEffective(type: String?, state: IBlockState): Boolean {
+  override fun isToolEffective(type: String?, state: MCBlock): Boolean {
     if (!needsTool) return true
     return type in tools.map { it.toolName }
   }
 
-  override fun hasTileEntity(state: IBlockState): Boolean = needsTile
+  override fun hasTileEntity(state: MCBlock): Boolean = needsTile
 
-  override fun createTileEntity(world: World, state: IBlockState): TileQuackLib? =
+  override fun createTileEntity(world: MCWorldMutable?, state: MCBlock): TileQuackLib? =
     when {
-      needsTick -> TileQuackLib.Tickable(def)
-      needsTile -> TileQuackLib(def)
+      needsTick -> TileQuackLib.Tickable(type)
+      needsTile -> TileQuackLib(type)
       else -> null
     }
 
-  override fun getMetaFromState(state: IBlockState?): Int = 0
+  override fun getMetaFromState(state: MCBlock?): Int = 0
 
-  override fun isOpaqueCube(state: IBlockState): Boolean {
+  // rendering
+  override fun isOpaqueCube(state: MCBlock): Boolean {
     // TODO query model
-    return if (initDone) cCollision.isEmpty()
+    return if (initDone) type.behavior.isNormalBlock()
     else tempBlockConf.components.none { it is BlockComponentCollision }
   }
 
-  override fun isNormalCube(state: IBlockState): Boolean {
-    return cCollision.isEmpty()
+  // no rendering
+  override fun isNormalCube(state: MCBlock): Boolean {
+    return type.behavior.isNormalBlock()
   }
 
-  override fun isFullCube(state: IBlockState): Boolean {
-    return cCollision.isEmpty()
+  // rendering (?)
+  override fun isFullCube(state: MCBlock): Boolean {
+    return type.behavior.isNormalBlock()
   }
 
   // TODO
-  override fun getItemDropped(state: IBlockState?, rand: Random?, fortune: Int): Item? = null
+  override fun getItemDropped(state: MCBlock?, rand: Random?, fortune: Int): MCItemType? = null
 
-  override fun getDrops(drops: NonNullList<ItemStack>, world: IBlockAccess, pos: BlockPos, state: IBlockState, fortune: Int) {
+  override fun getDrops(drops: NonNullList<MCItem>, world: MCWorld, pos: BlockPos, state: MCBlock, fortune: Int) {
     // super.getDrops(drops, world, pos, state, fortune)
-    cDrops.forEach { drops += it.getDrops(BlockDataROImpl(world, pos, state)) }
+    unsafe {
+      drops.addAll(getBlockImpl(world, pos).getDrops(fortune).map { it.mc })
+    }
   }
 
-  override fun getPickBlock(state: IBlockState, target: RayTraceResult, world: World, pos: BlockPos, player: EntityPlayer): ItemStack {
-    return cPickBlock.firstOrNull()?.getPickBlock(BlockDataImpl(world, pos, state))
-           ?: super.getPickBlock(state, target, world, pos, player)
+  override fun getPickBlock(state: MCBlock, target: RayTraceResult, world: MCWorldMutable, pos: BlockPos, player: EntityPlayer): MCItem {
+    return unsafe {
+      getBlockImpl(world, pos).getPickBlock(target, player).mc
+    }
   }
 
-  override fun addDestroyEffects(world: World, pos: BlockPos, manager: ParticleManager): Boolean {
+  override fun addDestroyEffects(world: MCWorldMutable, pos: BlockPos, manager: ParticleManager): Boolean {
     val state = world.getBlockState(pos)
     val bb = state.getBoundingBox(world, pos)
     val particlesX = maxOf(1, (4 * (bb.maxX - bb.minX)).roundToInt())
@@ -327,7 +283,7 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
   }
 
   override fun toString(): String {
-    return "Block '${def.rl}' (${components.size} components)"
+    return "Block '${type.registryName}' (${components.size} components)"
   }
 
   inline fun <reified T : BlockComponent> getComponentsOfType(): List<T> =
@@ -335,11 +291,11 @@ class BlockQuackLib(val def: BlockConfiguration) : Block(def.material.also { tem
 
   companion object {
 
-    private lateinit var tempBlockConf: BlockConfiguration
+    private lateinit var tempBlockConf: BlockType
 
     val NOPE_AABB = AxisAlignedBB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
     // FIXME use custom tuple here, not scalas
-    fun createBlockState(block: Block?): Tuple5<BlockStateContainer, MapProperties, MapExtendedProperties, SetPropertyRetrievers, SetExtendedPropertyRetrievers> {
+    fun createBlockState(block: MCBlockType?): Tuple5<BlockStateContainer, MapProperties, MapExtendedProperties, SetPropertyRetrievers, SetExtendedPropertyRetrievers> {
       val cPart = tempBlockConf.components.asReversed().mapNotNull { it as? BlockComponentData<*> }
 
       var properties: MapProperties = emptyMap()

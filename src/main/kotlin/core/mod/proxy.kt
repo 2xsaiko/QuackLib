@@ -15,6 +15,7 @@ import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
 import therealfarfetchd.quacklib.api.core.mod.BaseMod
 import therealfarfetchd.quacklib.api.core.mod.ModProxy
 import therealfarfetchd.quacklib.api.core.modinterface.item
+import therealfarfetchd.quacklib.api.core.unsafe
 import therealfarfetchd.quacklib.api.tools.Logger
 import therealfarfetchd.quacklib.block.impl.BlockQuackLib
 import therealfarfetchd.quacklib.block.init.BlockConfigurationScopeImpl
@@ -24,6 +25,8 @@ import therealfarfetchd.quacklib.core.init.ItemConfigurationScopeImpl
 import therealfarfetchd.quacklib.core.init.TabConfigurationScopeImpl
 import therealfarfetchd.quacklib.item.impl.ItemQuackLib
 import therealfarfetchd.quacklib.item.impl.TabQuackLib
+import therealfarfetchd.quacklib.objects.block.BlockTypeImpl
+import therealfarfetchd.quacklib.objects.item.ItemTypeImpl
 
 sealed class CommonProxy : ModProxy {
 
@@ -69,21 +72,29 @@ sealed class CommonProxy : ModProxy {
   fun registerBlocks(e: RegistryEvent.Register<Block>) {
     blockTemplates.forEach {
       Logger.info("Adding ${it.describe()}")
-      if (it.isMultipart) APIImpl.multipartAPI.registerBlock(e, it)
-      else registerBlock(e, it)
+      registerBlock(e, it)
     }
   }
 
   private fun registerBlock(e: RegistryEvent.Register<Block>, def: BlockConfiguration) {
-    val block = BlockQuackLib(def)
-    e.registry.register(block)
+    val type = BlockTypeImpl(def)
+    BlockTypeImpl.addBlock(type)
+    if (def.isMultipart) {
+      APIImpl.multipartAPI.registerBlock(e, type)
+    } else {
+      val block = BlockQuackLib(type)
+      BlockTypeImpl.associateBlock(type, block)
+      e.registry.register(block)
+    }
   }
 
   @SubscribeEvent
   fun registerItems(e: RegistryEvent.Register<Item>) {
     itemTemplates.forEach {
       Logger.info("Adding ${it.describe()}")
-      val item = ItemQuackLib(it)
+      val type = ItemTypeImpl(it)
+      val item = ItemQuackLib(type)
+      ItemTypeImpl.addItem(type, item)
       e.registry.register(item)
     }
   }
@@ -115,8 +126,10 @@ class ClientProxy : CommonProxy() {
 
   @SubscribeEvent
   fun registerModels(e: ModelRegistryEvent) {
-    itemTemplates.forEach {
-      ModelLoader.setCustomModelResourceLocation(item(it.rl).mcItem, 0, ModelResourceLocation(it.rl, "inventory"))
+    unsafe {
+      itemTemplates.forEach {
+        ModelLoader.setCustomModelResourceLocation(item(it.rl).mc, 0, ModelResourceLocation(it.rl, "inventory"))
+      }
     }
   }
 

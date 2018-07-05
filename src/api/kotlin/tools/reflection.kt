@@ -7,7 +7,7 @@ import kotlin.reflect.KProperty
 inline fun <reified T : Any, reified R> T.access(name: String, type: KClass<T> = T::class): R {
   val field = type.java.getDeclaredField(name)
   field.isAccessible = true
-  require(R::class.java.isAssignableFrom(field.type), { "Field $name is not of type ${R::class}" })
+  require(R::class.java.isAssignableFrom(field.type)) { "Field $name is not of type ${R::class}" }
   return field[this] as R
 }
 
@@ -19,7 +19,7 @@ inline fun <reified T : Any, reified R> T.accessDelegate(name: String, type: KCl
   init {
     val field = type.java.getDeclaredField(name)
     field.isAccessible = true
-    require(R::class.java.isAssignableFrom(field.type), { "Field $name is not of type ${R::class}" })
+    require(R::class.java.isAssignableFrom(field.type)) { "Field $name is not of type ${R::class}" }
 
     // Kotlin doesn't like these (╯°□°）╯︵ ┻━┻
 
@@ -43,6 +43,6 @@ inline fun <reified T : Any, reified R> T.accessDelegate(name: String, type: KCl
 inline fun <T : Any, reified R> KClass<T>.access(name: String): R {
   val field = java.getDeclaredField(name)
   field.isAccessible = true
-  require(R::class.java.isAssignableFrom(field.type), { "Field $name is not of type ${R::class}" })
+  require(R::class.java.isAssignableFrom(field.type)) { "Field $name is not of type ${R::class}" }
   return field[null] as R
 }

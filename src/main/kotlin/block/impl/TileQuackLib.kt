@@ -9,8 +9,8 @@ import net.minecraft.util.ITickable
 import net.minecraftforge.common.capabilities.Capability
 import therealfarfetchd.quacklib.api.block.component.BlockComponentCapability
 import therealfarfetchd.quacklib.api.block.component.BlockComponentTickable
-import therealfarfetchd.quacklib.api.block.init.BlockConfiguration
-import therealfarfetchd.quacklib.block.data.BlockDataDirectRef
+import therealfarfetchd.quacklib.api.objects.block.BlockType
+import therealfarfetchd.quacklib.objects.block.BlockImpl
 
 open class TileQuackLib() : TileEntity() {
 
@@ -19,12 +19,12 @@ open class TileQuackLib() : TileEntity() {
   var cCapability = c.getComponentsOfType<BlockComponentCapability>()
 
   @Suppress("LeakingThis")
-  constructor(def: BlockConfiguration) : this() {
-    setConfiguration(def)
+  constructor(type: BlockType) : this() {
+    setConfiguration(type)
   }
 
-  open fun setConfiguration(def: BlockConfiguration) {
-    c.setConfiguration(def)
+  open fun setConfiguration(type: BlockType) {
+    c.setType(type)
     updateComponents()
   }
 
@@ -82,18 +82,18 @@ open class TileQuackLib() : TileEntity() {
     cCapability.firstOrNull { it.hasCapability(getBlockData(), capability, facing) }?.getCapability(getBlockData(), capability, facing)
     ?: super.getCapability(capability, facing)
 
-  protected fun getBlockData() = BlockDataDirectRef(c, world, pos)
+  protected fun getBlockData() = BlockImpl.createExistingFromTile(this)
 
   class Tickable() : TileQuackLib(), ITickable {
 
-    constructor(def: BlockConfiguration) : this() {
-      setConfiguration(def)
+    constructor(type: BlockType) : this() {
+      setConfiguration(type)
     }
 
     var cTickable: List<BlockComponentTickable> = emptyList()
 
-    override fun setConfiguration(def: BlockConfiguration) {
-      super.setConfiguration(def)
+    override fun setConfiguration(type: BlockType) {
+      super.setConfiguration(type)
       cTickable = c.getComponentsOfType()
     }
 
@@ -104,7 +104,7 @@ open class TileQuackLib() : TileEntity() {
   }
 
   override fun toString(): String {
-    return "Tile '${c.def.rl}' (${c.def.components.size} components)"
+    return "Tile '${c.type.registryName}' (${c.type.components.size} components)"
   }
 
 }

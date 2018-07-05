@@ -1,7 +1,7 @@
 package therealfarfetchd.quacklib.api.block.component
 
-import therealfarfetchd.quacklib.api.block.data.BlockDataRO
 import therealfarfetchd.quacklib.api.core.modinterface.QuackLibAPI
+import therealfarfetchd.quacklib.api.objects.block.Block
 
 abstract class ImportedData<Self : ImportedData<Self, C>, C : BlockComponentDataImport<C, Self>>(val target: C) {
 
@@ -12,6 +12,6 @@ abstract class ImportedData<Self : ImportedData<Self, C>, C : BlockComponentData
 
 interface ImportedValue<out T> {
 
-  fun retrieve(data: BlockDataRO): T
+  fun retrieve(data: Block): T
 
 }
