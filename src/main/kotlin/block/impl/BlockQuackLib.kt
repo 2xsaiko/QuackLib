@@ -125,7 +125,7 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
 
   // collision
   override fun addCollisionBoxToList(state: MCBlock, world: MCWorldMutable, pos: BlockPos, entityBox: AxisAlignedBB, collidingBoxes: MutableList<AxisAlignedBB>, entityIn: Entity?, isActualState: Boolean) {
-    collidingBoxes.addAll(getBlockImpl(world, pos).getCollisionBoundingBoxes().filter { it.intersects(entityBox) })
+    collidingBoxes.addAll(getBlockImpl(world, pos).getCollisionBoundingBoxes().map { it.offset(pos) }.filter { it.intersects(entityBox) })
   }
 
   // outline
@@ -245,13 +245,13 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
   override fun getDrops(drops: NonNullList<MCItem>, world: MCWorld, pos: BlockPos, state: MCBlock, fortune: Int) {
     // super.getDrops(drops, world, pos, state, fortune)
     unsafe {
-      drops.addAll(getBlockImpl(world, pos).getDrops(fortune).map { it.mc })
+      drops.addAll(getBlockImpl(world, pos).getDrops(fortune).map { it.toMCItem() })
     }
   }
 
   override fun getPickBlock(state: MCBlock, target: RayTraceResult, world: MCWorldMutable, pos: BlockPos, player: EntityPlayer): MCItem {
     return unsafe {
-      getBlockImpl(world, pos).getPickBlock(target, player).mc
+      getBlockImpl(world, pos).getPickBlock(target, player).toMCItem()
     }
   }
 

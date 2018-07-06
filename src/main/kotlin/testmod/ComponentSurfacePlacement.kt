@@ -39,7 +39,6 @@ class ComponentSurfacePlacement : BlockComponentPlacement<ComponentSurfacePlacem
       if (side != facing) return
 
       if (!isValid(block.world, block.pos, side)) {
-        println("i'm fucking off")
         world.breakBlock(block.pos)
       }
     }

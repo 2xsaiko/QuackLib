@@ -34,7 +34,7 @@ class ComponentPlaceBlock(val block: BlockType) : ItemComponentUse {
 
     val newBlock = prepareBlock(block, world, pos, player, hand, hitSide, hitVec)
 
-    return if (stack.count > 0 && player.canPlayerEdit(pos.toMCVec3i(), hitSide, unsafe { stack.mc }) && world.canPlaceBlockAt(newBlock, pos, hitSide, null, true)) {
+    return if (stack.count > 0 && player.canPlayerEdit(pos.toMCVec3i(), hitSide, unsafe { stack.toMCItem() }) && world.canPlaceBlockAt(newBlock, pos, hitSide, null, true)) {
       if (placeBlockAt(newBlock, stack, player, world, pos)) {
         val b = world.getBlock(pos).orEmpty()
         val soundtype = b.getSoundType(player)
@@ -65,10 +65,10 @@ class ComponentPlaceBlock(val block: BlockType) : ItemComponentUse {
       if (!world.setBlock(pos, block)) return false
       unsafe {
         val mcPos = pos.toMCVec3i()
-        ItemBlock.setTileEntityNBT(world.mc, player, mcPos, item.mc)
+        ItemBlock.setTileEntityNBT(world.toMCWorld(), player, mcPos, item.toMCItem())
         block.onPlaced(player, item)
         if (player is EntityPlayerMP)
-          CriteriaTriggers.PLACED_BLOCK.trigger(player, mcPos, item.mc)
+          CriteriaTriggers.PLACED_BLOCK.trigger(player, mcPos, item.toMCItem())
       }
       return true
     }

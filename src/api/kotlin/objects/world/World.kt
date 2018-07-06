@@ -16,7 +16,7 @@ interface World {
 
   fun getBlock(at: PositionGrid): Block?
 
-  val Unsafe.mc: MCWorld
+  fun Unsafe.toMCWorld(): MCWorld
 
 }
 
@@ -38,16 +38,14 @@ interface WorldMutable : World {
 
   fun playSound(player: EntityPlayer, pos: PositionGrid, sound: SoundEvent, category: SoundCategory, volume: Float, pitch: Float)
 
-  override val Unsafe.mc: MCWorldMutable
+  override fun Unsafe.toMCWorld(): MCWorldMutable
 
 }
 
 interface UnsafeExtWorld : Unsafe {
 
-  val World.mc
-    get() = self.mc
+  fun World.toMCWorld() = self.toMCWorld()
 
-  val WorldMutable.mc
-    get() = self.mc
+  fun WorldMutable.toMCWorld() = self.toMCWorld()
 
 }

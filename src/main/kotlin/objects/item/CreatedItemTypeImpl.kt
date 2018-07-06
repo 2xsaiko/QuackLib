@@ -21,9 +21,8 @@ class CreatedItemTypeImpl(override val registryName: ResourceLocation, val def: 
     get() = realInstance?.components
             ?: def.components
 
-  override val Unsafe.mc: MCItemType
-    get() = unsafe { realInstance?.mc }
-            ?: crash()
+  override fun Unsafe.toMCItemType(): MCItemType = unsafe { realInstance?.toMCItemType() }
+                                                   ?: crash()
 
   @Suppress("NOTHING_TO_INLINE")
   private inline fun crash(): Nothing = error("Item not resolved yet! Come back after init is done")

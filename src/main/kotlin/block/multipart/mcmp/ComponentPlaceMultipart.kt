@@ -33,9 +33,9 @@ class ComponentPlaceMultipart(val block: BlockType) : ItemComponentUse {
 
   @Suppress("NAME_SHADOWING")
   override fun onUse(stack: Item, player: EntityPlayer, world: WorldMutable, pos: PositionGrid, hand: EnumHand, hitSide: Facing, hitVec: Vec3): EnumActionResult {
-    val mcb = unsafe { block.mc }
-    val mcw = unsafe { world.mc }
-    val mci = unsafe { stack.type.mc }
+    val mcb = unsafe { block.toMCBlockType() }
+    val mcw = unsafe { world.toMCWorld() }
+    val mci = unsafe { stack.type.toMCItemType() }
     val part = MultipartRegistry.INSTANCE.getPart(mcb)
 
     return ItemBlockMultipart.place(player, mcw, pos.toMCVec3i(), hand, hitSide, hitVec.x, hitVec.y, hitVec.z, mci,

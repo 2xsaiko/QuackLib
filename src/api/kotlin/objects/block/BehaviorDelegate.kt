@@ -80,7 +80,4 @@ interface BehaviorDelegate {
   fun canPlaceBlockAt(world: World, pos: PositionGrid, facing: Facing?): Boolean =
     behavior.canPlaceBlockAt(world, pos, facing)
 
-  fun copy(): Block =
-    behavior.copy(block)
-
 }

@@ -20,6 +20,5 @@ fun getResourceFromName(name: String): ResourceLocation {
   return ResourceLocation(domain, iname)
 }
 
-fun TileEntity.copy(): TileEntity? {
-  return TileEntity.create(world, NBTTagCompound().let(this::writeToNBT))
-}
+fun TileEntity.copy(): TileEntity? =
+  TileEntity.create(world, NBTTagCompound().let(this::writeToNBT))

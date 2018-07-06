@@ -54,9 +54,8 @@ class CreatedBlockTypeImpl(override val registryName: ResourceLocation, val def:
     get() = realInstance?.validTools
             ?: def.validTools
 
-  override val Unsafe.mc: MCBlockType
-    get() = unsafe { realInstance?.mc }
-            ?: crash()
+  override fun Unsafe.toMCBlockType(): MCBlockType = unsafe { realInstance?.toMCBlockType() }
+                                                     ?: crash()
 
   @Suppress("NOTHING_TO_INLINE")
   private inline fun crash(): Nothing = error("Block not resolved yet! Come back after init is done")

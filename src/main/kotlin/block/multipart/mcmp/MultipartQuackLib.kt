@@ -63,7 +63,7 @@ class MultipartQuackLib(private val block: BlockQuackLib) : IMultipart {
 
   override fun createMultipartTile(world: MCWorldMutable, slot: IPartSlot, state: MCBlock): IMultipartTile {
     val te = super.createMultipartTile(world, slot, state)
-    val container = unsafe { (data.get()?.mcTile as? TileQuackLib)?.c }
+    val container = unsafe { (data.get()?.getMCTile() as? TileQuackLib)?.c }
     if (container != null)
       (te.tileEntity as TileQuackLib).c.import(container)
     data.set(null)

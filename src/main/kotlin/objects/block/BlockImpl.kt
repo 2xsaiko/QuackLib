@@ -16,6 +16,7 @@ import therealfarfetchd.quacklib.api.tools.Facing
 import therealfarfetchd.quacklib.api.tools.PositionGrid
 import therealfarfetchd.quacklib.objects.world.BlockAccessVoid
 import therealfarfetchd.quacklib.objects.world.toWorld
+import therealfarfetchd.quacklib.tools.copy
 
 class BlockImpl(
   override val type: BlockType,
@@ -34,8 +35,8 @@ class BlockImpl(
   @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
   constructor(block: BlockType, world: World, pos: PositionGrid) : this(
     block, world, pos,
-    unsafe { block.mc.defaultState },
-    unsafe { block.mc.createTileEntity((world as? WorldMutable)?.mc, block.mc.defaultState) }
+    unsafe { block.toMCBlockType().defaultState },
+    unsafe { block.toMCBlockType().let { it.createTileEntity((world as? WorldMutable)?.toMCWorld(), it.defaultState) } }
   )
 
   override val behavior = type.behavior
@@ -46,11 +47,13 @@ class BlockImpl(
     return behavior.getFaceShape(this, side)
   }
 
-  override val Unsafe.mcBlock: MCBlock
-    get() = state
+  override fun copy(): Block {
+    return BlockImpl(type, world, pos, state, tile?.copy())
+  }
 
-  override val Unsafe.mcTile: MCBlockTile?
-    get() = tile
+  override fun Unsafe.toMCBlock(): MCBlock = state
+
+  override fun Unsafe.getMCTile(): MCBlockTile? = tile
 
   override fun Unsafe.useRef(world: World, pos: PositionGrid, asMutable: Boolean) {
     this@BlockImpl.world = world
@@ -69,8 +72,8 @@ class BlockImpl(
     fun createExistingFromWorld(world: World, pos: PositionGrid): BlockImpl {
       return unsafe {
         val pos1 = pos.toMCVec3i()
-        val state = world.mc.getBlockState(pos1)
-        val tile = world.mc.getTileEntity(pos1)
+        val state = world.toMCWorld().getBlockState(pos1)
+        val tile = world.toMCWorld().getTileEntity(pos1)
         val block = BlockTypeImpl.getBlock(state.block)
 
         BlockImpl(block, world, pos, state, tile)

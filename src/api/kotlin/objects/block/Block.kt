@@ -35,7 +35,7 @@ interface BlockType : Instantiable, Registered, ComponentHost<BlockComponent> {
 
   val validTools: Set<Tool>
 
-  val Unsafe.mc: MCBlockType
+  fun Unsafe.toMCBlockType(): MCBlockType
 
 }
 
@@ -50,9 +50,11 @@ interface Block : Instance<BlockType>, BehaviorDelegate {
   override val block: Block
     get() = this
 
-  val Unsafe.mcBlock: MCBlock
+  fun copy(): Block
 
-  val Unsafe.mcTile: MCBlockTile?
+  fun Unsafe.toMCBlock(): MCBlock
+
+  fun Unsafe.getMCTile(): MCBlockTile?
 
   fun Unsafe.useRef(world: World, pos: PositionGrid, asMutable: Boolean)
 
@@ -68,14 +70,14 @@ fun Block?.orEmpty(): Block = this ?: airBlockType.create()
 
 interface UnsafeExtBlock : Unsafe {
 
-  val BlockType.mc
-    get() = self.mc
+  fun BlockType.toMCBlockType() =
+    self.toMCBlockType()
 
-  val Block.mcBlock
-    get() = self.mcBlock
+  fun Block.toMCBlock() =
+    self.toMCBlock()
 
-  val Block.mcTile
-    get() = self.mcTile
+  fun Block.getMCTile() =
+    self.getMCTile()
 
   fun Block.useRef(world: World, pos: PositionGrid, asMutable: Boolean = world is WorldMutable) =
     self.useRef(world, pos, asMutable)

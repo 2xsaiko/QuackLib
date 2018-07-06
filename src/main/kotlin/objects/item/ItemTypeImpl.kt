@@ -21,8 +21,7 @@ class ItemTypeImpl(val conf: ItemConfiguration) : ItemType {
 
   override val registryName: ResourceLocation = conf.rl
 
-  override val Unsafe.mc: MCItemType
-    get() = item
+  override fun Unsafe.toMCItemType(): MCItemType = item
 
   companion object {
 
@@ -63,8 +62,7 @@ class ItemTypeImpl(val conf: ItemConfiguration) : ItemType {
 
     override val components: List<ItemComponent> = emptyList()
 
-    override val Unsafe.mc: MCItemType
-      get() = item
+    override fun Unsafe.toMCItemType(): MCItemType = item
 
   }
 

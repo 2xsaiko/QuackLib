@@ -128,7 +128,7 @@ class ClientProxy : CommonProxy() {
   fun registerModels(e: ModelRegistryEvent) {
     unsafe {
       itemTemplates.forEach {
-        ModelLoader.setCustomModelResourceLocation(item(it.rl).mc, 0, ModelResourceLocation(it.rl, "inventory"))
+        ModelLoader.setCustomModelResourceLocation(item(it.rl).toMCItemType(), 0, ModelResourceLocation(it.rl, "inventory"))
       }
     }
   }

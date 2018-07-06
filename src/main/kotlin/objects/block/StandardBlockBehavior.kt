@@ -46,7 +46,7 @@ class StandardBlockBehavior(val type: BlockType) : BlockBehavior {
   val cPlacement = getComponentsOfType<BlockComponentPlacement<BlockDataPart>>()
 
   private fun getContainer(block: Block) =
-    unsafe { (block.mcTile as?TileQuackLib)?.c }
+    unsafe { (block.getMCTile() as?TileQuackLib)?.c }
 
   override fun <T : BlockDataPart> getPart(block: Block, token: PartAccessToken<T>): T {
     if (token !is PartAccessTokenImpl<T>) error("Invalid token: $token")
@@ -152,10 +152,6 @@ class StandardBlockBehavior(val type: BlockType) : BlockBehavior {
 
   override fun initialize(block: Block, player: EntityPlayer, hand: EnumHand, hitSide: Facing, hitVec: Vec3) {
     cPlacement.forEach { it.initialize(block, player, hand, hitSide, hitVec) }
-  }
-
-  override fun copy(block: Block): Block {
-    TODO("not implemented")
   }
 
   private inline fun <reified T : BlockComponent> getComponentsOfType() =

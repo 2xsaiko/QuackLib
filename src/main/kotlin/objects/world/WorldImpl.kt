@@ -24,8 +24,7 @@ class WorldImpl(val world: MCWorld) : World {
     return BlockImpl.createExistingFromWorld(this, at)
   }
 
-  override val Unsafe.mc: MCWorld
-    get() = world
+  override fun Unsafe.toMCWorld(): MCWorld = world
 
 }
 
@@ -47,8 +46,8 @@ class WorldMutableImpl(val world: MCWorldMutable) : WorldMutable {
 
     return unsafe {
       block!!
-      var state = block.mcBlock
-      val tile = block.mcTile?.copy()
+      var state = block.toMCBlock()
+      val tile = block.getMCTile()?.copy()
       if (!world.setBlockState(mcpos, state)) false
       else {
         state = world.getBlockState(mcpos)
@@ -77,7 +76,7 @@ class WorldMutableImpl(val world: MCWorldMutable) : WorldMutable {
 
   override fun canPlaceBlockAt(block: Block, at: PositionGrid, hitSide: Facing, placer: Entity?, checkEntityCollision: Boolean): Boolean {
     return unsafe {
-      world.mayPlace(block.type.mc, at.toMCVec3i(), !checkEntityCollision, hitSide, placer)
+      world.mayPlace(block.type.toMCBlockType(), at.toMCVec3i(), !checkEntityCollision, hitSide, placer)
     }
   }
 
@@ -85,8 +84,7 @@ class WorldMutableImpl(val world: MCWorldMutable) : WorldMutable {
     world.playSound(player, pos.toMCVec3i(), sound, category, volume, pitch)
   }
 
-  override val Unsafe.mc: MCWorldMutable
-    get() = world
+  override fun Unsafe.toMCWorld(): MCWorldMutable = world
 
 }
 

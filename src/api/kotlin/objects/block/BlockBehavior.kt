@@ -61,6 +61,4 @@ interface BlockBehavior {
 
   fun initialize(block: Block, player: EntityPlayer, hand: EnumHand, hitSide: Facing, hitVec: Vec3)
 
-  fun copy(block: Block): Block
-
 }

@@ -16,9 +16,8 @@ class DeferredItemTypeImpl(override val registryName: ResourceLocation) : ItemTy
 
   var realInstance: ItemType? = null
 
-  override val Unsafe.mc: MCItemType
-    get() = unsafe { realInstance?.mc }
-            ?: crash()
+  override fun Unsafe.toMCItemType(): MCItemType = unsafe { realInstance?.toMCItemType() }
+                                                   ?: crash()
 
   override fun create(amount: Int, meta: Int): Item =
     realInstance?.create(amount, meta)

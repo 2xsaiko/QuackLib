@@ -38,7 +38,7 @@ class VanillaBlockBehavior(val type: MCBlockType) : BlockBehavior {
   override fun onActivated(block: Block, player: EntityPlayer, hand: EnumHand, facing: Facing, hitVec: Vec3): Boolean = unsafe {
     val worldMutable = block.worldMutable ?: return@unsafe false
 
-    type.onBlockActivated(worldMutable.mc, block.pos.toMCVec3i(), block.mcBlock, player, hand, facing, hitVec.x, hitVec.y, hitVec.z)
+    type.onBlockActivated(worldMutable.toMCWorld(), block.pos.toMCVec3i(), block.toMCBlock(), player, hand, facing, hitVec.x, hitVec.y, hitVec.z)
   }
 
   override fun onNeighborChanged(block: Block, side: EnumFacing) {
@@ -50,7 +50,7 @@ class VanillaBlockBehavior(val type: MCBlockType) : BlockBehavior {
   }
 
   override fun getFaceShape(self: Block, side: Facing): BlockFaceShape = unsafe {
-    self.mcBlock.getBlockFaceShape(self.world.mc, self.pos.toMCVec3i(), side)
+    self.toMCBlock().getBlockFaceShape(self.world.toMCWorld(), self.pos.toMCVec3i(), side)
   }
 
   override fun getSoundType(block: Block, entity: Entity?): SoundType {
@@ -58,7 +58,7 @@ class VanillaBlockBehavior(val type: MCBlockType) : BlockBehavior {
   }
 
   override fun getCollisionBoundingBox(block: Block): AxisAlignedBB? = unsafe {
-    block.mcBlock.getCollisionBoundingBox(block.world.mc, block.pos.toMCVec3i())
+    block.toMCBlock().getCollisionBoundingBox(block.world.toMCWorld(), block.pos.toMCVec3i())
   }
 
   override fun getCollisionBoundingBoxes(block: Block): List<AxisAlignedBB> {
@@ -75,7 +75,7 @@ class VanillaBlockBehavior(val type: MCBlockType) : BlockBehavior {
 
   override fun getDrops(block: Block, fortune: Int): List<Item> = unsafe {
     val list = NonNullList.create<MCItem>()
-    type.getDrops(list, block.world.mc, block.pos.toMCVec3i(), block.mcBlock, fortune)
+    type.getDrops(list, block.world.toMCWorld(), block.pos.toMCVec3i(), block.toMCBlock(), fortune)
     list.map { it.toItem() }
   }
 
@@ -100,7 +100,7 @@ class VanillaBlockBehavior(val type: MCBlockType) : BlockBehavior {
   }
 
   override fun isReplacable(block: Block): Boolean = unsafe {
-    type.isReplaceable(block.world.mc, block.pos.toMCVec3i())
+    type.isReplaceable(block.world.toMCWorld(), block.pos.toMCVec3i())
   }
 
   override fun isNormalBlock(): Boolean {
@@ -112,11 +112,7 @@ class VanillaBlockBehavior(val type: MCBlockType) : BlockBehavior {
   }
 
   override fun initialize(block: Block, player: EntityPlayer, hand: EnumHand, hitSide: Facing, hitVec: Vec3) {
-    TODO("not implemented")
-  }
 
-  override fun copy(block: Block): Block {
-    TODO("not implemented")
   }
 
 }

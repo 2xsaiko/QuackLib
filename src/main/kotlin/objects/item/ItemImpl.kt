@@ -12,7 +12,7 @@ class ItemImpl(
   val stack: ItemStack
 ) : Item {
 
-  constructor(type: ItemType, amount: Int, meta: Int) : this(type, ItemStack(unsafe { type.mc }, amount, meta))
+  constructor(type: ItemType, amount: Int, meta: Int) : this(type, ItemStack(unsafe { type.toMCItemType() }, amount, meta))
 
   constructor(type: ItemType) : this(type, 1, 0)
 
@@ -24,7 +24,9 @@ class ItemImpl(
       stack.count = value
     }
 
-  override val Unsafe.mc: MCItem
-    get() = stack
+  override fun copy(): Item =
+    ItemImpl(type, stack.copy())
+
+  override fun Unsafe.toMCItem(): MCItem = stack
 
 }

@@ -26,6 +26,7 @@ import therealfarfetchd.quacklib.api.tools.access
 import therealfarfetchd.quacklib.api.tools.isDebugMode
 import therealfarfetchd.quacklib.block.impl.BlockExtraDebug
 import therealfarfetchd.quacklib.block.impl.TileQuackLib
+import therealfarfetchd.quacklib.config.QuackLibConfig
 import therealfarfetchd.quacklib.core.APIImpl
 import therealfarfetchd.quacklib.core.ModID
 import therealfarfetchd.quacklib.core.QuackLib
@@ -49,6 +50,7 @@ import kotlin.reflect.jvm.javaMethod
 sealed class CommonProxy {
 
   open fun preInit(e: FMLPreInitializationEvent) {
+    QuackLibConfig
     MinecraftForge.EVENT_BUS.register(this)
     MinecraftForge.EVENT_BUS.register(APIImpl.multipartAPI)
     fixMods()
@@ -105,7 +107,7 @@ sealed class CommonProxy {
 
   open fun postInit(e: FMLPostInitializationEvent) {
     run {
-      val block = unsafe { block("qltestmod:wallplate").mc.blockState }
+      val block = unsafe { block("qltestmod:wallplate").toMCBlockType().blockState }
       val vc = ValidationContextImpl("Model for 'qltestmod:wallplate'")
       VanillaLoader.load(ResourceLocation("qltestmod", "wallplate"), block, vc)
       vc.printMessages()

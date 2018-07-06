@@ -40,8 +40,7 @@ class BlockTypeImpl(val conf: BlockConfiguration) : BlockType {
   override fun hasComponent(type: KClass<out BlockComponent>): Boolean =
     componentPresence.computeIfAbsent(type) { super.hasComponent(type) }
 
-  override val Unsafe.mc: MCBlockType
-    get() = block
+  override fun Unsafe.toMCBlockType(): MCBlockType = block
 
   override val registryName: ResourceLocation
     get() = conf.rl
@@ -98,8 +97,7 @@ class BlockTypeImpl(val conf: BlockConfiguration) : BlockType {
 
     override val behavior: BlockBehavior = VanillaBlockBehavior(block)
 
-    override val Unsafe.mc: MCBlockType
-      get() = block
+    override fun Unsafe.toMCBlockType(): MCBlockType = block
 
     override val registryName: ResourceLocation
       get() = block.registryName!!

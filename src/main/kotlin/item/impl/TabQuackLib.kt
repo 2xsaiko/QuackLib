@@ -8,11 +8,11 @@ import therealfarfetchd.quacklib.api.item.init.TabConfiguration
 
 class TabQuackLib(val def: TabConfiguration) : CreativeTabs(def.rl.toString()) {
 
-  override fun getTabIconItem(): ItemStack = unsafe { def.icon.create().mc }
+  override fun getTabIconItem(): ItemStack = unsafe { def.icon.create().toMCItem() }
 
   override fun displayAllRelevantItems(items: NonNullList<ItemStack>) {
     def.items.forEach {
-      val item = unsafe { it.mc }
+      val item = unsafe { it.toMCItemType() }
       when {
         item is ItemQuackLib -> item.getSubItems(this, items)
         item.creativeTab != null -> item.getSubItems(item.creativeTab, items)

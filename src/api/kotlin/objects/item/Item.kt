@@ -15,7 +15,7 @@ typealias MCItem = net.minecraft.item.ItemStack
 
 interface ItemType : Instantiable, Registered, ComponentHost<ItemComponent> {
 
-  val Unsafe.mc: MCItemType
+  fun Unsafe.toMCItemType(): MCItemType
 
   fun create(amount: Int = 1, meta: Int = 0): Item
 
@@ -23,9 +23,11 @@ interface ItemType : Instantiable, Registered, ComponentHost<ItemComponent> {
 
 interface Item : Instance<ItemType> {
 
-  val Unsafe.mc: MCItem
+  fun Unsafe.toMCItem(): MCItem
 
   var count: Int
+
+  fun copy(): Item
 
 }
 
@@ -41,10 +43,10 @@ fun Item?.orEmpty(): Item = this ?: airItemType.create()
 
 interface UnsafeExtItem : Unsafe {
 
-  val ItemType.mc
-    get() = self.mc
+  fun ItemType.toMCItemType() =
+    self.toMCItemType()
 
-  val Item.mc
-    get() = self.mc
+  fun Item.toMCItem() =
+    self.toMCItem()
 
 }
