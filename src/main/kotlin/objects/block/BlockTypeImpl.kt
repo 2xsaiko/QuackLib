@@ -45,6 +45,10 @@ class BlockTypeImpl(val conf: BlockConfiguration) : BlockType {
   override val registryName: ResourceLocation
     get() = conf.rl
 
+  override fun toString(): String {
+    return "Block '$registryName' (${components.size} components)"
+  }
+
   companion object {
 
     val map = mutableMapOf<ResourceLocation, BlockType>()
@@ -70,10 +74,6 @@ class BlockTypeImpl(val conf: BlockConfiguration) : BlockType {
 
     fun addBlock(type: BlockTypeImpl) {
       map[type.registryName] = type
-    }
-
-    fun associateBlock(type: BlockTypeImpl, mc: MCBlockType) {
-      type.block = mc
     }
 
   }
@@ -104,6 +104,10 @@ class BlockTypeImpl(val conf: BlockConfiguration) : BlockType {
 
     override val components: List<BlockComponent>
       get() = emptyList()
+
+    override fun toString(): String {
+      return "Block '$registryName'"
+    }
 
   }
 

@@ -48,7 +48,6 @@ object MultipartAPIImpl : MultipartAPIInternal {
   override fun registerBlock(e: RegistryEvent.Register<Block>, type: BlockTypeImpl) {
     val block = BlockQuackLib(type)
     val part = MultipartQuackLib(block)
-    BlockTypeImpl.associateBlock(type, block)
     e.registry.register(block)
     MultipartRegistry.INSTANCE.registerPartWrapper(block, part)
   }

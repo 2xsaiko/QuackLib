@@ -35,7 +35,7 @@ class ComponentPlaceBlock(val block: BlockType) : ItemComponentUse {
     val newBlock = prepareBlock(block, world, pos, player, hand, hitSide, hitVec)
 
     return if (stack.count > 0 && player.canPlayerEdit(pos.toMCVec3i(), hitSide, unsafe { stack.toMCItem() }) && world.canPlaceBlockAt(newBlock, pos, hitSide, null, true)) {
-      if (placeBlockAt(newBlock, stack, player, world, pos)) {
+      if (world.canPlaceBlockAt(newBlock, pos, hitSide, player) && placeBlockAt(newBlock, stack, player, world, pos)) {
         val b = world.getBlock(pos).orEmpty()
         val soundtype = b.getSoundType(player)
         world.playSound(player, pos, soundtype.placeSound, SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F)
@@ -47,18 +47,6 @@ class ComponentPlaceBlock(val block: BlockType) : ItemComponentUse {
       EnumActionResult.FAIL
     }
   }
-
-  //  private fun MCWorldMutable.mayPlace(block: BlockType, pos: PositionGrid, skipCollisionCheck: Boolean, hitSide: Facing, placer: Entity?, c: DataContainer): Boolean {
-  //    if (block !is BlockQuackLib) return mayPlace(block, pos, skipCollisionCheck, hitSide, placer)
-  //
-  //    val state = getBlockState(pos)
-  //    val aabb = if (skipCollisionCheck) null else block.getCollisionBoundingBox(BlockDataDirectRef(c, this, pos, state))
-  //    return if (aabb != null && !checkNoEntityCollision(aabb.offset(pos), placer)) {
-  //      false
-  //    } else {
-  //      state.block.isReplaceable(this, pos) && block.canPlaceBlockOnSide(this, pos, hitSide)
-  //    }
-  //  }
 
   companion object {
     fun placeBlockAt(block: Block, item: Item, player: EntityPlayer, world: WorldMutable, pos: PositionGrid): Boolean {

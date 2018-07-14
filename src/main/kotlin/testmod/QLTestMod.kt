@@ -15,13 +15,15 @@ object QLTestMod : BaseMod() {
   override fun initContent(ctx: InitializationContext) = ctx {
     if (!isDebugMode) return@ctx
 
-    // val testBlock = addBlock("test_block") {
-    //   material = Material.IRON
-    //   hardness = 0.5f
-    //   validTools = setOf(Tool("pickaxe", 2))
-    //
-    //   apply(ComponentTest())
-    // }
+    val testBlock = addBlock("test_block") {
+      material = Material.IRON
+      hardness = 0.5f
+      validTools = setOf(Tool("pickaxe", 2))
+    }
+
+    val testBlockItem = addPlacementItem(testBlock)
+
+    val testItem = addItem("test_item")
 
     val wallplate = addBlock("wallplate") {
       material = Material.ROCK
@@ -44,8 +46,9 @@ object QLTestMod : BaseMod() {
     val wallplateItem = addPlacementItem(wallplate)
 
     addTab("standard", item("minecraft:stone")) {
-      // include(testBlock)
+      include(testBlockItem)
       include(wallplateItem)
+      include(testItem)
       include("minecraft:diamond")
     }
   }

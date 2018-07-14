@@ -13,6 +13,10 @@ class CreatedItemTypeImpl(override val registryName: ResourceLocation, val def: 
 
   var realInstance: ItemType? = null
 
+  init {
+    instances += this
+  }
+
   override fun create(amount: Int, meta: Int): Item =
     realInstance?.create()
     ?: crash()
@@ -25,10 +29,10 @@ class CreatedItemTypeImpl(override val registryName: ResourceLocation, val def: 
                                                    ?: crash()
 
   @Suppress("NOTHING_TO_INLINE")
-  private inline fun crash(): Nothing = error("Item not resolved yet! Come back after init is done")
+  private inline fun crash(): Nothing = error("Item $registryName not resolved yet! Come back after init is done")
 
   companion object {
-    var instances: Set<DeferredItemTypeImpl> = emptySet()
+    var instances: Set<CreatedItemTypeImpl> = emptySet()
   }
 
 }

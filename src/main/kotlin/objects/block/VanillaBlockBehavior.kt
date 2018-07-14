@@ -65,8 +65,8 @@ class VanillaBlockBehavior(val type: MCBlockType) : BlockBehavior {
     TODO("not implemented")
   }
 
-  override fun getRaytraceBoundingBox(block: Block): AxisAlignedBB? {
-    TODO("not implemented")
+  override fun getRaytraceBoundingBox(block: Block): AxisAlignedBB? = unsafe {
+    block.toMCBlock().getBoundingBox(block.world.toMCWorld(), block.pos.toMCVec3i())
   }
 
   override fun getRaytraceBoundingBoxes(block: Block): List<AxisAlignedBB> {

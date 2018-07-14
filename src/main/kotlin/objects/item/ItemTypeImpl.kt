@@ -23,6 +23,10 @@ class ItemTypeImpl(val conf: ItemConfiguration) : ItemType {
 
   override fun Unsafe.toMCItemType(): MCItemType = item
 
+  override fun toString(): String {
+    return "Item '$registryName' (${components.size} components)"
+  }
+
   companion object {
 
     val map = mutableMapOf<ResourceLocation, ItemType>()
@@ -63,6 +67,10 @@ class ItemTypeImpl(val conf: ItemConfiguration) : ItemType {
     override val components: List<ItemComponent> = emptyList()
 
     override fun Unsafe.toMCItemType(): MCItemType = item
+
+    override fun toString(): String {
+      return "Item '$registryName'"
+    }
 
   }
 

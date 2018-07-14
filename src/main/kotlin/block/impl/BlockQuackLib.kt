@@ -36,6 +36,7 @@ import therealfarfetchd.quacklib.block.data.get
 import therealfarfetchd.quacklib.block.data.render.PropertyData
 import therealfarfetchd.quacklib.block.data.render.PropertyDataExtended
 import therealfarfetchd.quacklib.objects.block.BlockImpl
+import therealfarfetchd.quacklib.objects.block.BlockTypeImpl
 import therealfarfetchd.quacklib.objects.world.toWorld
 import java.util.*
 import kotlin.math.roundToInt
@@ -68,6 +69,7 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
   lateinit var extproperties: MapExtendedProperties
 
   init {
+    (type as? BlockTypeImpl)?.block = this
     registryName = type.registryName
     unlocalizedName = type.registryName.toString()
     type.hardness?.also {

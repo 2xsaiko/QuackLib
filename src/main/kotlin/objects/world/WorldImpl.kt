@@ -4,6 +4,7 @@ import net.minecraft.entity.Entity
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.util.SoundCategory
 import net.minecraft.util.SoundEvent
+import net.minecraft.util.math.AxisAlignedBB
 import therealfarfetchd.quacklib.api.core.Unsafe
 import therealfarfetchd.quacklib.api.core.extensions.toMCVec3i
 import therealfarfetchd.quacklib.api.core.unsafe
@@ -75,9 +76,18 @@ class WorldMutableImpl(val world: MCWorldMutable) : WorldMutable {
   }
 
   override fun canPlaceBlockAt(block: Block, at: PositionGrid, hitSide: Facing, placer: Entity?, checkEntityCollision: Boolean): Boolean {
-    return unsafe {
-      world.mayPlace(block.type.toMCBlockType(), at.toMCVec3i(), !checkEntityCollision, hitSide, placer)
+    if (checkEntityCollision) {
+      val bb = block.getCollisionBoundingBox()?.offset(at.toMCVec3i())
+      if (bb != null && checkForCollision(bb)) return false
     }
+
+    return unsafe {
+      world.mayPlace(block.type.toMCBlockType(), at.toMCVec3i(), true, hitSide, placer)
+    }
+  }
+
+  override fun checkForCollision(aabb: AxisAlignedBB, except: Entity?): Boolean {
+    return !world.checkNoEntityCollision(aabb, except)
   }
 
   override fun playSound(player: EntityPlayer, pos: PositionGrid, sound: SoundEvent, category: SoundCategory, volume: Float, pitch: Float) {

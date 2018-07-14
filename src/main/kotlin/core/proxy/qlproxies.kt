@@ -7,6 +7,7 @@ import net.minecraft.item.Item
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.RayTraceResult
 import net.minecraftforge.client.event.RenderGameOverlayEvent
+import net.minecraftforge.client.model.ModelLoaderRegistry
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.fml.common.FMLModContainer
@@ -38,8 +39,10 @@ import therealfarfetchd.quacklib.objects.block.DeferredBlockTypeImpl
 import therealfarfetchd.quacklib.objects.item.CreatedItemTypeImpl
 import therealfarfetchd.quacklib.objects.item.DeferredItemTypeImpl
 import therealfarfetchd.quacklib.objects.item.ItemTypeImpl
+import therealfarfetchd.quacklib.render.client.ModelLoaderQuackLib
 import therealfarfetchd.quacklib.render.vanilla.VanillaLoader
 import therealfarfetchd.quacklib.tools.ModContext
+import therealfarfetchd.quacklib.tools.progressbar
 import therealfarfetchd.quacklib.tools.registerAnnotatedCapabilities
 import java.io.IOException
 import java.io.InputStream
@@ -47,7 +50,7 @@ import java.lang.reflect.Method
 import kotlin.math.min
 import kotlin.reflect.jvm.javaMethod
 
-sealed class CommonProxy {
+sealed class QLCommonProxy {
 
   open fun preInit(e: FMLPreInitializationEvent) {
     QuackLibConfig
@@ -67,40 +70,48 @@ sealed class CommonProxy {
 
   @SubscribeEvent(priority = EventPriority.LOWEST)
   fun resolveItems(e: RegistryEvent.Register<Item>) {
-    val vc = ValidationContextImpl("Deferred objects")
-    DeferredItemTypeImpl.instances.forEach {
-      val type = ItemTypeImpl.getItem(it.registryName)
-      if (type == null) vc.error("Item ${it.registryName} does not exist!")
-      else it.realInstance = type
-    }
-    DeferredItemTypeImpl.isInit = false
+    progressbar("Resolving items", DeferredItemTypeImpl.instances.size + CreatedItemTypeImpl.instances.size) {
+      val vc = ValidationContextImpl("Deferred objects")
+      DeferredItemTypeImpl.instances.forEach {
+        step(it.registryName.toString())
+        val type = ItemTypeImpl.getItem(it.registryName)
+        if (type == null) vc.error("Item ${it.registryName} does not exist!")
+        else it.realInstance = type
+      }
+      DeferredItemTypeImpl.isInit = false
 
-    CreatedItemTypeImpl.instances.forEach {
-      val type = ItemTypeImpl.getItem(it.registryName)
-      if (type == null) vc.error("Item ${it.registryName} does not exist for created item! Something is horribly wrong...")
-      else it.realInstance = type
+      CreatedItemTypeImpl.instances.forEach {
+        step(it.registryName.toString())
+        val type = ItemTypeImpl.getItem(it.registryName)
+        if (type == null) vc.error("Item ${it.registryName} does not exist for created item! Something is horribly wrong...")
+        else it.realInstance = type
+      }
+      vc.printMessages()
+      if (!vc.isValid()) error("Could not resolve some deferred objects, can't proceed")
     }
-    vc.printMessages()
-    if (!vc.isValid()) error("Could not resolve some deferred objects, can't proceed")
   }
 
   @SubscribeEvent(priority = EventPriority.LOWEST)
   fun resolveBlocks(e: RegistryEvent.Register<Block>) {
-    val vc = ValidationContextImpl("Deferred objects")
-    DeferredBlockTypeImpl.instances.forEach {
-      val type = BlockTypeImpl.getBlock(it.registryName)
-      if (type == null) vc.error("Block ${it.registryName} does not exist!")
-      else it.realInstance = type
-    }
-    DeferredBlockTypeImpl.isInit = false
+    progressbar("Resolving blocks", DeferredBlockTypeImpl.instances.size + CreatedBlockTypeImpl.instances.size) {
+      val vc = ValidationContextImpl("Deferred objects")
+      DeferredBlockTypeImpl.instances.forEach {
+        step(it.registryName.toString())
+        val type = BlockTypeImpl.getBlock(it.registryName)
+        if (type == null) vc.error("Block ${it.registryName} does not exist!")
+        else it.realInstance = type
+      }
+      DeferredBlockTypeImpl.isInit = false
 
-    CreatedBlockTypeImpl.instances.forEach {
-      val type = BlockTypeImpl.getBlock(it.registryName)
-      if (type == null) vc.error("Block ${it.registryName} does not exist for created block! Something is horribly wrong...")
-      else it.realInstance = type
+      CreatedBlockTypeImpl.instances.forEach {
+        step(it.registryName.toString())
+        val type = BlockTypeImpl.getBlock(it.registryName)
+        if (type == null) vc.error("Block ${it.registryName} does not exist for created block! Something is horribly wrong...")
+        else it.realInstance = type
+      }
+      vc.printMessages()
+      if (!vc.isValid()) error("Could not resolve some deferred objects, can't proceed")
     }
-    vc.printMessages()
-    if (!vc.isValid()) error("Could not resolve some deferred objects, can't proceed")
   }
 
   open fun init(e: FMLInitializationEvent) {}
@@ -133,13 +144,14 @@ sealed class CommonProxy {
 
 }
 
-class ClientProxy : CommonProxy() {
+class QLClientProxy : QLCommonProxy() {
 
   lateinit var mc: Minecraft
 
   override fun preInit(e: FMLPreInitializationEvent) {
     super.preInit(e)
     mc = Minecraft.getMinecraft()
+    ModelLoaderRegistry.registerLoader(ModelLoaderQuackLib)
   }
 
   @SubscribeEvent
@@ -172,4 +184,4 @@ class ClientProxy : CommonProxy() {
 
 }
 
-class ServerProxy : CommonProxy()
+class QLServerProxy : QLCommonProxy()

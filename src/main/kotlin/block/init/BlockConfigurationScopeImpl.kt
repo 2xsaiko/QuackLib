@@ -28,10 +28,12 @@ class BlockConfigurationScopeImpl(modid: String, override val name: String, val 
   override var item: ItemType? = null
 
   override var components: List<BlockComponent> = emptyList()
+  override val renderers: List<BlockRenderer> = emptyList()
 
   override var isMultipart: Boolean = false
     private set
 
+  @Suppress("UNCHECKED_CAST")
   override fun <T : BlockComponent> apply(component: T): AppliedComponent<T> {
     components += component
     component.onApplied(this)
@@ -43,7 +45,9 @@ class BlockConfigurationScopeImpl(modid: String, override val name: String, val 
     BlockDataLinkScopeImpl().also(op)
   }
 
-  override fun apply(renderer: BlockRenderer) {}
+  override fun apply(renderer: BlockRenderer) {
+    // TODO
+  }
 
   fun validate(): Boolean {
     val vc = ValidationContextImpl("Block $name")

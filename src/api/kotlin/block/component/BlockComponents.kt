@@ -45,6 +45,15 @@ interface BlockComponentCapability : TE {
 
 }
 
+interface BlockComponentCapabilityMulti : TE {
+
+  fun <T> hasCapability(block: Block, capability: Capability<T>, edge: ConnectionMask): Boolean =
+    getCapability(block, capability, edge) != null
+
+  fun <T> getCapability(block: Block, capability: Capability<T>, edge: ConnectionMask): T?
+
+}
+
 interface BlockComponentData<T : BlockDataPart> : TE, Reg {
 
   var part: PartAccessToken<T>

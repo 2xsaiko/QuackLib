@@ -29,4 +29,8 @@ class ItemImpl(
 
   override fun Unsafe.toMCItem(): MCItem = stack
 
+  override fun toString(): String {
+    return "${count}×${type.registryName}:${stack.metadata} ($type)"
+  }
+
 }

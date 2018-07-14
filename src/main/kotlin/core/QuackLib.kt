@@ -8,7 +8,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import org.apache.logging.log4j.Logger
 import therealfarfetchd.quacklib.api.core.mod.KotlinAdapter
 import therealfarfetchd.quacklib.api.core.modinterface.QuackLibAPI
-import therealfarfetchd.quacklib.core.proxy.CommonProxy
+import therealfarfetchd.quacklib.core.proxy.QLCommonProxy
 import therealfarfetchd.quacklib.api.tools.Logger as logger
 
 const val ModID = "quacklib"
@@ -19,9 +19,9 @@ object QuackLib {
   val Logger: Logger
 
   @SidedProxy(
-    clientSide = "therealfarfetchd.quacklib.core.proxy.ClientProxy",
-    serverSide = "therealfarfetchd.quacklib.core.proxy.ServerProxy")
-  lateinit var proxy: CommonProxy
+    clientSide = "therealfarfetchd.quacklib.core.proxy.QLClientProxy",
+    serverSide = "therealfarfetchd.quacklib.core.proxy.QLServerProxy")
+  lateinit var proxy: QLCommonProxy
 
   init {
     QuackLibAPI.impl = APIImpl

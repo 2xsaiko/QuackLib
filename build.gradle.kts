@@ -67,8 +67,8 @@ tasks.withType<KotlinCompile> {
 
 repositories {
   mavenCentral()
-  maven("https://modmaven.k-4u.nl/")
   maven("http://maven.shadowfacts.net/")
+  maven("https://modmaven.k-4u.nl/")
 }
 
 dependencies {

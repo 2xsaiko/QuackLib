@@ -1,12 +1,14 @@
 package therealfarfetchd.quacklib.render.vanilla
 
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms
 import therealfarfetchd.math.Mat4
 import therealfarfetchd.math.Vec3
-import therealfarfetchd.math.times
 
 interface Transformation {
 
   fun transformPoint(type: TransformType, v: Vec3): Vec3
+
+  fun getTransformationMatrix(type: TransformType): Mat4?
 
 }
 
@@ -14,11 +16,15 @@ object IdentityTransformation : Transformation {
 
   override fun transformPoint(type: TransformType, v: Vec3): Vec3 = v
 
+  override fun getTransformationMatrix(type: TransformType): Mat4 = Mat4.Identity
+
 }
 
 data class MatrixTransformation(val mat: Mat4) : Transformation {
 
   override fun transformPoint(type: TransformType, v: Vec3): Vec3 = mat * v
+
+  override fun getTransformationMatrix(type: TransformType): Mat4 = mat
 
 }
 
@@ -26,6 +32,10 @@ data class MultiTransformation(val components: Map<TransformType, Transformation
 
   override fun transformPoint(type: TransformType, v: Vec3): Vec3 {
     return components[type]?.transformPoint(type, v) ?: v
+  }
+
+  override fun getTransformationMatrix(type: TransformType): Mat4? {
+    return components[type]?.getTransformationMatrix(type)
   }
 
 }
@@ -49,3 +59,6 @@ enum class TransformType(val jname: String) {
   }
 
 }
+
+fun ItemCameraTransforms.TransformType.toTransformType() =
+  TransformType.valueOf(this.name)

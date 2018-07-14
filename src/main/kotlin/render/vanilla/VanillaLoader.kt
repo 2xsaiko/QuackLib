@@ -7,11 +7,11 @@ import net.minecraft.block.state.IBlockState
 import net.minecraft.util.ResourceLocation
 import therealfarfetchd.math.Mat4
 import therealfarfetchd.math.Vec3
-import therealfarfetchd.math.times
 import therealfarfetchd.quacklib.api.core.init.ValidationContext
 import therealfarfetchd.quacklib.api.core.modinterface.logException
 import therealfarfetchd.quacklib.api.core.modinterface.openResource
 import therealfarfetchd.quacklib.api.render.ModelLoader
+import therealfarfetchd.quacklib.core.init.ValidationContextImpl
 
 /**
  * A model loader that loads vanilla (JSON) models/blockstates.
@@ -142,6 +142,10 @@ object VanillaLoader : ModelLoader {
     }
 
     val rl = ResourceLocation(tree.asString)
+    return loadTransformFromFile0(rl, path, vc)
+  }
+
+  private fun loadTransformFromFile0(rl: ResourceLocation, path: JsonPathSpec, vc: ValidationContext): Transformation {
     val fixed = ResourceLocation(rl.resourceDomain, "transform/${rl.resourcePath}.json")
     val path1 = JsonPathSpec("${rl.resourcePath}.json")
 
@@ -167,6 +171,17 @@ object VanillaLoader : ModelLoader {
     }
 
     return loadTransformRoot(trtree, path1, vc)
+  }
+
+  fun loadTransformFromResource(rl: ResourceLocation): Transformation? {
+    val path = JsonPathSpec("<none>")
+    val vc = ValidationContextImpl("Transformation $rl")
+    val r = loadTransformFromFile0(rl, path, vc)
+    if (!vc.isValid()) {
+      vc.printMessages()
+      return null
+    }
+    return r
   }
 
   private fun loadTransformMatrixPacked(tree: JsonElement, path: JsonPathSpec, vc: ValidationContext): Transformation {
@@ -222,8 +237,8 @@ object VanillaLoader : ModelLoader {
     val rotation = tree["rotation"]?.let { loadRotation(it, path.subtree("rotation"), vc) }
                    ?: Mat4.Identity
 
-    val scale = tree["translation"]?.let { loadScale(it, path.subtree("scale"), vc) }
-                ?: Vec3.Origin
+    val scale = tree["scale"]?.let { loadScale(it, path.subtree("scale"), vc) }
+                ?: Vec3(1, 1, 1)
 
     val postRotation = tree["post-rotation"]?.let { loadRotation(it, path.subtree("post-rotation"), vc) }
                        ?: Mat4.Identity
@@ -336,6 +351,12 @@ object VanillaLoader : ModelLoader {
     val pVariants = partSpec.flatMap { loadVariantPart(tree[it], it, path.subtree(it), block, vc) }.toMap()
     val variants = fVariants + pVariants
   }
+  //
+  //  fun loadVariantPart0(tree: JsonElement, property: String, path: JsonPathSpec, block: BlockStateContainer, vc: ValidationContext): List<Pair<VariantPart<*>, Unit>> {
+  //    val type = run{
+  //
+  //    }
+  //  }
 
   @Suppress("UNCHECKED_CAST")
   fun loadVariantPart(tree: JsonElement, property: String, path: JsonPathSpec, block: BlockStateContainer, vc: ValidationContext): List<Pair<VariantPart<*>, Unit>> {

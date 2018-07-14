@@ -67,6 +67,10 @@ class BlockImpl(
     this@BlockImpl.tile = tile
   }
 
+  override fun toString(): String {
+    return "$state;$tile ($type)"
+  }
+
   companion object {
 
     fun createExistingFromWorld(world: World, pos: PositionGrid): BlockImpl {
