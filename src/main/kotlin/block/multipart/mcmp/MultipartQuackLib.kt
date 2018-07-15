@@ -10,7 +10,6 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
-import net.minecraft.world.World
 import therealfarfetchd.math.Vec3
 import therealfarfetchd.quacklib.api.block.component.BlockComponentMultipart
 import therealfarfetchd.quacklib.api.block.component.BlockComponentOcclusion
@@ -86,11 +85,11 @@ class MultipartQuackLib(private val block: BlockQuackLib) : IMultipart {
     return BlockImpl(block(part.state.block), part.partWorld.toWorld(), part.partPos.toVec3i(), part.state, part.tile.tileEntity)
   }
 
-  override fun canPlacePartAt(world: World, pos: BlockPos): Boolean {
+  override fun canPlacePartAt(world: MCWorldMutable, pos: BlockPos): Boolean {
     return block.type.behavior.canPlaceBlockAt(world.toWorld(), pos.toVec3i(), null)
   }
 
-  override fun canPlacePartOnSide(world: World, pos: BlockPos, side: EnumFacing, slot: IPartSlot): Boolean {
+  override fun canPlacePartOnSide(world: MCWorldMutable, pos: BlockPos, side: EnumFacing, slot: IPartSlot): Boolean {
     return block.type.behavior.canPlaceBlockAt(world.toWorld(), pos.toVec3i(), side)
   }
 

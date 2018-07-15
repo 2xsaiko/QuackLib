@@ -5,6 +5,7 @@ import net.minecraft.client.particle.ParticleDigging
 import net.minecraft.client.particle.ParticleManager
 import net.minecraft.entity.Entity
 import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.util.BlockRenderLayer
 import net.minecraft.util.EnumHand
 import net.minecraft.util.NonNullList
 import net.minecraft.util.math.AxisAlignedBB
@@ -165,6 +166,10 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
     if (side == null) return false
 
     return getBlockImpl(world, pos).canConnectRedstone(side.opposite)
+  }
+
+  override fun getBlockLayer(): BlockRenderLayer {
+    return BlockRenderLayer.CUTOUT
   }
 
   @Suppress("UNCHECKED_CAST")

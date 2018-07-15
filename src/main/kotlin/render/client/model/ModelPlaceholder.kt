@@ -13,15 +13,18 @@ import therealfarfetchd.quacklib.api.objects.block.BlockType
 import therealfarfetchd.quacklib.api.objects.block.MCBlockType
 import therealfarfetchd.quacklib.api.objects.item.ItemType
 import therealfarfetchd.quacklib.core.ModID
+import therealfarfetchd.quacklib.render.client.model.objects.InflatedTexture
 import therealfarfetchd.quacklib.render.client.model.objects.SimpleTexturedBox
+import therealfarfetchd.quacklib.render.texture.AtlasTextureImpl
 import java.util.function.Function
 
 private val Placeholder = ResourceLocation(ModID, "pablo")
 private val Textures = setOf(Placeholder)
 
-class ModelPlaceholderBlock(val rl: ResourceLocation, val block: BlockType) : IModel {
+class ModelPlaceholderBlock(val rl: ResourceLocation, val bb: AxisAlignedBB) : IModel {
 
-  val bb: AxisAlignedBB = block.create().getCollisionBoundingBox() ?: MCBlockType.FULL_BLOCK_AABB
+  constructor(rl: ResourceLocation, block: BlockType) : this(rl, block.create().getCollisionBoundingBox()
+                                                                 ?: MCBlockType.FULL_BLOCK_AABB)
 
   override fun getTextures(): Collection<ResourceLocation> = Textures
 
@@ -30,7 +33,7 @@ class ModelPlaceholderBlock(val rl: ResourceLocation, val block: BlockType) : IM
     return BakedModelBuilder(state, format) {
       particleTexture = tex
       transformation = BakedModelBuilder.defaultBlock
-      addQuads(SimpleTexturedBox(Vec3(bb.minX.toFloat(), bb.minY.toFloat(), bb.minZ.toFloat()), Vec3(bb.maxX.toFloat(), bb.maxY.toFloat(), bb.maxZ.toFloat()), tex))
+      addQuads(SimpleTexturedBox(Vec3(bb.minX.toFloat(), bb.minY.toFloat(), bb.minZ.toFloat()), Vec3(bb.maxX.toFloat(), bb.maxY.toFloat(), bb.maxZ.toFloat()), AtlasTextureImpl(tex), true))
     }
   }
 
@@ -45,7 +48,7 @@ class ModelPlaceholderItem(val rl: ResourceLocation, val item: ItemType) : IMode
     return BakedModelBuilder(state, format) {
       particleTexture = tex
       transformation = BakedModelBuilder.defaultItem
-      addQuads(SimpleTexturedBox(Vec3(0f, 0f, 7.5f / 16f), Vec3(1f, 1f, 8.5f / 16f), tex))
+      addQuads(InflatedTexture(AtlasTextureImpl(tex)))
     }
   }
 

@@ -39,7 +39,7 @@ class ValidationContextImpl(val thing: String) : ValidationContext {
       }
       Logger.log(level, it.text)
     }
-    if (!isValid()) Logger.fatal("Errors exist for '$thing', can't proceed")
+    if (!isValid()) Logger.fatal("Errors exist for '$thing'")
   }
 
   fun isValid() = messages.none { it.sev == Severity.Error }

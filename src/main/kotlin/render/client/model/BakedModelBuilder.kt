@@ -17,6 +17,8 @@ import org.apache.commons.lang3.tuple.Pair
 import therealfarfetchd.math.Vec3
 import therealfarfetchd.quacklib.api.core.extensions.toMatrix4f
 import therealfarfetchd.quacklib.api.core.extensions.toVec3
+import therealfarfetchd.quacklib.api.render.Quad
+import therealfarfetchd.quacklib.render.bake
 import therealfarfetchd.quacklib.render.vanilla.IdentityTransformation
 import therealfarfetchd.quacklib.render.vanilla.Transformation
 import therealfarfetchd.quacklib.render.vanilla.VanillaLoader

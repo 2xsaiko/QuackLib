@@ -1,12 +1,12 @@
 package therealfarfetchd.quacklib.render.client.model.objects
 
-import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.util.EnumFacing.*
 import therealfarfetchd.math.Vec3
-import therealfarfetchd.quacklib.render.client.model.Quad
-import therealfarfetchd.quacklib.render.client.model.mkQuad
+import therealfarfetchd.quacklib.api.render.Quad
+import therealfarfetchd.quacklib.api.render.mkQuad
+import therealfarfetchd.quacklib.api.render.texture.AtlasTexture
 
-class SimpleTexturedBox(from: Vec3, to: Vec3, val tex: TextureAtlasSprite) : Iterable<Quad> {
+class SimpleTexturedBox(from: Vec3, to: Vec3, val tex: AtlasTexture, rotate: Boolean = false) : Iterable<Quad> {
 
   @Suppress("UnnecessaryVariable")
   val quads = run {
@@ -20,12 +20,12 @@ class SimpleTexturedBox(from: Vec3, to: Vec3, val tex: TextureAtlasSprite) : Ite
     // val p8 = Vec3(to.x, to.y, from.z)
 
     listOf(
-      mkQuad(tex, DOWN, p7, p5),
-      mkQuad(tex, UP, p2, p4),
-      mkQuad(tex, NORTH, p7, p2),
-      mkQuad(tex, SOUTH, p4, p5),
-      mkQuad(tex, WEST, p4, p7),
-      mkQuad(tex, EAST, p2, p5)
+      mkQuad(tex, DOWN, p7, p5, rotate = rotate),
+      mkQuad(tex, UP, p2, p4, rotate = rotate),
+      mkQuad(tex, NORTH, p7, p2, rotate = rotate),
+      mkQuad(tex, SOUTH, p4, p5, rotate = rotate),
+      mkQuad(tex, WEST, p4, p7, rotate = rotate),
+      mkQuad(tex, EAST, p2, p5, rotate = rotate)
     )
   }
 
