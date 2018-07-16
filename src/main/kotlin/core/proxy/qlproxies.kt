@@ -33,6 +33,7 @@ import therealfarfetchd.quacklib.core.ModID
 import therealfarfetchd.quacklib.core.QuackLib
 import therealfarfetchd.quacklib.core.QuackLib.Logger
 import therealfarfetchd.quacklib.core.init.ValidationContextImpl
+import therealfarfetchd.quacklib.notification.NotificationQuackLib
 import therealfarfetchd.quacklib.objects.block.BlockTypeImpl
 import therealfarfetchd.quacklib.objects.block.CreatedBlockTypeImpl
 import therealfarfetchd.quacklib.objects.block.DeferredBlockTypeImpl
@@ -64,6 +65,7 @@ sealed class QLCommonProxy {
     ModContext.dissociate("therealfarfetchd.quacklib.tools", recursive = true)
 
     GameRegistry.registerTileEntity(TileQuackLib::class.java, ResourceLocation(ModID, "tile_quacklib"))
+    GameRegistry.registerTileEntity(TileQuackLib.Tickable::class.java, ResourceLocation(ModID, "tile_quacklib_tickable"))
 
     registerAnnotatedCapabilities(e.asmData)
   }
@@ -142,6 +144,8 @@ sealed class QLCommonProxy {
     return cls.classLoader.getResourceAsStream("/assets/${rl.resourceDomain}/${rl.resourcePath}")
   }
 
+  abstract fun addNotification(title: String, body: String?, expireTime: Long, icon: ResourceLocation?)
+
 }
 
 class QLClientProxy : QLCommonProxy() {
@@ -182,6 +186,14 @@ class QLClientProxy : QLCommonProxy() {
     }
   }
 
+  override fun addNotification(title: String, body: String?, expireTime: Long, icon: ResourceLocation?) {
+    mc.toastGui.add(NotificationQuackLib(title, body, expireTime, icon))
+  }
+
 }
 
-class QLServerProxy : QLCommonProxy()
+class QLServerProxy : QLCommonProxy() {
+
+  override fun addNotification(title: String, body: String?, expireTime: Long, icon: ResourceLocation?) {}
+
+}

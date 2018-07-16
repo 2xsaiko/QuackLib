@@ -27,6 +27,10 @@ interface WorldMutable : World {
 
   val isClient: Boolean
 
+  val worldTime: Long
+
+  val totalTime: Long
+
   fun setBlock(at: PositionGrid, block: Block?): Boolean
 
   fun redraw(from: PositionGrid, to: PositionGrid = from)

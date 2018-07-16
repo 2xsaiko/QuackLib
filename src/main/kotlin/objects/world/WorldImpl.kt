@@ -35,6 +35,12 @@ class WorldMutableImpl(val world: MCWorldMutable) : WorldMutable {
 
   override val isClient: Boolean = world.isRemote
 
+  override val worldTime: Long
+    get() = world.worldTime
+
+  override val totalTime: Long
+    get() = world.totalWorldTime
+
   override fun getBlock(at: PositionGrid): Block? {
     if (world.isAirBlock(at.toMCVec3i())) return null
     return BlockImpl.createExistingFromWorld(this, at)
@@ -43,10 +49,9 @@ class WorldMutableImpl(val world: MCWorldMutable) : WorldMutable {
   override fun setBlock(at: PositionGrid, block: Block?): Boolean {
     val mcpos = at.toMCVec3i()
 
-    if (block == null) world.setBlockToAir(mcpos)
+    if (block == null) return world.setBlockToAir(mcpos)
 
     return unsafe {
-      block!!
       var state = block.toMCBlock()
       val tile = block.getMCTile()?.copy()
       if (!world.setBlockState(mcpos, state)) false

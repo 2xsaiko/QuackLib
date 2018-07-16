@@ -54,6 +54,8 @@ interface QuackLibAPI {
 
   fun <T : Any> registerCapability(type: KClass<T>)
 
+  fun notifySend(title: String, body: String?, expireTime: Long, icon: ResourceLocation?)
+
   fun <R> unsafeOps(op: (UnsafeScope) -> R): R
 
   fun logException(e: Throwable)

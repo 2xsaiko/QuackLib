@@ -23,12 +23,12 @@ open class TileQuackLib() : TileEntity() {
     setConfiguration(type)
   }
 
-  open fun setConfiguration(type: BlockType) {
+  fun setConfiguration(type: BlockType) {
     c.setType(type)
     updateComponents()
   }
 
-  fun updateComponents() {
+  open fun updateComponents() {
     cCapability = c.getComponentsOfType()
   }
 
@@ -92,8 +92,8 @@ open class TileQuackLib() : TileEntity() {
 
     var cTickable: List<BlockComponentTickable> = emptyList()
 
-    override fun setConfiguration(type: BlockType) {
-      super.setConfiguration(type)
+    override fun updateComponents() {
+      super.updateComponents()
       cTickable = c.getComponentsOfType()
     }
 

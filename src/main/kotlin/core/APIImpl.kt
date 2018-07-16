@@ -96,6 +96,10 @@ object APIImpl : QuackLibAPI {
     return ExportedValueImpl { data -> op(target, data) }
   }
 
+  override fun notifySend(title: String, body: String?, expireTime: Long, icon: ResourceLocation?) {
+    QuackLib.proxy.addNotification(title, body, expireTime, icon)
+  }
+
   override fun <T : Any> registerCapability(type: KClass<T>) {
     therealfarfetchd.quacklib.tools.registerCapability(type)
   }

@@ -7,24 +7,31 @@ import net.minecraftforge.client.model.ICustomModelLoader
 import net.minecraftforge.client.model.IModel
 import therealfarfetchd.quacklib.api.core.modinterface.block
 import therealfarfetchd.quacklib.api.core.modinterface.item
+import therealfarfetchd.quacklib.api.core.modinterface.logException
 import therealfarfetchd.quacklib.objects.block.BlockTypeImpl
 import therealfarfetchd.quacklib.objects.item.ItemTypeImpl
+import therealfarfetchd.quacklib.render.client.model.ModelError
 import therealfarfetchd.quacklib.render.client.model.ModelPlaceholderBlock
 import therealfarfetchd.quacklib.render.client.model.ModelPlaceholderItem
 
 object ModelLoaderQuackLib : ICustomModelLoader {
 
   override fun loadModel(modelLocation: ResourceLocation): IModel {
-    val mt = getModelTypeForRL(modelLocation)
+    try {
+      val mt = getModelTypeForRL(modelLocation)
 
-    return when (mt) {
-      is ModelLoaderQuackLib.ModelType.Block -> {
-        ModelPlaceholderBlock(modelLocation, mt.block)
+      return when (mt) {
+        is ModelLoaderQuackLib.ModelType.Block -> {
+          ModelPlaceholderBlock(modelLocation, mt.block)
+        }
+        is ModelLoaderQuackLib.ModelType.Item -> {
+          ModelPlaceholderItem(modelLocation, mt.item)
+        }
+        null -> error("unexpected state")
       }
-      is ModelLoaderQuackLib.ModelType.Item -> {
-        ModelPlaceholderItem(modelLocation, mt.item)
-      }
-      null -> error("unexpected state")
+    } catch (e: Exception) {
+      logException(e)
+      return ModelError
     }
   }
 

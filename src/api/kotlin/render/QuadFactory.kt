@@ -60,8 +60,8 @@ private fun getuvfromxyz(facing: Facing, from: Vec3, to: Vec3): Pair<Vec2, Vec2>
 private fun postprocQuad(f: Facing, q: Quad, rotate: Boolean): Quad = when (f) {
   DOWN -> q
   UP -> q
-  NORTH -> q.rotatedTexture90.runIf(rotate) { mirrorTextureX }
-  SOUTH -> q.rotatedTexture90.runIf(rotate) { mirrorTextureX.mirrorTextureY }
-  WEST -> q.runIf(rotate) { mirrorTextureX }
-  EAST -> q
+  NORTH -> q.rotatedTexture90
+  SOUTH -> q.rotatedTexture90.runIf(rotate) { mirrorTextureY }
+  WEST -> q.mirrorTextureY.runIf(rotate) { mirrorTextureX }
+  EAST -> q.mirrorTextureY
 }

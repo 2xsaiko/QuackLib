@@ -28,3 +28,6 @@ inline fun logException(e: Throwable) =
 
 inline fun openResource(rl: ResourceLocation, respectResourcePack: Boolean = false): InputStream? =
   QuackLibAPI.impl.openResource(rl, respectResourcePack)
+
+inline fun notifySend(title: String, body: String? = null, expireTime: Long = 5000, icon: ResourceLocation? = null) =
+  QuackLibAPI.impl.notifySend(title, body, expireTime, icon)
