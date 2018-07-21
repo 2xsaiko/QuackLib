@@ -19,6 +19,7 @@ import net.minecraftforge.client.event.DrawBlockHighlightEvent
 import net.minecraftforge.client.event.ModelRegistryEvent
 import net.minecraftforge.client.event.TextureStitchEvent
 import net.minecraftforge.client.model.ModelLoader
+import net.minecraftforge.client.model.ModelLoaderRegistry
 import net.minecraftforge.fml.client.registry.ClientRegistry
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
@@ -73,6 +74,8 @@ class Proxy : Proxy() {
     ClientRegistry.bindTileEntitySpecialRenderer(QBContainerTileInventory::class.java, QBContainerTileRenderer)
     if (FeatureManager.isRequired(DefaultFeatures.MCMultipartCompat))
       ClientRegistry.bindTileEntitySpecialRenderer(QBContainerTileMultipart::class.java, QBContainerTileRenderer)
+
+    ModelLoaderRegistry.registerLoader(ModelLoaderQL)
   }
 
   override fun init(e: FMLInitializationEvent) {
