@@ -2,6 +2,7 @@ package therealfarfetchd.quacklib.client.api.model
 
 import net.minecraft.client.renderer.block.model.BakedQuad
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
+import net.minecraft.client.renderer.vertex.VertexFormat
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraftforge.common.property.IExtendedBlockState
@@ -9,9 +10,9 @@ import net.minecraftforge.common.property.IExtendedBlockState
 interface IModel {
   val particleTexture: TextureAtlasSprite
 
-  fun bakeQuads(face: EnumFacing?, state: IExtendedBlockState): List<BakedQuad>
+  fun bakeQuads(face: EnumFacing?, state: IExtendedBlockState, vf: VertexFormat): List<BakedQuad>
 
-  fun bakeItemQuads(face: EnumFacing?, stack: ItemStack): List<BakedQuad>
+  fun bakeItemQuads(face: EnumFacing?, stack: ItemStack, vf: VertexFormat): List<BakedQuad>
 
   fun getParticleTexture(state: IExtendedBlockState): TextureAtlasSprite = particleTexture
 

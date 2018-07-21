@@ -3,6 +3,7 @@ package therealfarfetchd.quacklib.client.api.model
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.block.model.BakedQuad
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
+import net.minecraft.client.renderer.vertex.VertexFormat
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.math.MathHelper
@@ -21,16 +22,16 @@ import kotlin.math.PI
 abstract class SimpleModel : IModel {
   protected val mc = Minecraft.getMinecraft()
 
-  override fun bakeQuads(face: EnumFacing?, state: IExtendedBlockState): List<BakedQuad> {
+  override fun bakeQuads(face: EnumFacing?, state: IExtendedBlockState, vf: VertexFormat): List<BakedQuad> {
     val builder = ModelBuilder(face)
     addShapes(state, builder)
-    return filterCategories(face, builder.quads).map(Quad::bake)
+    return filterCategories(face, builder.quads).map { it.bake(vf) }
   }
 
-  override fun bakeItemQuads(face: EnumFacing?, stack: ItemStack): List<BakedQuad> {
+  override fun bakeItemQuads(face: EnumFacing?, stack: ItemStack, vf: VertexFormat): List<BakedQuad> {
     val builder = ModelBuilder(face)
     addShapes(stack, builder)
-    return filterCategories(face, builder.quads).map(Quad::bake)
+    return filterCategories(face, builder.quads).map { it.bake(vf) }
   }
 
   private fun filterCategories(face: EnumFacing?, quads: List<Quad>): List<Quad> {

@@ -3,7 +3,10 @@ package therealfarfetchd.quacklib.client.api.render
 import net.minecraft.client.renderer.block.model.BakedQuad
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
+import net.minecraft.client.renderer.vertex.VertexFormat
+import net.minecraft.client.renderer.vertex.VertexFormatElement
 import net.minecraft.util.EnumFacing
+import net.minecraftforge.client.model.pipeline.IVertexConsumer
 import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad
 import therealfarfetchd.quacklib.common.api.extensions.RGBA
 import therealfarfetchd.quacklib.common.api.util.math.Mat4
@@ -21,32 +24,38 @@ data class Quad(
 
   val facing: EnumFacing by lazy { EnumFacing.getFacingFromVector(normal.xf, normal.yf, normal.zf) }
 
-  fun bake(): BakedQuad {
+  fun bake(format: VertexFormat = DefaultVertexFormats.ITEM): BakedQuad {
+    val builder = UnpackedBakedQuad.Builder(format)
+    pipe(builder)
+    return builder.build()
+  }
+
+  fun pipe(c: IVertexConsumer) {
     val vertices = (0..3).map { i ->
       val (xyz, uv) = shuf(i)
       xyz to Vec2(texture.getInterpolatedU(uv.xf * 16.0).toDouble(), texture.getInterpolatedV(uv.yf * 16.0).toDouble())
     }
 
-    val builder = UnpackedBakedQuad.Builder(DefaultVertexFormats.ITEM)
-    builder.setApplyDiffuseLighting(true)
-    builder.setQuadOrientation(facing)
+    c.setApplyDiffuseLighting(true)
+    c.setQuadOrientation(facing)
 
-    builder.setQuadTint(-1)
-    builder.setTexture(texture)
+    c.setQuadTint(-1)
+    c.setTexture(texture)
 
     for ((xyz, uv) in vertices) {
-      builder.put(0, xyz.xf, xyz.yf, xyz.zf, 1f)
-      builder.put(1,
-        maxOf(0f, minOf(color.first, 1f)),
-        maxOf(0f, minOf(color.second, 1f)),
-        maxOf(0f, minOf(color.third, 1f)),
-        maxOf(0f, minOf(color.fourth, 1f)))
-      builder.put(2, uv.xf, uv.yf, 0f, 1f)
-      builder.put(3, normal.xf, normal.yf, normal.zf, 0f)
-      builder.put(4)
+      for ((i, el) in c.vertexFormat.elements.withIndex()) {
+        when (el.usage) {
+          VertexFormatElement.EnumUsage.POSITION -> c.put(i, xyz.xf, xyz.yf, xyz.zf, 1f)
+          VertexFormatElement.EnumUsage.NORMAL -> c.put(i, normal.xf, normal.yf, normal.zf, 0f)
+          VertexFormatElement.EnumUsage.COLOR -> c.put(i, color.first, color.second, color.third, color.fourth)
+          VertexFormatElement.EnumUsage.UV -> when (el.index) {
+            0 -> c.put(i, uv.xf, uv.yf, 0f, 1f) // texture
+            1 -> c.put(i, 0f, 0f, 0f, 1f) // lightmap
+          }
+          else -> c.put(i)
+        }
+      }
     }
-
-    return builder.build()
   }
 
   private fun ftoi(float: Float) = (float * 255).toInt()

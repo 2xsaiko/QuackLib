@@ -16,7 +16,6 @@ import net.minecraft.item.Item
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraftforge.client.event.DrawBlockHighlightEvent
-import net.minecraftforge.client.event.ModelBakeEvent
 import net.minecraftforge.client.event.ModelRegistryEvent
 import net.minecraftforge.client.event.TextureStitchEvent
 import net.minecraftforge.client.model.ModelLoader
@@ -36,7 +35,10 @@ import therealfarfetchd.quacklib.client.api.gui.elements.Button
 import therealfarfetchd.quacklib.client.api.gui.elements.Dummy
 import therealfarfetchd.quacklib.client.api.gui.elements.Frame
 import therealfarfetchd.quacklib.client.api.gui.elements.Label
-import therealfarfetchd.quacklib.client.api.model.*
+import therealfarfetchd.quacklib.client.api.model.IDynamicModel
+import therealfarfetchd.quacklib.client.api.model.IIconRegister
+import therealfarfetchd.quacklib.client.api.model.IModel
+import therealfarfetchd.quacklib.client.api.model.registerIconRegister
 import therealfarfetchd.quacklib.client.api.qbr.DynamicModelRenderer
 import therealfarfetchd.quacklib.client.api.qbr.QBContainerTileRenderer
 import therealfarfetchd.quacklib.client.api.qbr.bindSpecialRenderer
@@ -117,7 +119,7 @@ class Proxy : Proxy() {
   fun drawBlockOutline(e: DrawBlockHighlightEvent) {
     val world = when {
       e::class.qualifiedName == "mcmultipart.api.event.DrawMultipartHighlightEvent" -> (e as DrawMultipartHighlightEvent).partInfo.partWorld
-      else                                                                          -> e.player.world
+      else -> e.player.world
     }
     val pos = e.target.blockPos ?: return
     val state = world.getBlockState(pos)
@@ -194,14 +196,6 @@ class Proxy : Proxy() {
   }
 
   @SubscribeEvent
-  fun bakeModels(e: ModelBakeEvent) {
-    CachedBakedModel.clearCache()
-    for ((model, mrl) in BakedModelRegistry.models) {
-      e.modelRegistry.putObject(mrl, model)
-    }
-  }
-
-  @SubscribeEvent
   fun textureLoad(e: TextureStitchEvent.Pre) {
     val map = e.map
     if (map.basePath == "textures") {
@@ -227,8 +221,8 @@ fun registerModelBakery(block: Block, item: Item?, bakery: IModel) {
   b.ignore(*block.defaultState.propertyKeys.toTypedArray())
   val map = b.build()
   val rl = ModelResourceLocation(block.registryName, "normal")
-
-  CachedBakedModel(bakery).registerBakedModel(rl)
+  if (item != null) ModelLoaderQL.register(item, bakery)
+  ModelLoaderQL.register(block, bakery)
   ModelLoader.setCustomStateMapper(block, map)
 
   if (item != null) {
@@ -245,7 +239,7 @@ fun registerModelBakery(block: Block, item: Item?, bakery: IModel) {
 @SideOnly(Side.CLIENT)
 fun registerModelBakery(item: Item, bakery: IModel) {
   val rl = ModelResourceLocation(item.registryName, "normal")
-  CachedBakedModel(bakery).registerBakedModel(rl)
+  ModelLoaderQL.register(item, bakery)
   ModelLoader.setCustomModelResourceLocation(item, 0, rl)
   if (bakery is IIconRegister) bakery.registerIconRegister()
 }

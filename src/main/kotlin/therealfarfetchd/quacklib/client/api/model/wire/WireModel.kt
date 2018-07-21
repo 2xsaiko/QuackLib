@@ -3,6 +3,7 @@ package therealfarfetchd.quacklib.client.api.model.wire
 import net.minecraft.client.renderer.block.model.BakedQuad
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.client.renderer.texture.TextureMap
+import net.minecraft.client.renderer.vertex.VertexFormat
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumFacing.*
@@ -79,7 +80,7 @@ open class WireModel(
 
   constructor(cableWidth: Double, cableHeight: Double, textureSize: Double, texLocation: ResourceLocation) : this(cableWidth, cableHeight, textureSize, listOf(texLocation), { texLocation }, { texLocation })
 
-  override fun bakeQuads(face: EnumFacing?, state: IExtendedBlockState): List<BakedQuad> {
+  override fun bakeQuads(face: EnumFacing?, state: IExtendedBlockState, vf: VertexFormat): List<BakedQuad> {
     val texture = textures[texLocationRetriever(state)]!!
     particleTexture = texture
 
@@ -88,17 +89,17 @@ open class WireModel(
 
     if (face !in listOf(null, side)) return emptyList()
 
-    return if (face == null) mkQuads(texture, side, *c).map(Quad::bake)
+    return if (face == null) mkQuads(texture, side, *c).map { it.bake(vf) }
     else emptyList() // TODO render bottom of wire
   }
 
-  override fun bakeItemQuads(face: EnumFacing?, stack: ItemStack): List<BakedQuad> {
+  override fun bakeItemQuads(face: EnumFacing?, stack: ItemStack, vf: VertexFormat): List<BakedQuad> {
     val texture = textures[itemTexLocationRetriever(stack)]!!
     particleTexture = texture
 
     if (face != null) return emptyList()
 
-    return mkQuads(texture, DOWN, External, External, External, External).map { it.translate(Vec3(0.0, 0.275, 0.0)) }.map(Quad::bake)
+    return mkQuads(texture, DOWN, External, External, External, External).map { it.translate(Vec3(0.0, 0.275, 0.0)) }.map { it.bake(vf) }
   }
 
   private fun mkQuads(texture: TextureAtlasSprite, side: EnumFacing, vararg c: EnumWireConnection): List<Quad> {
@@ -257,5 +258,6 @@ open class WireModel(
   }
 
   @Suppress("USELESS_ELVIS")
-  override fun createKey(state: IExtendedBlockState, face: EnumFacing?): String = super.createKey(state, face) + (state[BlockWire.PropConnections] ?: emptyList()).joinToString()
+  override fun createKey(state: IExtendedBlockState, face: EnumFacing?): String = super.createKey(state, face) + (state[BlockWire.PropConnections]
+                                                                                                                  ?: emptyList()).joinToString()
 }

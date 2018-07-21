@@ -7,19 +7,20 @@ import net.minecraft.client.renderer.block.model.IBakedModel
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms
 import net.minecraft.client.renderer.block.model.ItemOverrideList
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
+import net.minecraft.client.renderer.vertex.VertexFormat
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.init.Blocks
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraft.world.World
 
-class CachedBakedModel(private val bakery: IModel) : IBakedModel {
+class CachedBakedModel(private val bakery: IModel, private val vf: VertexFormat) : IBakedModel {
   override fun getParticleTexture(): TextureAtlasSprite = bakery.particleTexture
 
   override fun getQuads(state: IBlockState?, side: EnumFacing?, rand: Long): List<BakedQuad> {
     val s = state?.wrapIfNeeded() ?: return emptyList()
     val key = bakery.createKey(s, side)
-    return models[key] ?: bakery.bakeQuads(side, s).also { models += key to it }
+    return models[key] ?: bakery.bakeQuads(side, s, vf).also { models += key to it }
   }
 
   override fun getItemCameraTransforms(): ItemCameraTransforms = blockItemCameraTransforms
@@ -45,7 +46,8 @@ class CachedBakedModel(private val bakery: IModel) : IBakedModel {
     override fun getQuads(state: IBlockState?, side: EnumFacing?, rand: Long): List<BakedQuad> {
       val stack = this.stack ?: return emptyList()
       val key = bakery.createKey(stack, side)
-      return itemModels[key] ?: bakery.bakeItemQuads(side, stack).also { itemModels += key to it }
+      return itemModels[key]
+             ?: bakery.bakeItemQuads(side, stack, vf).also { itemModels += key to it }
     }
 
     override fun getItemCameraTransforms(): ItemCameraTransforms = blockItemCameraTransforms
