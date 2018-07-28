@@ -20,6 +20,7 @@ import therealfarfetchd.quacklib.testmod.ComponentSurfacePlacement.Exported
 class ComponentSurfacePlacement : BlockComponentPlacement<ComponentSurfacePlacement.Data>,
                                   BlockComponentData<ComponentSurfacePlacement.Data>,
                                   BlockComponentDataExport<ComponentSurfacePlacement, Exported>,
+                                  BlockComponentRenderProperties,
                                   BlockComponentNeighborListener,
                                   BlockComponentPlacementCheck {
 
@@ -28,6 +29,8 @@ class ComponentSurfacePlacement : BlockComponentPlacement<ComponentSurfacePlacem
   override val rl: ResourceLocation = ResourceLocation("qltestmod", "sidedplacement")
 
   override lateinit var part: PartAccessToken<Data>
+
+  val rpFacing = renderProperty<Facing>("facing") { output { block -> block.part.facing } }
 
   override fun initialize(block: Block, placer: EntityLivingBase, hand: EnumHand, facing: Facing, hit: Vec3) {
     block.part.facing = facing.opposite
@@ -58,7 +61,7 @@ class ComponentSurfacePlacement : BlockComponentPlacement<ComponentSurfacePlacem
 
   class Data : BlockDataPart(version = 0) {
 
-    var facing: Facing by data("facing", Facing.DOWN, render = true)
+    var facing: Facing by data("facing", Facing.DOWN)
 
   }
 

@@ -3,6 +3,7 @@ package therealfarfetchd.quacklib.core.init
 import net.minecraft.util.ResourceLocation
 import therealfarfetchd.quacklib.api.item.component.ItemComponent
 import therealfarfetchd.quacklib.api.item.init.ItemConfigurationScope
+import therealfarfetchd.quacklib.api.render.model.ItemModel
 import kotlin.reflect.jvm.jvmName
 
 class ItemConfigurationScopeImpl(modid: String, override val name: String, val init: InitializationContextImpl) : ItemConfigurationScope {
@@ -14,6 +15,11 @@ class ItemConfigurationScopeImpl(modid: String, override val name: String, val i
   override fun apply(component: ItemComponent) {
     components += component
     component.onApplied(this)
+  }
+
+  override fun <T : ItemModel> apply(renderer: T): T {
+    // TODO
+    return renderer
   }
 
   fun validate(): Boolean {

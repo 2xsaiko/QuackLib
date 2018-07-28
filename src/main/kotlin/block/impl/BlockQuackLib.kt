@@ -33,7 +33,6 @@ import therealfarfetchd.quacklib.api.objects.world.MCWorldMutable
 import therealfarfetchd.quacklib.api.tools.Facing
 import therealfarfetchd.quacklib.block.data.PartAccessTokenImpl
 import therealfarfetchd.quacklib.block.data.PropertyResourceLocation
-import therealfarfetchd.quacklib.block.data.get
 import therealfarfetchd.quacklib.block.data.render.PropertyData
 import therealfarfetchd.quacklib.block.data.render.PropertyDataExtended
 import therealfarfetchd.quacklib.objects.block.BlockImpl
@@ -43,10 +42,10 @@ import java.util.*
 import kotlin.math.roundToInt
 import kotlin.reflect.jvm.jvmName
 
-private typealias SetPropertyRetrievers = Set<(MCBlock, MCWorld, BlockPos, TileQuackLib) -> MCBlock>
-private typealias SetExtendedPropertyRetrievers = Set<(IExtendedBlockState, MCWorld, BlockPos, TileQuackLib) -> IExtendedBlockState>
-private typealias MapProperties = Map<PropertyResourceLocation, PropertyData<*>>
-private typealias MapExtendedProperties = Map<PropertyResourceLocation, PropertyDataExtended<*>>
+private typealias SetPropertyRetrievers = MutableSet<(MCBlock, MCWorld, BlockPos, TileQuackLib) -> MCBlock>
+private typealias SetExtendedPropertyRetrievers = MutableSet<(IExtendedBlockState, MCWorld, BlockPos, TileQuackLib) -> IExtendedBlockState>
+private typealias MapProperties = MutableMap<PropertyResourceLocation, PropertyData<*>>
+private typealias MapExtendedProperties = MutableMap<PropertyResourceLocation, PropertyDataExtended<*>>
 
 @Suppress("OverridingDeprecatedMember")
 class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { tempBlockConf = type }), BlockExtraDebug {
@@ -305,36 +304,36 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
     fun createBlockState(block: MCBlockType?): Tuple5<BlockStateContainer, MapProperties, MapExtendedProperties, SetPropertyRetrievers, SetExtendedPropertyRetrievers> {
       val cPart = tempBlockConf.components.asReversed().mapNotNull { it as? BlockComponentData<*> }
 
-      var properties: MapProperties = emptyMap()
-      var extproperties: MapExtendedProperties = emptyMap()
-      var propRetrievers: SetPropertyRetrievers = emptySet()
-      var extpropRetrievers: SetExtendedPropertyRetrievers = emptySet()
+      val properties: MapProperties = mutableMapOf()
+      val extproperties: MapExtendedProperties = mutableMapOf()
+      val propRetrievers: SetPropertyRetrievers = mutableSetOf()
+      val extpropRetrievers: SetExtendedPropertyRetrievers = mutableSetOf()
 
-      for (c in cPart) {
-        val defs = c.createPart().defs
-        for ((name, def) in defs) {
-          if (!def.render) continue
-
-          val prl = PropertyResourceLocation(c.rl, name)
-          val needsExt = def.validValues == null || def.validValues!!.size > 32
-          if (needsExt) {
-            val prop = PropertyDataExtended(prl, def)
-            extproperties += prl to prop
-            extpropRetrievers += { state, _, _, te ->
-              val value = te.c.parts.getValue(prl.base).storage.get(prl.property)
-              state.withProperty(prop, value)
-            }
-          } else {
-            val prop = PropertyData(prl, def)
-            properties += prl to prop
-            propRetrievers += { state, _, _, te ->
-              val value = te.c.parts.getValue(prl.base).storage.get(prl.property)
-              @Suppress("UNCHECKED_CAST")
-              state.withProperty(prop, prop.wrap(value) as PropertyData.Wrapper<Any?>)
-            }
-          }
-        }
-      }
+      //      for (c in cPart) {
+      //        val defs = c.createPart().defs
+      //        for ((name, def) in defs) {
+      //          if (!def.render) continue
+      //
+      //          val prl = PropertyResourceLocation(c.rl, name)
+      //          val needsExt = def.validValues == null || def.validValues!!.size > 32
+      //          if (needsExt) {
+      //            val prop = PropertyDataExtended(prl, def)
+      //            extproperties += prl to prop
+      //            extpropRetrievers += { state, _, _, te ->
+      //              val value = te.c.parts.getValue(prl.base).storage.get(prl.property)
+      //              state.withProperty(prop, value)
+      //            }
+      //          } else {
+      //            val prop = PropertyData(prl, def)
+      //            properties += prl to prop
+      //            propRetrievers += { state, _, _, te ->
+      //              val value = te.c.parts.getValue(prl.base).storage.get(prl.property)
+      //              @Suppress("UNCHECKED_CAST")
+      //              state.withProperty(prop, prop.wrap(value) as PropertyData.Wrapper<Any?>)
+      //            }
+      //          }
+      //        }
+      //      }
 
       return Tuple5(
         ExtendedBlockState(block, properties.values.toTypedArray(), extproperties.values.toTypedArray()),

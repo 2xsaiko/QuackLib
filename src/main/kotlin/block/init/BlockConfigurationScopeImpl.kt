@@ -8,9 +8,9 @@ import therealfarfetchd.quacklib.api.block.component.BlockComponent
 import therealfarfetchd.quacklib.api.block.component.BlockComponentMultipart
 import therealfarfetchd.quacklib.api.block.init.BlockConfigurationScope
 import therealfarfetchd.quacklib.api.block.init.BlockDataLinkScope
-import therealfarfetchd.quacklib.api.block.render.BlockRenderer
 import therealfarfetchd.quacklib.api.item.Tool
 import therealfarfetchd.quacklib.api.objects.item.ItemType
+import therealfarfetchd.quacklib.api.render.model.BlockModel
 import therealfarfetchd.quacklib.block.component.AppliedComponentImpl
 import therealfarfetchd.quacklib.core.init.InitializationContextImpl
 import therealfarfetchd.quacklib.core.init.ValidationContextImpl
@@ -28,7 +28,7 @@ class BlockConfigurationScopeImpl(modid: String, override val name: String, val 
   override var item: ItemType? = null
 
   override var components: List<BlockComponent> = emptyList()
-  override val renderers: List<BlockRenderer> = emptyList()
+  override val renderers: List<BlockModel> = emptyList()
 
   override var isMultipart: Boolean = false
     private set
@@ -45,8 +45,9 @@ class BlockConfigurationScopeImpl(modid: String, override val name: String, val 
     BlockDataLinkScopeImpl().also(op)
   }
 
-  override fun apply(renderer: BlockRenderer) {
+  override fun <T : BlockModel> apply(renderer: T): T {
     // TODO
+    return renderer
   }
 
   fun validate(): Boolean {

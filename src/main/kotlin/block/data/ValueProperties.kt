@@ -9,7 +9,6 @@ data class ValuePropertiesImpl<T>(
   override val default: T,
   override val persistent: Boolean,
   override val sync: Boolean,
-  override val render: Boolean,
   override val validValues: List<T>?
 ) : BlockDataPart.ValueProperties<T> {
 

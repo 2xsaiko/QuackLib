@@ -12,8 +12,11 @@ import therealfarfetchd.quacklib.api.objects.block.BlockType
 import therealfarfetchd.quacklib.api.objects.block.MCBlockType
 import therealfarfetchd.quacklib.api.objects.block.orEmpty
 import therealfarfetchd.quacklib.api.objects.item.*
+import therealfarfetchd.quacklib.api.render.property.RenderProperty
+import therealfarfetchd.quacklib.api.render.property.RenderPropertyConfigurationScope
 import therealfarfetchd.quacklib.api.tools.Logger
 import therealfarfetchd.quacklib.api.tools.isDebugMode
+import therealfarfetchd.quacklib.block.component.ComponentRenderProps
 import therealfarfetchd.quacklib.block.component.ExportedValueImpl
 import therealfarfetchd.quacklib.block.component.ImportedValueImpl
 import therealfarfetchd.quacklib.block.data.DataPartSerializationRegistryImpl
@@ -21,12 +24,16 @@ import therealfarfetchd.quacklib.block.data.ValuePropertiesImpl
 import therealfarfetchd.quacklib.block.data.get
 import therealfarfetchd.quacklib.block.data.set
 import therealfarfetchd.quacklib.block.multipart.MultipartAPIInternal
+import therealfarfetchd.quacklib.hax.ExtraData
 import therealfarfetchd.quacklib.objects.block.BlockTypeImpl
 import therealfarfetchd.quacklib.objects.block.DeferredBlockTypeImpl
 import therealfarfetchd.quacklib.objects.item.DeferredItemTypeImpl
 import therealfarfetchd.quacklib.objects.item.ItemImpl
 import therealfarfetchd.quacklib.objects.item.ItemTypeImpl
+import therealfarfetchd.quacklib.render.property.RenderPropertyConfigurationScopeImpl
+import therealfarfetchd.quacklib.render.property.RenderPropertyImpl
 import therealfarfetchd.quacklib.tools.ModContext
+import therealfarfetchd.quacklib.tools.getCallStack
 import therealfarfetchd.quacklib.tools.getResourceFromName
 import java.io.InputStream
 import java.io.PrintWriter
@@ -66,8 +73,11 @@ object APIImpl : QuackLibAPI {
 
   override fun convertItem(item: MCItem): Item = ItemImpl(item)
 
+  override fun getResourceFromContext(name: String): ResourceLocation =
+    getResourceFromName(name)
+
   @Suppress("UNCHECKED_CAST")
-  override fun <T> createBlockDataDelegate(part: BlockDataPart, name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, render: Boolean, validValues: List<T>?): ReadWriteProperty<BlockDataPart, T> {
+  override fun <T> createBlockDataDelegate(part: BlockDataPart, name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, validValues: List<T>?): ReadWriteProperty<BlockDataPart, T> {
     val delegate = object : ReadWriteProperty<BlockDataPart, T> {
 
       @Suppress("UNCHECKED_CAST")
@@ -83,7 +93,7 @@ object APIImpl : QuackLibAPI {
 
     if (name in part.defs) error("Duplicate name")
 
-    part.addDefinition(name, ValuePropertiesImpl(name, type as KClass<Any>, default, persistent, sync, render, validValues))
+    part.addDefinition(name, ValuePropertiesImpl(name, type as KClass<Any>, default, persistent, sync, validValues))
 
     return delegate
   }
@@ -94,6 +104,22 @@ object APIImpl : QuackLibAPI {
 
   override fun <R, C : BlockComponentDataExport<C, D>, D : ExportedData<D, C>> createExportedValue(target: C, op: (C, Block) -> R): ExportedValue<D, R> {
     return ExportedValueImpl { data -> op(target, data) }
+  }
+
+  override fun <T> addRenderProperty(type: BlockComponentRenderProperties, ptype: KClass<*>, name: String, op: (RenderPropertyConfigurationScope<T>) -> Unit): RenderProperty<T> {
+    val hasAccess = getCallStack()
+      .drop(1) // this
+      .first().methodName == "<init>"
+
+    if (!hasAccess) error("Render properties need to be defined in the component constructor!")
+
+    val rcs = RenderPropertyConfigurationScopeImpl<T>(name).also(op)
+
+    val rp = RenderPropertyImpl(type.rl, name, ptype, rcs.outputOp, { rcs.constraints.all { op -> op(it) } }, null)
+
+    ExtraData.get(type, ComponentRenderProps.Key).props += rp
+
+    return rp
   }
 
   override fun notifySend(title: String, body: String?, expireTime: Long, icon: ResourceLocation?) {

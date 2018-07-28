@@ -72,6 +72,10 @@ interface BlockComponentData<T : BlockDataPart> : TE, Reg {
 
 }
 
+interface BlockComponentRenderProperties : Base, Reg {
+
+}
+
 interface BlockComponentDataExport<Self : BlockComponentDataExport<Self, D>, D : ExportedData<D, Self>> : Base {
 
   val exported: D

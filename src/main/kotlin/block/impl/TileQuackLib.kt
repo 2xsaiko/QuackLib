@@ -46,13 +46,13 @@ open class TileQuackLib() : TileEntity() {
 
   override fun getUpdateTag(): NBTTagCompound {
     val nbt = super.getUpdateTag()
-    c.saveData(nbt) { _, prop -> prop.render || prop.sync }
+    c.saveData(nbt) { _, prop -> /*prop.render ||*/ prop.sync }
     return nbt
   }
 
   override fun handleUpdateTag(nbt: NBTTagCompound) {
     super.readFromNBT(nbt)
-    c.loadData(nbt) { _, prop -> prop.render || prop.sync }
+    c.loadData(nbt) { _, prop -> /*prop.render ||*/ prop.sync }
     updateComponents()
   }
 
@@ -61,14 +61,14 @@ open class TileQuackLib() : TileEntity() {
     var renderUpdate = 0
     val nbt = NBTTagCompound()
     c.saveData(nbt) { _, prop ->
-      if (prop.render) renderUpdate = 1
-      prop.render || prop.sync
+      // if (prop.render) renderUpdate = 1
+      /*prop.render ||*/ prop.sync
     }
     return SPacketUpdateTileEntity(getPos(), renderUpdate, nbt)
   }
 
   override fun onDataPacket(net: NetworkManager, pkt: SPacketUpdateTileEntity) {
-    c.loadData(pkt.nbtCompound) { _, prop -> prop.render || prop.sync }
+    c.loadData(pkt.nbtCompound) { _, prop -> /*prop.render ||*/ prop.sync }
     if (pkt.tileEntityType == 1) {
       getWorld().markBlockRangeForRenderUpdate(getPos(), getPos())
     }

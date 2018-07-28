@@ -13,6 +13,8 @@ import therealfarfetchd.quacklib.api.objects.item.Item
 import therealfarfetchd.quacklib.api.objects.item.ItemType
 import therealfarfetchd.quacklib.api.objects.item.MCItem
 import therealfarfetchd.quacklib.api.objects.item.MCItemType
+import therealfarfetchd.quacklib.api.render.property.RenderProperty
+import therealfarfetchd.quacklib.api.render.property.RenderPropertyConfigurationScope
 import therealfarfetchd.quacklib.api.tools.ModContext
 import java.io.InputStream
 import kotlin.properties.ReadWriteProperty
@@ -46,11 +48,15 @@ interface QuackLibAPI {
 
   fun convertItem(item: MCItem): Item
 
-  fun <T> createBlockDataDelegate(part: BlockDataPart, name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, render: Boolean, validValues: List<T>?): ReadWriteProperty<BlockDataPart, T>
+  fun getResourceFromContext(name: String): ResourceLocation
+
+  fun <T> createBlockDataDelegate(part: BlockDataPart, name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, validValues: List<T>?): ReadWriteProperty<BlockDataPart, T>
 
   fun <T, C : BlockComponentDataImport<C, D>, D : ImportedData<D, C>> createImportedValue(target: C): ImportedValue<T>
 
   fun <R, C : BlockComponentDataExport<C, D>, D : ExportedData<D, C>> createExportedValue(target: C, op: (C, Block) -> R): ExportedValue<D, R>
+
+  fun <T> addRenderProperty(type: BlockComponentRenderProperties, ptype: KClass<*>, name: String, op: (RenderPropertyConfigurationScope<T>) -> Unit): RenderProperty<T>
 
   fun <T : Any> registerCapability(type: KClass<T>)
 

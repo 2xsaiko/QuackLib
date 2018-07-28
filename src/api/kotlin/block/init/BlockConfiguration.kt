@@ -4,10 +4,10 @@ import net.minecraft.block.SoundType
 import net.minecraft.block.material.Material
 import net.minecraft.util.ResourceLocation
 import therealfarfetchd.quacklib.api.block.component.BlockComponent
-import therealfarfetchd.quacklib.api.block.render.BlockRenderer
 import therealfarfetchd.quacklib.api.core.Describable
 import therealfarfetchd.quacklib.api.item.Tool
 import therealfarfetchd.quacklib.api.objects.item.ItemType
+import therealfarfetchd.quacklib.api.render.model.BlockModel
 
 interface BlockConfiguration : Describable {
 
@@ -54,7 +54,7 @@ interface BlockConfiguration : Describable {
   /**
    *
    */
-  val renderers: List<BlockRenderer>
+  val renderers: List<BlockModel>
 
   /**
    * The item this block is represented by.

@@ -4,10 +4,10 @@ import net.minecraft.block.SoundType
 import net.minecraft.block.material.Material
 import therealfarfetchd.quacklib.api.block.component.AppliedComponent
 import therealfarfetchd.quacklib.api.block.component.BlockComponent
-import therealfarfetchd.quacklib.api.block.render.BlockRenderer
 import therealfarfetchd.quacklib.api.core.init.InitDSL
 import therealfarfetchd.quacklib.api.item.Tool
 import therealfarfetchd.quacklib.api.objects.item.ItemType
+import therealfarfetchd.quacklib.api.render.model.BlockModel
 
 @InitDSL
 interface BlockConfigurationScope : BlockConfiguration {
@@ -47,7 +47,7 @@ interface BlockConfigurationScope : BlockConfiguration {
   /**
    *
    */
-  fun apply(renderer: BlockRenderer)
+  fun <T : BlockModel> apply(renderer: T): T
 
   /**
    *
