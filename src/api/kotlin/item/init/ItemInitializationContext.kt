@@ -7,7 +7,7 @@ interface ItemInitializationContext {
 
   fun addItem(name: String, op: ItemConfigurationScope.() -> Unit = {}): ItemType
 
-  fun addPlacementItem(block: BlockType, name: String = block.registryName.resourcePath, op: ItemConfigurationScope.() -> Unit = {}): ItemType
+  fun addPlacementItem(block: BlockType, name: String = block.registryName.path, op: ItemConfigurationScope.() -> Unit = {}): ItemType
 
   fun addTab(name: String, icon: ItemType, op: TabConfigurationScope.() -> Unit = {})
 

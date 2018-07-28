@@ -51,7 +51,7 @@ private fun computeQuadsForTexture(tex: AtlasTexture): List<Quad> {
 }
 
 fun fixRes(rl: ResourceLocation) =
-  ResourceLocation(rl.resourceDomain, "textures/${rl.resourcePath}.png")
+  ResourceLocation(rl.namespace, "textures/${rl.path}.png")
 
 // Generates quads for the specified facing.
 private fun descend(tex: AtlasTexture, f: QuadFacing, image: BufferedImage): List<Quad> {

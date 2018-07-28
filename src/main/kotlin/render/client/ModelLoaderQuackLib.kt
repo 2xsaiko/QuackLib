@@ -42,7 +42,7 @@ object ModelLoaderQuackLib : ICustomModelLoader {
   }
 
   private fun ResourceLocation.clean(): ResourceLocation =
-    if (this::class != ResourceLocation::class) ResourceLocation(resourceDomain, resourcePath)
+    if (this::class != ResourceLocation::class) ResourceLocation(namespace, path)
     else this
 
   private fun getModelTypeForRL(rl: ResourceLocation): ModelType? {

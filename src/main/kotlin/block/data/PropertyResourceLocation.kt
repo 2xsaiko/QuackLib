@@ -2,11 +2,11 @@ package therealfarfetchd.quacklib.block.data
 
 import net.minecraft.util.ResourceLocation
 
-class PropertyResourceLocation(resourceDomain: String, resourcePath: String, val property: String) : ResourceLocation(resourceDomain, resourcePath) {
+class PropertyResourceLocation(namespace: String, path: String, val property: String) : ResourceLocation(namespace, path) {
 
-  constructor(rl: ResourceLocation, property: String) : this(rl.resourceDomain, rl.resourcePath, property)
+  constructor(rl: ResourceLocation, property: String) : this(rl.namespace, rl.path, property)
 
-  val base = ResourceLocation(resourceDomain, resourcePath)
+  val base = ResourceLocation(namespace, path)
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true

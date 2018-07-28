@@ -24,7 +24,7 @@ class ItemQuackLib(val type: ItemType) : Item() {
 
   init {
     registryName = type.registryName
-    unlocalizedName = type.registryName.toString()
+    translationKey = type.registryName.toString()
 
     getComponentsOfType<ItemComponentTool>()
       .flatMap(ItemComponentTool::toolTypes)

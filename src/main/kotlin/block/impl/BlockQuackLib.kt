@@ -71,7 +71,7 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
   init {
     (type as? BlockTypeImpl)?.block = this
     registryName = type.registryName
-    unlocalizedName = type.registryName.toString()
+    translationKey = type.registryName.toString()
     type.hardness?.also {
       setHardness(it)
     } ?: setBlockUnbreakable()
@@ -167,7 +167,7 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
     return getBlockImpl(world, pos).canConnectRedstone(side.opposite)
   }
 
-  override fun getBlockLayer(): BlockRenderLayer {
+  override fun getRenderLayer(): BlockRenderLayer {
     return BlockRenderLayer.CUTOUT
   }
 

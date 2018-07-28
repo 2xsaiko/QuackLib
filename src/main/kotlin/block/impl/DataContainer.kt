@@ -61,7 +61,7 @@ class DataContainer {
           val v = storage.get(name)
           DataPartSerializationRegistryImpl.save(partNBT, name, v)
         }
-        if (!partNBT.hasNoTags()) nbt.setTag(c.rl.toString(), partNBT)
+        if (!partNBT.isEmpty) nbt.setTag(c.rl.toString(), partNBT)
       } catch (e: Exception) {
         Logger.error("Could not serialize component ${c.rl}!")
         logException(e)

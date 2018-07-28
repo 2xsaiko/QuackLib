@@ -24,9 +24,9 @@ object VanillaLoader : ModelLoader {
   val missingModel = ResourceLocation("minecraft:missing")
 
   override fun load(rl: ResourceLocation, block: BlockStateContainer, vc: ValidationContext) {
-    val fixed = ResourceLocation(rl.resourceDomain, "blockstates/${rl.resourcePath}.json")
+    val fixed = ResourceLocation(rl.namespace, "blockstates/${rl.path}.json")
 
-    val filename = "${rl.resourcePath}.json"
+    val filename = "${rl.path}.json"
     val content = openResource(fixed, true)
     if (content == null) {
       vc.error("Could not open block state '$rl' ('$fixed')")
@@ -146,8 +146,8 @@ object VanillaLoader : ModelLoader {
   }
 
   private fun loadTransformFromFile0(rl: ResourceLocation, path: JsonPathSpec, vc: ValidationContext): Transformation {
-    val fixed = ResourceLocation(rl.resourceDomain, "transform/${rl.resourcePath}.json")
-    val path1 = JsonPathSpec("${rl.resourcePath}.json")
+    val fixed = ResourceLocation(rl.namespace, "transform/${rl.path}.json")
+    val path1 = JsonPathSpec("${rl.path}.json")
 
     if (path == path1) {
       // TODO: better recursion fix
