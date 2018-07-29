@@ -25,6 +25,7 @@ buildscript {
     jcenter()
     mavenCentral()
     maven("http://files.minecraftforge.net/maven")
+    maven("http://dl.bintray.com/kotlin/kotlin-eap")
   }
   dependencies {
     classpath("net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT")
@@ -63,19 +64,21 @@ tasks.withType<JavaCompile> {
 
 tasks.withType<KotlinCompile> {
   kotlinOptions.jvmTarget = "1.8"
+  kotlinOptions.freeCompilerArgs += "-Xuse-experimental=kotlin.ExperimentalUnsignedTypes"
 }
 
 repositories {
   mavenCentral()
   maven("http://maven.shadowfacts.net/")
   maven("https://modmaven.k-4u.nl/")
+  maven("http://dl.bintray.com/kotlin/kotlin-eap")
 }
 
 dependencies {
   compile(kotlin("stdlib-jdk8", kotlin_version))
   compile(kotlin("reflect", kotlin_version))
 
-  runtimeOnly("net.shadowfacts", "Forgelin", forgelin_version)
+  runtimeOnly("net.shadowfacts", "Forgelin-EAP", forgelin_version)
 
   compile("therealfarfetchd.extmath", "extmath", extmath_version)
 
