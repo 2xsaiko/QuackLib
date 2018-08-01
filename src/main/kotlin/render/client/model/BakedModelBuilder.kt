@@ -11,7 +11,6 @@ import net.minecraft.client.renderer.vertex.VertexFormat
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.client.model.PerspectiveMapWrapper
-import net.minecraftforge.common.model.IModelState
 import net.minecraftforge.common.model.TRSRTransformation
 import org.apache.commons.lang3.tuple.Pair
 import therealfarfetchd.math.Vec3
@@ -50,6 +49,10 @@ class BakedModelBuilder private constructor() {
     quads.computeIfAbsent(cullface) { mutableListOf() } += q
   }
 
+  fun addQuads(p: Iterable<Quad>, cullface: EnumFacing?) {
+    p.forEach { addQuad(it, cullface) }
+  }
+
   fun addQuads(p: Iterable<Quad>) {
     p.forEach(::addQuad)
   }
@@ -83,6 +86,10 @@ class BakedModelBuilder private constructor() {
     private val transformation: Transformation
   ) : IBakedModel {
 
+    private val perspectives = ItemCameraTransforms.TransformType.values().associate { tt ->
+      tt to PerspectiveMapWrapper.handlePerspective(this, { Optional.ofNullable(TRSRTransformation(transformation.getTransformationMatrix(tt.toTransformType())?.toMatrix4f())) }, tt)
+    }
+
     override fun getParticleTexture(): TextureAtlasSprite =
       particleTexture
 
@@ -101,9 +108,8 @@ class BakedModelBuilder private constructor() {
     override fun getOverrides(): ItemOverrideList =
       overrides
 
-    override fun handlePerspective(cameraTransformType: ItemCameraTransforms.TransformType): Pair<out IBakedModel, Matrix4f> {
-      return PerspectiveMapWrapper.handlePerspective(this, { Optional.ofNullable(TRSRTransformation(transformation.getTransformationMatrix(cameraTransformType.toTransformType())?.toMatrix4f())) }, cameraTransformType)
-    }
+    override fun handlePerspective(cameraTransformType: ItemCameraTransforms.TransformType): Pair<out IBakedModel, Matrix4f> =
+      perspectives.getValue(cameraTransformType)
 
   }
 
@@ -112,7 +118,7 @@ class BakedModelBuilder private constructor() {
     val defaultItem = VanillaLoader.loadTransformFromResource(ResourceLocation("forge", "default-item"))!!
     val defaultTool = VanillaLoader.loadTransformFromResource(ResourceLocation("forge", "default-tool"))!!
 
-    operator fun invoke(state: IModelState, format: VertexFormat = DefaultVertexFormats.ITEM, op: BakedModelBuilder.() -> Unit): IBakedModel {
+    operator fun invoke(format: VertexFormat = DefaultVertexFormats.ITEM, op: BakedModelBuilder.() -> Unit): IBakedModel {
       val builder = BakedModelBuilder().also(op)
       if (!builder::particleTexture.isInitialized) error("Particle texture not set!")
       return BakedModel(

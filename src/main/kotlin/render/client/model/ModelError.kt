@@ -13,16 +13,21 @@ import therealfarfetchd.quacklib.render.client.model.objects.SimpleTexturedBox
 import therealfarfetchd.quacklib.render.texture.AtlasTextureImpl
 import java.util.function.Function
 
-private val ErrorTex = ResourceLocation(ModID, "error")
-private val Textures = setOf(ErrorTex)
-
 object ModelError : IModel {
+
+  val ErrorTex = ResourceLocation(ModID, "error")
+
+  private val Textures = setOf(ErrorTex)
 
   override fun getTextures() = Textures
 
   override fun bake(state: IModelState, format: VertexFormat, bakedTextureGetter: Function<ResourceLocation, TextureAtlasSprite>): IBakedModel {
+    return bake(format, bakedTextureGetter)
+  }
+
+  fun bake(format: VertexFormat, bakedTextureGetter: Function<ResourceLocation, TextureAtlasSprite>): IBakedModel {
     val tex = bakedTextureGetter(ErrorTex)
-    return BakedModelBuilder(state, format) {
+    return BakedModelBuilder(format) {
       particleTexture = tex
       transformation = BakedModelBuilder.defaultBlock
       addQuads(SimpleTexturedBox(Vec3(0, 0, 0), Vec3(1, 1, 1), AtlasTextureImpl(tex), true))

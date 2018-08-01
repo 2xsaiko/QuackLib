@@ -13,6 +13,7 @@ import therealfarfetchd.quacklib.api.objects.item.Item
 import therealfarfetchd.quacklib.api.objects.item.ItemType
 import therealfarfetchd.quacklib.api.objects.item.MCItem
 import therealfarfetchd.quacklib.api.objects.item.MCItemType
+import therealfarfetchd.quacklib.api.render.model.ModelAPI
 import therealfarfetchd.quacklib.api.render.property.RenderProperty
 import therealfarfetchd.quacklib.api.render.property.RenderPropertyConfigurationScope
 import therealfarfetchd.quacklib.api.tools.ModContext
@@ -31,6 +32,8 @@ interface QuackLibAPI {
   val serializationRegistry: DataPartSerializationRegistry
 
   val multipartAPI: MultipartAPI
+
+  val modelAPI: ModelAPI
 
   val qlVersion: String
 
@@ -52,11 +55,11 @@ interface QuackLibAPI {
 
   fun <T> createBlockDataDelegate(part: BlockDataPart, name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, validValues: List<T>?): ReadWriteProperty<BlockDataPart, T>
 
-  fun <T, C : BlockComponentDataImport<C, D>, D : ImportedData<D, C>> createImportedValue(target: C): ImportedValue<T>
+  fun <T, C : BlockComponentDataImport> createImportedValue(target: C): ImportedValue<T>
 
-  fun <R, C : BlockComponentDataExport<C, D>, D : ExportedData<D, C>> createExportedValue(target: C, op: (C, Block) -> R): ExportedValue<D, R>
+  fun <T, C : BlockComponentDataExport> createExportedValue(target: C, op: (C, Block) -> T): ExportedValue<C, T>
 
-  fun <T> addRenderProperty(type: BlockComponentRenderProperties, ptype: KClass<*>, name: String, op: (RenderPropertyConfigurationScope<T>) -> Unit): RenderProperty<T>
+  fun <T, C : BlockComponentRenderProperties> addRenderProperty(target: C, ptype: KClass<*>, name: String, op: (RenderPropertyConfigurationScope<T>) -> Unit): RenderProperty<C, T>
 
   fun <T : Any> registerCapability(type: KClass<T>)
 

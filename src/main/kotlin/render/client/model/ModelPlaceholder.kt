@@ -30,7 +30,7 @@ class ModelPlaceholderBlock(val rl: ResourceLocation, val bb: AxisAlignedBB) : I
 
   override fun bake(state: IModelState, format: VertexFormat, bakedTextureGetter: Function<ResourceLocation, TextureAtlasSprite>): IBakedModel {
     val tex = bakedTextureGetter(Placeholder)
-    return BakedModelBuilder(state, format) {
+    return BakedModelBuilder(format) {
       particleTexture = tex
       transformation = BakedModelBuilder.defaultBlock
       addQuads(SimpleTexturedBox(Vec3(bb.minX.toFloat(), bb.minY.toFloat(), bb.minZ.toFloat()), Vec3(bb.maxX.toFloat(), bb.maxY.toFloat(), bb.maxZ.toFloat()), AtlasTextureImpl(tex), true))
@@ -45,7 +45,7 @@ class ModelPlaceholderItem(val rl: ResourceLocation, val item: ItemType) : IMode
 
   override fun bake(state: IModelState, format: VertexFormat, bakedTextureGetter: Function<ResourceLocation, TextureAtlasSprite>): IBakedModel {
     val tex = bakedTextureGetter(Placeholder)
-    return BakedModelBuilder(state, format) {
+    return BakedModelBuilder(format) {
       particleTexture = tex
       transformation = BakedModelBuilder.defaultItem
       addQuads(InflatedTexture(AtlasTextureImpl(tex)))

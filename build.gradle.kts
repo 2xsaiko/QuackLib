@@ -86,10 +86,10 @@ dependencies {
   deobfCompile("MCMultiPart2", "MCMultiPart", mcmp_version)
 
   // CBMP
-  deobfCompile("codechicken", "ForgeMultipart", "$mc_version-$cbmp_version", classifier = "universal")
+  //  deobfCompile("codechicken", "ForgeMultipart", "$mc_version-$cbmp_version", classifier = "universal")
 
   // temp shit
-  runtimeOnly("codechicken", "ChickenASM", "1.12-1.0.2.9")
+  //  runtimeOnly("codechicken", "ChickenASM", "1.12-1.0.2.9")
 
   runtimeOnly("mezz.jei", "jei_$mc_version", jei_version)
 }

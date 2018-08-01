@@ -30,11 +30,14 @@ import therealfarfetchd.quacklib.api.objects.item.MCItem
 import therealfarfetchd.quacklib.api.objects.item.MCItemType
 import therealfarfetchd.quacklib.api.objects.world.MCWorld
 import therealfarfetchd.quacklib.api.objects.world.MCWorldMutable
+import therealfarfetchd.quacklib.api.render.property.PropertyType
 import therealfarfetchd.quacklib.api.tools.Facing
+import therealfarfetchd.quacklib.block.component.ComponentRenderProps
 import therealfarfetchd.quacklib.block.data.PartAccessTokenImpl
 import therealfarfetchd.quacklib.block.data.PropertyResourceLocation
 import therealfarfetchd.quacklib.block.data.render.PropertyData
 import therealfarfetchd.quacklib.block.data.render.PropertyDataExtended
+import therealfarfetchd.quacklib.hax.ExtraData
 import therealfarfetchd.quacklib.objects.block.BlockImpl
 import therealfarfetchd.quacklib.objects.block.BlockTypeImpl
 import therealfarfetchd.quacklib.objects.world.toWorld
@@ -42,13 +45,13 @@ import java.util.*
 import kotlin.math.roundToInt
 import kotlin.reflect.jvm.jvmName
 
-private typealias SetPropertyRetrievers = MutableSet<(MCBlock, MCWorld, BlockPos, TileQuackLib) -> MCBlock>
-private typealias SetExtendedPropertyRetrievers = MutableSet<(IExtendedBlockState, MCWorld, BlockPos, TileQuackLib) -> IExtendedBlockState>
+private typealias SetPropertyRetrievers = MutableSet<(MCBlock, Block) -> MCBlock>
+private typealias SetExtendedPropertyRetrievers = MutableSet<(IExtendedBlockState, Block) -> IExtendedBlockState>
 private typealias MapProperties = MutableMap<PropertyResourceLocation, PropertyData<*>>
 private typealias MapExtendedProperties = MutableMap<PropertyResourceLocation, PropertyDataExtended<*>>
 
 @Suppress("OverridingDeprecatedMember")
-class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { tempBlockConf = type }), BlockExtraDebug {
+class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { tempBlockConf = type as BlockTypeImpl }), BlockExtraDebug {
 
   private var initDone = false
 
@@ -100,14 +103,14 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
   }
 
   override fun getActualState(state: MCBlock, world: MCWorld, pos: BlockPos): MCBlock {
-    val te = world.getTileEntity(pos) as? TileQuackLib ?: return state
-    return propRetrievers.fold(state) { acc, op -> op(acc, world, pos, te) }
+    val block = world.toWorld().getBlock(pos.toVec3i()) ?: return state
+    return propRetrievers.fold(state) { acc, op -> op(acc, block) }
   }
 
   override fun getExtendedState(state: MCBlock, world: MCWorld, pos: BlockPos): MCBlock {
-    val te = world.getTileEntity(pos) as? TileQuackLib ?: return state
+    val block = world.toWorld().getBlock(pos.toVec3i()) ?: return state
     state as? IExtendedBlockState ?: return state
-    return extpropRetrievers.fold(state) { acc, op -> op(acc, world, pos, te) }
+    return extpropRetrievers.fold(state) { acc, op -> op(acc, block) }
   }
 
   // ray trace
@@ -297,12 +300,13 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
 
   companion object {
 
-    private lateinit var tempBlockConf: BlockType
+    private lateinit var tempBlockConf: BlockTypeImpl
 
     val NOPE_AABB = AxisAlignedBB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+
     // FIXME use custom tuple here, not scalas
     fun createBlockState(block: MCBlockType?): Tuple5<BlockStateContainer, MapProperties, MapExtendedProperties, SetPropertyRetrievers, SetExtendedPropertyRetrievers> {
-      val cPart = tempBlockConf.components.asReversed().mapNotNull { it as? BlockComponentData<*> }
+      val cRender = tempBlockConf.components.asReversed().mapNotNull { it as? BlockComponentRenderProperties }
 
       val properties: MapProperties = mutableMapOf()
       val extproperties: MapExtendedProperties = mutableMapOf()
@@ -334,6 +338,33 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
       //          }
       //        }
       //      }
+
+      unsafe {
+        for (c in cRender) {
+          val data = ExtraData.getOrNull(c, ComponentRenderProps.Key) ?: continue
+          data.props.forEach {
+            val pt = it.getMCProperty()
+
+            @Suppress("UNCHECKED_CAST")
+            when (pt) {
+              is PropertyType.Standard -> {
+                val prop = pt.prop as PropertyData<Any?>
+                properties += PropertyResourceLocation(c.rl, it.name) to prop
+                propRetrievers += { state: MCBlock, block: Block ->
+                  state.withProperty(prop, prop.wrap(it.getValue(block))!!)
+                }
+              }
+              is PropertyType.Extended -> {
+                val prop = pt.prop as PropertyDataExtended<Any?>
+                extproperties += PropertyResourceLocation(c.rl, it.name) to prop
+                extpropRetrievers += { state: IExtendedBlockState, block: Block ->
+                  state.withProperty(prop, it.getValue(block))
+                }
+              }
+            }
+          }
+        }
+      }
 
       return Tuple5(
         ExtendedBlockState(block, properties.values.toTypedArray(), extproperties.values.toTypedArray()),

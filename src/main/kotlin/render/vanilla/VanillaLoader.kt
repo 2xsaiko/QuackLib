@@ -407,6 +407,7 @@ object VanillaLoader : ModelLoader {
   }
 
   fun parseBlockState(sc: BlockStateContainer, stringSpec: String, vc: ValidationContext): IBlockState {
+    if (stringSpec == "normal") return sc.baseState
     return stringSpec.split(",").fold(sc.baseState) { acc, a ->
       val (key, value) = a.split("=", limit = 1)
       val prop = sc.getProperty(key)

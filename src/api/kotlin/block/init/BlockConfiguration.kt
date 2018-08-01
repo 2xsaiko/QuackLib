@@ -7,7 +7,7 @@ import therealfarfetchd.quacklib.api.block.component.BlockComponent
 import therealfarfetchd.quacklib.api.core.Describable
 import therealfarfetchd.quacklib.api.item.Tool
 import therealfarfetchd.quacklib.api.objects.item.ItemType
-import therealfarfetchd.quacklib.api.render.model.BlockModel
+import therealfarfetchd.quacklib.api.render.model.Model
 
 interface BlockConfiguration : Describable {
 
@@ -54,7 +54,7 @@ interface BlockConfiguration : Describable {
   /**
    *
    */
-  val renderers: List<BlockModel>
+  val renderers: List<Model>
 
   /**
    * The item this block is represented by.

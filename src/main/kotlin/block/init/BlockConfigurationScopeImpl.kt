@@ -3,15 +3,15 @@ package therealfarfetchd.quacklib.block.init
 import net.minecraft.block.SoundType
 import net.minecraft.block.material.Material
 import net.minecraft.util.ResourceLocation
-import therealfarfetchd.quacklib.api.block.component.AppliedComponent
 import therealfarfetchd.quacklib.api.block.component.BlockComponent
 import therealfarfetchd.quacklib.api.block.component.BlockComponentMultipart
 import therealfarfetchd.quacklib.api.block.init.BlockConfigurationScope
-import therealfarfetchd.quacklib.api.block.init.BlockDataLinkScope
+import therealfarfetchd.quacklib.api.block.init.BlockLinkScope
 import therealfarfetchd.quacklib.api.item.Tool
 import therealfarfetchd.quacklib.api.objects.item.ItemType
-import therealfarfetchd.quacklib.api.render.model.BlockModel
-import therealfarfetchd.quacklib.block.component.AppliedComponentImpl
+import therealfarfetchd.quacklib.api.render.model.DataSource
+import therealfarfetchd.quacklib.api.render.model.Model
+import therealfarfetchd.quacklib.api.render.model.accepts
 import therealfarfetchd.quacklib.core.init.InitializationContextImpl
 import therealfarfetchd.quacklib.core.init.ValidationContextImpl
 import kotlin.reflect.jvm.jvmName
@@ -27,26 +27,26 @@ class BlockConfigurationScopeImpl(modid: String, override val name: String, val 
   override var validTools: Set<Tool> = emptySet()
   override var item: ItemType? = null
 
-  override var components: List<BlockComponent> = emptyList()
-  override val renderers: List<BlockModel> = emptyList()
+  override val components = mutableListOf<BlockComponent>()
+  override val renderers = mutableListOf<Model>()
 
   override var isMultipart: Boolean = false
     private set
 
   @Suppress("UNCHECKED_CAST")
-  override fun <T : BlockComponent> apply(component: T): AppliedComponent<T> {
+  override fun <T : BlockComponent> apply(component: T): T {
     components += component
     component.onApplied(this)
     if (component is BlockComponentMultipart) isMultipart = true
-    return AppliedComponentImpl(component)
+    return component
   }
 
-  override fun link(op: BlockDataLinkScope.() -> Unit) {
-    BlockDataLinkScopeImpl().also(op)
+  override fun link(op: BlockLinkScope.() -> Unit) {
+    BlockLinkScopeImpl(rl).also(op)
   }
 
-  override fun <T : BlockModel> apply(renderer: T): T {
-    // TODO
+  override fun <T : Model> apply(renderer: T): T {
+    renderers += renderer
     return renderer
   }
 
@@ -60,6 +60,21 @@ class BlockConfigurationScopeImpl(modid: String, override val name: String, val 
       vc.additionalInfo = it::class.simpleName ?: it::class.qualifiedName ?: it::class.jvmName
       it.validate(this, vc)
     }
+
+    renderers
+      .filter { !it.accepts<DataSource.Block>() }
+      .forEach {
+        vc.additionalInfo = it::class.simpleName ?: it::class.qualifiedName ?: it::class.jvmName
+        vc.error("Renderer doesn't support block rendering!")
+        renderers -= it
+      }
+
+    // TODO: renderer validation?
+    // renderers.forEach {
+    //   vc.additionalInfo = it::class.simpleName ?: it::class.qualifiedName ?: it::class.jvmName
+    //   it.validate(this, vc)
+    // }
+
     vc.additionalInfo = null
 
     vc.printMessages()

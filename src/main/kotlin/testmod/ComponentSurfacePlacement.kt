@@ -15,22 +15,21 @@ import therealfarfetchd.quacklib.api.objects.world.World
 import therealfarfetchd.quacklib.api.tools.Facing
 import therealfarfetchd.quacklib.api.tools.PositionGrid
 import therealfarfetchd.quacklib.api.tools.offset
-import therealfarfetchd.quacklib.testmod.ComponentSurfacePlacement.Exported
 
 class ComponentSurfacePlacement : BlockComponentPlacement<ComponentSurfacePlacement.Data>,
                                   BlockComponentData<ComponentSurfacePlacement.Data>,
-                                  BlockComponentDataExport<ComponentSurfacePlacement, Exported>,
+                                  BlockComponentDataExport,
                                   BlockComponentRenderProperties,
                                   BlockComponentNeighborListener,
                                   BlockComponentPlacementCheck {
 
-  override val exported = Exported(this)
-
   override val rl: ResourceLocation = ResourceLocation("qltestmod", "sidedplacement")
 
-  override lateinit var part: PartAccessToken<Data>
+  val facing = export(Data::facing)
 
-  val rpFacing = renderProperty<Facing>("facing") { output { block -> block.part.facing } }
+  val rpFacing = renderProperty<Facing>("facing") { output { block -> block.part.facing } } fix this
+
+  override lateinit var part: PartAccessToken<Data>
 
   override fun initialize(block: Block, placer: EntityLivingBase, hand: EnumHand, facing: Facing, hit: Vec3) {
     block.part.facing = facing.opposite
@@ -62,12 +61,6 @@ class ComponentSurfacePlacement : BlockComponentPlacement<ComponentSurfacePlacem
   class Data : BlockDataPart(version = 0) {
 
     var facing: Facing by data("facing", Facing.DOWN)
-
-  }
-
-  class Exported(target: ComponentSurfacePlacement) : ExportedData<Exported, ComponentSurfacePlacement>(target) {
-
-    val facing = export(Data::facing)
 
   }
 

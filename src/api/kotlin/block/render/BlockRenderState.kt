@@ -1,4 +1,7 @@
 package therealfarfetchd.quacklib.api.block.render
 
-interface BlockRenderState {
+import therealfarfetchd.quacklib.api.render.ParamRenderState
+
+interface BlockRenderState : ParamRenderState {
+
 }

@@ -12,6 +12,7 @@ import therealfarfetchd.quacklib.api.objects.block.BlockType
 import therealfarfetchd.quacklib.api.objects.block.MCBlockType
 import therealfarfetchd.quacklib.api.objects.block.orEmpty
 import therealfarfetchd.quacklib.api.objects.item.*
+import therealfarfetchd.quacklib.api.render.model.ModelAPI
 import therealfarfetchd.quacklib.api.render.property.RenderProperty
 import therealfarfetchd.quacklib.api.render.property.RenderPropertyConfigurationScope
 import therealfarfetchd.quacklib.api.tools.Logger
@@ -30,6 +31,7 @@ import therealfarfetchd.quacklib.objects.block.DeferredBlockTypeImpl
 import therealfarfetchd.quacklib.objects.item.DeferredItemTypeImpl
 import therealfarfetchd.quacklib.objects.item.ItemImpl
 import therealfarfetchd.quacklib.objects.item.ItemTypeImpl
+import therealfarfetchd.quacklib.render.model.ModelAPIImpl
 import therealfarfetchd.quacklib.render.property.RenderPropertyConfigurationScopeImpl
 import therealfarfetchd.quacklib.render.property.RenderPropertyImpl
 import therealfarfetchd.quacklib.tools.ModContext
@@ -50,6 +52,8 @@ object APIImpl : QuackLibAPI {
   override val serializationRegistry: DataPartSerializationRegistry = DataPartSerializationRegistryImpl
 
   override val multipartAPI: MultipartAPIInternal = MCMPAPI
+
+  override val modelAPI: ModelAPI = ModelAPIImpl
 
   override var qlVersion: String = "unset"
 
@@ -98,15 +102,15 @@ object APIImpl : QuackLibAPI {
     return delegate
   }
 
-  override fun <T, C : BlockComponentDataImport<C, D>, D : ImportedData<D, C>> createImportedValue(target: C): ImportedValue<T> {
+  override fun <T, C : BlockComponentDataImport> createImportedValue(target: C): ImportedValue<T> {
     return ImportedValueImpl()
   }
 
-  override fun <R, C : BlockComponentDataExport<C, D>, D : ExportedData<D, C>> createExportedValue(target: C, op: (C, Block) -> R): ExportedValue<D, R> {
+  override fun <T, C : BlockComponentDataExport> createExportedValue(target: C, op: (C, Block) -> T): ExportedValue<C, T> {
     return ExportedValueImpl { data -> op(target, data) }
   }
 
-  override fun <T> addRenderProperty(type: BlockComponentRenderProperties, ptype: KClass<*>, name: String, op: (RenderPropertyConfigurationScope<T>) -> Unit): RenderProperty<T> {
+  override fun <T, C : BlockComponentRenderProperties> addRenderProperty(target: C, ptype: KClass<*>, name: String, op: (RenderPropertyConfigurationScope<T>) -> Unit): RenderProperty<C, T> {
     val hasAccess = getCallStack()
       .drop(1) // this
       .first().methodName == "<init>"
@@ -115,9 +119,9 @@ object APIImpl : QuackLibAPI {
 
     val rcs = RenderPropertyConfigurationScopeImpl<T>(name).also(op)
 
-    val rp = RenderPropertyImpl(type.rl, name, ptype, rcs.outputOp, { rcs.constraints.all { op -> op(it) } }, null)
+    val rp = RenderPropertyImpl(target::class, target.rl, name, ptype, rcs.outputOp, { rcs.constraints.all { op -> op(it) } }, null)
 
-    ExtraData.get(type, ComponentRenderProps.Key).props += rp
+    ExtraData.get(target, ComponentRenderProps.Key).props += rp
 
     return rp
   }

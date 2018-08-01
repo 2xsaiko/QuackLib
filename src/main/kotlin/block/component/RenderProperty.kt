@@ -7,7 +7,7 @@ import therealfarfetchd.quacklib.hax.ExtraData
 
 class ComponentRenderProps : Attachable<BlockComponentRenderProperties> {
 
-  val props = mutableListOf<RenderProperty<*>>()
+  val props = mutableListOf<RenderProperty<*, *>>()
 
   companion object {
     val Key = ExtraData.createKey(::ComponentRenderProps)

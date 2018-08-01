@@ -3,13 +3,10 @@ package therealfarfetchd.quacklib.api.block.component
 import therealfarfetchd.quacklib.api.core.modinterface.QuackLibAPI
 import therealfarfetchd.quacklib.api.objects.block.Block
 
-abstract class ImportedData<Self : ImportedData<Self, C>, C : BlockComponentDataImport<C, Self>>(val target: C) {
+fun <T> BlockComponentDataImport.import(): ImportedValue<T> =
+  QuackLibAPI.impl.createImportedValue(this)
 
-  protected fun <T> import(): ImportedValue<T> =
-    QuackLibAPI.impl.createImportedValue(target)
-
-}
-
+@Suppress("unused")
 interface ImportedValue<out T> {
 
   fun retrieve(data: Block): T

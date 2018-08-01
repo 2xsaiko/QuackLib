@@ -76,17 +76,10 @@ interface BlockComponentRenderProperties : Base, Reg {
 
 }
 
-interface BlockComponentDataExport<Self : BlockComponentDataExport<Self, D>, D : ExportedData<D, Self>> : Base {
+interface BlockComponentDataExport : Base
 
-  val exported: D
 
-}
-
-interface BlockComponentDataImport<Self : BlockComponentDataImport<Self, D>, D : ImportedData<D, Self>> : Base {
-
-  val imported: D
-
-}
+interface BlockComponentDataImport : Base
 
 interface BlockComponentPlacement<T : BlockDataPart> : BlockComponentData<T> {
 

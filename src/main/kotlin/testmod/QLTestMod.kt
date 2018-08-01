@@ -1,12 +1,18 @@
 package therealfarfetchd.quacklib.testmod
 
 import net.minecraft.block.material.Material
+import net.minecraft.util.EnumFacing
+import net.minecraft.util.ResourceLocation
 import net.minecraftforge.fml.common.Mod
+import therealfarfetchd.quacklib.api.block.component.BlockComponentRenderProperties
+import therealfarfetchd.quacklib.api.block.component.fix
+import therealfarfetchd.quacklib.api.block.component.renderProperty
 import therealfarfetchd.quacklib.api.core.init.InitializationContext
 import therealfarfetchd.quacklib.api.core.mod.BaseMod
 import therealfarfetchd.quacklib.api.core.mod.KotlinAdapter
 import therealfarfetchd.quacklib.api.core.modinterface.item
 import therealfarfetchd.quacklib.api.item.Tool
+import therealfarfetchd.quacklib.api.render.model.DataSource
 import therealfarfetchd.quacklib.api.render.model.SimpleModel
 import therealfarfetchd.quacklib.api.tools.isDebugMode
 
@@ -21,16 +27,51 @@ object QLTestMod : BaseMod() {
       hardness = 0.5f
       validTools = setOf(Tool("pickaxe", 2))
 
-      class TestModel : SimpleModel() {
-        override fun ModelContext.addObjects() {
+      class DummyComp : BlockComponentRenderProperties {
 
+        override val rl: ResourceLocation = ResourceLocation("qltestmod:dummy")
+
+        val dummyExport = renderProperty<Float>("dummy") { output { 45f } } fix this
+
+      }
+
+      class TestModel : SimpleModel() {
+        val walls = useTexture("quacklib:error")
+        val vertical = useTexture("quacklib:pablo")
+
+        val rot = useRenderParam<Float>()
+
+        override fun ModelContext.addObjects() {
+          coordsScale(16)
+
+          val rotation = when (
+            val d = data) {
+            is DataSource.Block -> d.state[rot]
+            is DataSource.Item -> d.state[rot]
+            is DataSource.Unknown -> 0f
+          }
+
+          translate(8f, 8f, 8f)
+          rotate(rotation, 0f, 1f, 0f)
+          translate(-8f, -8f, -8f)
+
+          add(Box) {
+            from(2f, 2f, 2f)
+            to(14f, 14f, 14f)
+
+            textureAll(walls)
+            texture(vertical, EnumFacing.UP, EnumFacing.DOWN)
+          }
         }
       }
 
+      val comp = apply(DummyComp())
+
       val model = apply(TestModel())
 
-
-      link { }
+      link {
+        comp.dummyExport provides model.rot
+      }
     }
 
     val testBlockItem = addPlacementItem(testBlock)
@@ -49,9 +90,9 @@ object QLTestMod : BaseMod() {
       val part = apply(SidedMultipart())
 
       link {
-        box { side.exports.facing provides facing }
-        part { side.exports.facing provides facing }
-        rs { side.exports.facing provides facing }
+        side.facing provides box.facing
+        side.facing provides part.facing
+        side.facing provides rs.facing
       }
     }
 

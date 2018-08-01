@@ -5,14 +5,13 @@ import net.minecraft.util.math.AxisAlignedBB
 import therealfarfetchd.quacklib.api.block.component.*
 import therealfarfetchd.quacklib.api.core.extensions.AxisAlignedBB
 import therealfarfetchd.quacklib.api.objects.block.Block
-import therealfarfetchd.quacklib.testmod.ComponentBounds.Imported
 
 class ComponentBounds(height: Float) : BlockComponentCollision,
                                        BlockComponentMouseOver,
                                        BlockComponentOcclusion,
-                                       BlockComponentDataImport<ComponentBounds, Imported> {
+                                       BlockComponentDataImport {
 
-  override val imported = Imported(this)
+  val facing = import<EnumFacing>()
 
   val bounds = EnumFacing.values().associate {
     it to when (it) {
@@ -26,11 +25,11 @@ class ComponentBounds(height: Float) : BlockComponentCollision,
   }
 
   override fun getCollisionBoundingBoxes(block: Block): List<AxisAlignedBB> {
-    return listOf(bounds.getValue(block[imported.facing]))
+    return listOf(bounds.getValue(block[facing]))
   }
 
   override fun getOcclusionBoundingBoxes(block: Block): List<AxisAlignedBB> {
-    val facing = block[imported.facing]
+    val facing = block[facing]
     val axis = facing.axis
 
     val xMult = 0.125.takeIf { axis != EnumFacing.Axis.X } ?: 0.0
@@ -43,11 +42,5 @@ class ComponentBounds(height: Float) : BlockComponentCollision,
 
   override fun getRaytraceBoundingBoxes(block: Block): List<AxisAlignedBB> =
     getCollisionBoundingBoxes(block)
-
-  class Imported(target: ComponentBounds) : ImportedData<Imported, ComponentBounds>(target) {
-
-    val facing = import<EnumFacing>()
-
-  }
 
 }

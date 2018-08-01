@@ -2,12 +2,11 @@ package therealfarfetchd.quacklib.api.block.init
 
 import net.minecraft.block.SoundType
 import net.minecraft.block.material.Material
-import therealfarfetchd.quacklib.api.block.component.AppliedComponent
 import therealfarfetchd.quacklib.api.block.component.BlockComponent
 import therealfarfetchd.quacklib.api.core.init.InitDSL
 import therealfarfetchd.quacklib.api.item.Tool
 import therealfarfetchd.quacklib.api.objects.item.ItemType
-import therealfarfetchd.quacklib.api.render.model.BlockModel
+import therealfarfetchd.quacklib.api.render.model.Model
 
 @InitDSL
 interface BlockConfigurationScope : BlockConfiguration {
@@ -42,16 +41,16 @@ interface BlockConfigurationScope : BlockConfiguration {
   /**
    *
    */
-  fun <T : BlockComponent> apply(component: T): AppliedComponent<T>
+  fun <T : BlockComponent> apply(component: T): T
 
   /**
    *
    */
-  fun <T : BlockModel> apply(renderer: T): T
+  fun <T : Model> apply(renderer: T): T
 
   /**
    *
    */
-  fun link(op: BlockDataLinkScope.() -> Unit)
+  fun link(op: BlockLinkScope.() -> Unit)
 
 }
