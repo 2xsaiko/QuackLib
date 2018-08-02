@@ -62,7 +62,7 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
 
   val cData = getComponentsOfType<BlockComponentData<*>>()
 
-  val needsTile = getComponentsOfType<BlockComponentNeedTE>().isNotEmpty()
+  val needsTile = getComponentsOfType<BlockComponentNeedTE>().isNotEmpty() || (type as BlockTypeImpl).conf.renderers.any { it.needsDynamicRender() }
   val needsTick = getComponentsOfType<BlockComponentTickable>().isNotEmpty()
 
   lateinit var propRetrievers: SetPropertyRetrievers

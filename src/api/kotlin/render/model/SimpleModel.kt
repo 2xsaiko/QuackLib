@@ -28,13 +28,10 @@ abstract class SimpleModel : Model {
   final override fun getUsedTextures(): List<ResourceLocation> =
     atlasTexs.map(PreparedTexture::resource)
 
-  final override fun <T : DataSource<D>, D : DynDataSource> getDynamicRender(data: T, dyndata: D): List<Quad> {
-    TODO("not implemented")
-  }
+  final override fun <T : DataSource<D>, D : DynDataSource> getDynamicRender(data: T, dyndata: D, getTexture: (ResourceLocation) -> AtlasTexture): List<Quad> =
+    QuackLibAPI.impl.modelAPI.getDynamicRender(this, data, dyndata, getTexture)
 
-  final override fun needsDynamicRender(): Boolean {
-    TODO("not implemented")
-  }
+  final override fun needsDynamicRender(): Boolean = true
 
   fun useTexture(resource: String, addToAtlas: Boolean = true): PreparedTexture =
     useTexture(QuackLibAPI.impl.getResourceFromContext(resource), addToAtlas)

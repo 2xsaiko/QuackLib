@@ -98,3 +98,6 @@ class BlockImpl(
   }
 
 }
+
+fun TileEntity.toBlock(): Block =
+  BlockImpl.createExistingFromTile(this)

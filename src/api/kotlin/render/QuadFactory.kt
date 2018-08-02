@@ -22,7 +22,7 @@ fun mkQuad(tex: AtlasTexture, facing: Facing, from: Vec3, to: Vec3, uv: Vec2, uv
     Z -> to.copy(z = (from.z + to.z) / 2, x = from.x)
   }
 
-  return Quad(tex, from, vec2, to, vec4, uv, uv.copy(y = uv1.y), uv1, uv1.copy(y = uv.y), c)
+  return Quad(tex, from, vec2, to, vec4, uv, uv.copy(y = uv1.y), uv1, uv1.copy(y = uv.y), Vec2.Origin, c)
 }
 
 fun mkQuad16(tex: AtlasTexture, facing: Facing, from: Vec3, to: Vec3, uv: Vec2, uv1: Vec2, c: Color = Color.WHITE): Quad {

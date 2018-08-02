@@ -41,7 +41,7 @@ fun Quad.pipe(c: IVertexConsumer) {
         VertexFormatElement.EnumUsage.COLOR -> c.put(i, color.redf, color.greenf, color.bluef, color.alphaf)
         VertexFormatElement.EnumUsage.UV -> when (el.index) {
           0 -> c.put(i, uv.x, uv.y, 0f, 1f) // texture
-          1 -> c.put(i, 0f, 0f, 0f, 1f) // lightmap
+          1 -> c.put(i, lightmap.x, lightmap.y, 0f, 1f) // lightmap
         }
         else -> c.put(i)
       }

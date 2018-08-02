@@ -47,6 +47,7 @@ interface Block : Instance<BlockType>, BehaviorDelegate {
 
   val pos: PositionGrid
 
+  @Deprecated("Internal usage", ReplaceWith("this"), DeprecationLevel.ERROR)
   override val block: Block
     get() = this
 

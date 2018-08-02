@@ -60,7 +60,7 @@ interface Model {
 
   fun getUsedTextures(): List<ResourceLocation>
 
-  fun <T : DataSource<D>, D : DynDataSource> getDynamicRender(data: T, dyndata: D): List<Quad>
+  fun <T : DataSource<D>, D : DynDataSource> getDynamicRender(data: T, dyndata: D, getTexture: (ResourceLocation) -> AtlasTexture): List<Quad>
 
   fun needsDynamicRender(): Boolean
 

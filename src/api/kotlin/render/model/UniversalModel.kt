@@ -1,6 +1,5 @@
 package therealfarfetchd.quacklib.api.render.model
 
-import net.minecraft.entity.player.EntityPlayer
 import therealfarfetchd.quacklib.api.block.render.BlockRenderState
 import therealfarfetchd.quacklib.api.item.render.ItemRenderState
 import therealfarfetchd.quacklib.api.objects.block.BlockType
@@ -29,6 +28,6 @@ sealed class DataSource<D : DynDataSource> {
 
 sealed class DynDataSource {
   object Unknown : DynDataSource()
-  class Block(val player: EntityPlayer) : DynDataSource()
-  class Item(val player: EntityPlayer) : DynDataSource()
+  class Block(val block: therealfarfetchd.quacklib.api.objects.block.Block, partialTicks: Float) : DynDataSource()
+  class Item(val item: therealfarfetchd.quacklib.api.objects.item.Item, partialTicks: Float) : DynDataSource()
 }

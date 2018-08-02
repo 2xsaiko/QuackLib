@@ -74,6 +74,8 @@ open class TileQuackLib() : TileEntity() {
     }
   }
 
+  override fun hasFastRenderer(): Boolean = true
+
   override fun hasCapability(capability: Capability<*>, facing: EnumFacing?): Boolean =
     cCapability.any { it.hasCapability(getBlockData(), capability, facing) } ||
     super.hasCapability(capability, facing)

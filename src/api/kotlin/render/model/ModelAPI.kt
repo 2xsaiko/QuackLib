@@ -8,4 +8,6 @@ interface ModelAPI {
 
   fun getStaticRender(model: SimpleModel, data: DataSource<*>, texture: (ResourceLocation) -> AtlasTexture): List<Quad>
 
+  fun <T : DynDataSource> getDynamicRender(model: SimpleModel, data: DataSource<T>, dyndata: T, texture: (ResourceLocation) -> AtlasTexture): List<Quad>
+
 }

@@ -10,6 +10,7 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.client.model.ModelLoaderRegistry
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.RegistryEvent
+import net.minecraftforge.fml.client.registry.ClientRegistry
 import net.minecraftforge.fml.common.FMLModContainer
 import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.event.FMLEvent
@@ -41,6 +42,7 @@ import therealfarfetchd.quacklib.objects.item.CreatedItemTypeImpl
 import therealfarfetchd.quacklib.objects.item.DeferredItemTypeImpl
 import therealfarfetchd.quacklib.objects.item.ItemTypeImpl
 import therealfarfetchd.quacklib.render.client.ModelLoaderQuackLib
+import therealfarfetchd.quacklib.render.client.TESRQuackLib
 import therealfarfetchd.quacklib.render.vanilla.VanillaLoader
 import therealfarfetchd.quacklib.tools.ModContext
 import therealfarfetchd.quacklib.tools.progressbar
@@ -156,6 +158,7 @@ class QLClientProxy : QLCommonProxy() {
     super.preInit(e)
     mc = Minecraft.getMinecraft()
     ModelLoaderRegistry.registerLoader(ModelLoaderQuackLib)
+    ClientRegistry.bindTileEntitySpecialRenderer(TileQuackLib::class.java, TESRQuackLib())
   }
 
   @SubscribeEvent

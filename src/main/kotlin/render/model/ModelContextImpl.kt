@@ -7,7 +7,7 @@ import therealfarfetchd.quacklib.api.render.model.*
 import therealfarfetchd.quacklib.api.render.texture.AtlasTexture
 import therealfarfetchd.quacklib.api.render.texture.Texture
 
-class ModelContextImpl(override val data: DataSource<*>, val getTexture: (ResourceLocation) -> AtlasTexture) : SimpleModel.ModelContext {
+open class ModelContextImpl(override val data: DataSource<*>, val getTexture: (ResourceLocation) -> AtlasTexture) : SimpleModel.ModelContext {
 
   override val Box: ObjectBuilderProvider<BoxConfigurationScope> = ::BoxConfigurationScopeImpl
   override val OBJ: ObjectBuilderProvider<ObjConfigurationScope> = ::ObjConfigurationScopeImpl
@@ -19,7 +19,7 @@ class ModelContextImpl(override val data: DataSource<*>, val getTexture: (Resour
   val transformStack = mutableListOf<Mat4>()
   var currentTransform = Mat4.Identity
 
-  val dynops = mutableListOf<SimpleModel.Dynamic.() -> Unit>()
+  val dynops = mutableListOf<DynState>()
 
   internal fun getQuads(): List<Quad> {
     return quads
@@ -70,7 +70,21 @@ class ModelContextImpl(override val data: DataSource<*>, val getTexture: (Resour
   }
 
   override fun dynamic(op: SimpleModel.Dynamic.() -> Unit) {
-    dynops += op
+    dynops += DynState(transformStack + currentTransform, coordsScale, op)
+  }
+
+  data class DynState(val trStack: List<Mat4>, val cscale: Float, val op: SimpleModel.Dynamic.() -> Unit)
+
+  class Dynamic(state: DynState, data: DataSource<*>, override val dyndata: DynDataSource, getTexture: (ResourceLocation) -> AtlasTexture) : ModelContextImpl(data, getTexture), SimpleModel.Dynamic {
+
+    init {
+      transformStack += state.trStack.dropLast(1)
+      currentTransform = state.trStack.last()
+      coordsScale = state.cscale
+    }
+
+    override fun dynamic(op: SimpleModel.Dynamic.() -> Unit): Unit =
+      error("Can't have nested dynamic blocks!")
   }
 
 }

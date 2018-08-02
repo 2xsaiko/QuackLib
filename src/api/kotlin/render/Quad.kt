@@ -12,6 +12,7 @@ data class Quad(
   val texture: AtlasTexture,
   val vert1: Vec3, val vert2: Vec3, val vert3: Vec3, val vert4: Vec3,
   val tex1: Vec2, val tex2: Vec2, val tex3: Vec2, val tex4: Vec2,
+  val lightmap: Vec2,
   val color: Color
 ) {
   val normal by lazy { ((vert2 - vert1) crossProduct (vert3 - vert1)).normalized }
@@ -42,7 +43,7 @@ data class Quad(
     else {
       val rotate = rotateAround(a, axis, center)
       val r = listOf(vert1, vert2, vert3, vert4).map { rotateAround(a, axis, center) * it }
-      Quad(texture, r[0], r[1], r[2], r[3], tex1, tex2, tex3, tex4, color)
+      Quad(texture, r[0], r[1], r[2], r[3], tex1, tex2, tex3, tex4, lightmap, color)
     }
   }
 
@@ -58,6 +59,9 @@ data class Quad(
 
   fun transform(mat: Mat4) =
     copy(vert1 = mat * vert1, vert2 = mat * vert2, vert3 = mat * vert3, vert4 = mat * vert4)
+
+  fun lightmap(x: Float, y: Float) =
+    copy(lightmap = Vec2(x, y))
 
   /**
    * Rotates the texture by 90°.
