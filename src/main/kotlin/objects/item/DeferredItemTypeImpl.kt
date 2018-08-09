@@ -5,6 +5,7 @@ import therealfarfetchd.quacklib.api.core.Unsafe
 import therealfarfetchd.quacklib.api.core.unsafe
 import therealfarfetchd.quacklib.api.item.component.ItemComponent
 import therealfarfetchd.quacklib.api.objects.item.Item
+import therealfarfetchd.quacklib.api.objects.item.ItemBehavior
 import therealfarfetchd.quacklib.api.objects.item.ItemType
 import therealfarfetchd.quacklib.api.objects.item.MCItemType
 
@@ -22,6 +23,10 @@ class DeferredItemTypeImpl(override val registryName: ResourceLocation) : ItemTy
   override fun create(amount: Int, meta: Int): Item =
     realInstance?.create(amount, meta)
     ?: crash()
+
+  override val behavior: ItemBehavior
+    get() = realInstance?.behavior
+            ?: crash()
 
   override val components: List<ItemComponent>
     get() = realInstance?.components

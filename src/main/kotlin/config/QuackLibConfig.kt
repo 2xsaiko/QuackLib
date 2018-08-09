@@ -11,7 +11,7 @@ object QuackLibConfig : Configuration(File("config/quacklib.conf")) {
   val alwaysShowMultipartDebug by storedBool(true, "misc", "Show real blockstate for non-QuackLib multiparts")
 
   init {
-    QuackLibConfig::class.declaredMemberProperties.forEach { it.get(this) }
+    QuackLibConfig::class.declaredMemberProperties.forEach { it.get(this) } // FIXME crashes on server
 
     save()
   }

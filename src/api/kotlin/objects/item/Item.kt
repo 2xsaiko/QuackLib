@@ -15,17 +15,23 @@ typealias MCItem = net.minecraft.item.ItemStack
 
 interface ItemType : Instantiable, Registered, ComponentHost<ItemComponent> {
 
-  fun Unsafe.toMCItemType(): MCItemType
-
   fun create(amount: Int = 1, meta: Int = 0): Item
+
+  val behavior: ItemBehavior
+
+  fun Unsafe.toMCItemType(): MCItemType
 
 }
 
-interface Item : Instance<ItemType> {
+interface Item : Instance<ItemType>, BehaviorDelegate {
 
   fun Unsafe.toMCItem(): MCItem
 
   var count: Int
+
+  @Deprecated("Internal usage", ReplaceWith("this"), DeprecationLevel.ERROR)
+  override val item: Item
+    get() = this
 
   fun copy(): Item
 

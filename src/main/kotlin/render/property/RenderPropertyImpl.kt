@@ -3,15 +3,18 @@ package therealfarfetchd.quacklib.render.property
 import net.minecraft.util.ResourceLocation
 import therealfarfetchd.quacklib.api.block.component.BlockComponentRenderProperties
 import therealfarfetchd.quacklib.api.core.Unsafe
+import therealfarfetchd.quacklib.api.item.component.ItemComponentRenderProperties
 import therealfarfetchd.quacklib.api.objects.block.Block
+import therealfarfetchd.quacklib.api.objects.item.Item
 import therealfarfetchd.quacklib.api.render.property.PropertyType
 import therealfarfetchd.quacklib.api.render.property.RenderProperty
+import therealfarfetchd.quacklib.api.render.property.RenderPropertyBlock
 import therealfarfetchd.quacklib.block.data.PropertyResourceLocation
 import therealfarfetchd.quacklib.block.data.render.PropertyData
 import therealfarfetchd.quacklib.block.data.render.PropertyDataExtended
 import kotlin.reflect.KClass
 
-class RenderPropertyImpl<C : BlockComponentRenderProperties, T>(
+class RenderPropertyBlockImpl<C : BlockComponentRenderProperties, T>(
   val targetClass: KClass<out C>,
   val rl: ResourceLocation,
   override val name: String,
@@ -19,7 +22,7 @@ class RenderPropertyImpl<C : BlockComponentRenderProperties, T>(
   val outputOp: (Block) -> T,
   constraints: (T) -> Boolean,
   values: List<T>?
-) : RenderProperty<C, T> {
+) : RenderPropertyBlock<C, T> {
 
   val useExtendedProperty = true // TODO
 
@@ -34,14 +37,32 @@ class RenderPropertyImpl<C : BlockComponentRenderProperties, T>(
       PropertyType.Standard(PropertyData(PropertyResourceLocation(rl, name), type, values!!.filter(constraints)))
     }
 
+  override fun getValue(container: Block): T {
+    return outputOp(container)
+  }
+
   override fun getComponentClass(): KClass<out C> {
     return targetClass
   }
 
-  override fun getValue(b: Block): T {
-    return outputOp(b)
+  override fun Unsafe.getMCProperty(): PropertyType<T> = pt
+
+}
+
+class RenderPropertyItemImpl<C : ItemComponentRenderProperties, T>(
+  val targetClass: KClass<out C>,
+  override val name: String,
+  val outputOp: (Item) -> T,
+  constraints: (T) -> Boolean,
+  values: List<T>?
+) : RenderProperty<C, Item, T> {
+
+  override fun getValue(container: Item): T {
+    return outputOp(container)
   }
 
-  override fun Unsafe.getMCProperty(): PropertyType<T> = pt
+  override fun getComponentClass(): KClass<out C> {
+    return targetClass
+  }
 
 }

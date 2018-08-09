@@ -30,15 +30,26 @@ interface BoxConfigurationScope : ModelConfigurationScope {
   fun cull(b: Boolean)
   fun cullFace(s: CullFace)
 
-  fun texture(t: SimpleModel.PreparedTexture?, side0: Facing)
+  fun texture(t: SimpleModel.PreparedTexture?, side0: Facing, op: TextureConfigScope.() -> Unit = {})
 
-  fun texture(t: SimpleModel.PreparedTexture?, side0: Facing, vararg side: Facing) {
+  fun texture(t: SimpleModel.PreparedTexture?, side0: Facing, vararg side: Facing, op: TextureConfigScope.() -> Unit = {}) {
     texture(t, side0)
-    for (s in side) texture(t, s)
+    for (s in side) texture(t, s, op)
   }
 
-  fun textureAll(t: SimpleModel.PreparedTexture?) {
-    for (s in Facing.VALUES) texture(t, s)
+  fun textureAll(t: SimpleModel.PreparedTexture?, op: TextureConfigScope.() -> Unit = {}) {
+    for (s in Facing.VALUES) texture(t, s, op)
+  }
+
+  interface TextureConfigScope {
+
+    fun uv(x1: Float, y1: Float, x2: Float, y2: Float)
+
+    /**
+     * Rotates the texture by the specified angle. 90° increments only.
+     */
+    fun rotate(angle: Int)
+
   }
 
   enum class CullFace {

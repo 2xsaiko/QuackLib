@@ -9,7 +9,7 @@ interface ExportedValue<C : BlockComponentDataExport, out T>
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun <C : BlockComponentDataExport, R> C.export(noinline op: (C, Block) -> R): ExportedValue<C, R> =
-  QuackLibAPI.impl.createExportedValue(this, op)
+  QuackLibAPI.impl.createExportedValueBlock(this, op)
 
 inline fun <C, D : BlockDataPart, R> C.export(crossinline op: (D) -> R): ExportedValue<C, R>
   where C : BlockComponentDataExport,

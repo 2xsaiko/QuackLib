@@ -4,6 +4,7 @@ import com.google.common.collect.ListMultimap
 import net.minecraft.block.Block
 import net.minecraft.client.Minecraft
 import net.minecraft.item.Item
+import net.minecraft.util.EnumHand
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.RayTraceResult
 import net.minecraftforge.client.event.RenderGameOverlayEvent
@@ -34,6 +35,7 @@ import therealfarfetchd.quacklib.core.ModID
 import therealfarfetchd.quacklib.core.QuackLib
 import therealfarfetchd.quacklib.core.QuackLib.Logger
 import therealfarfetchd.quacklib.core.init.ValidationContextImpl
+import therealfarfetchd.quacklib.item.impl.ItemExtraDebug
 import therealfarfetchd.quacklib.notification.NotificationQuackLib
 import therealfarfetchd.quacklib.objects.block.BlockTypeImpl
 import therealfarfetchd.quacklib.objects.block.CreatedBlockTypeImpl
@@ -158,7 +160,7 @@ class QLClientProxy : QLCommonProxy() {
     super.preInit(e)
     mc = Minecraft.getMinecraft()
     ModelLoaderRegistry.registerLoader(ModelLoaderQuackLib)
-    ClientRegistry.bindTileEntitySpecialRenderer(TileQuackLib::class.java, TESRQuackLib())
+    ClientRegistry.bindTileEntitySpecialRenderer(TileQuackLib::class.java, TESRQuackLib)
   }
 
   @SubscribeEvent
@@ -175,6 +177,14 @@ class QLClientProxy : QLCommonProxy() {
       val block = state.block
       if (block is BlockExtraDebug) {
         block.addInformation(mc.world, pos, state.getActualState(mc.world, pos), mc.player, e.left, e.right)
+      }
+    }
+
+    for (hand in EnumHand.values()) {
+      val stack = mc.player.getHeldItem(hand)
+      val item = stack.item
+      if (item is ItemExtraDebug) {
+        item.addInformation(mc.world, stack, hand, mc.player, e.left, e.right)
       }
     }
   }
@@ -195,8 +205,16 @@ class QLClientProxy : QLCommonProxy() {
 
 }
 
+@Suppress("CanSealedSubClassBeObject")
 class QLServerProxy : QLCommonProxy() {
 
-  override fun addNotification(title: String, body: String?, expireTime: Long, icon: ResourceLocation?) {}
+  override fun addNotification(title: String, body: String?, expireTime: Long, icon: ResourceLocation?) {
+    Logger.info(title)
+    if (body != null) {
+      for (line in body.lines()) {
+        Logger.info(line)
+      }
+    }
+  }
 
 }

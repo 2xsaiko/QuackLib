@@ -1,11 +1,17 @@
 package therealfarfetchd.quacklib.api.core.modinterface
 
 import net.minecraft.util.ResourceLocation
-import therealfarfetchd.quacklib.api.block.component.*
+import therealfarfetchd.quacklib.api.block.component.BlockComponentDataExport
+import therealfarfetchd.quacklib.api.block.component.BlockComponentDataImport
+import therealfarfetchd.quacklib.api.block.component.BlockComponentRenderProperties
 import therealfarfetchd.quacklib.api.block.data.BlockDataPart
 import therealfarfetchd.quacklib.api.block.data.DataPartSerializationRegistry
 import therealfarfetchd.quacklib.api.block.multipart.MultipartAPI
 import therealfarfetchd.quacklib.api.core.UnsafeScope
+import therealfarfetchd.quacklib.api.item.component.ItemComponentDataExport
+import therealfarfetchd.quacklib.api.item.component.ItemComponentDataImport
+import therealfarfetchd.quacklib.api.item.component.ItemComponentRenderProperties
+import therealfarfetchd.quacklib.api.item.data.ItemDataPart
 import therealfarfetchd.quacklib.api.objects.block.Block
 import therealfarfetchd.quacklib.api.objects.block.BlockType
 import therealfarfetchd.quacklib.api.objects.block.MCBlockType
@@ -15,11 +21,16 @@ import therealfarfetchd.quacklib.api.objects.item.MCItem
 import therealfarfetchd.quacklib.api.objects.item.MCItemType
 import therealfarfetchd.quacklib.api.render.model.ModelAPI
 import therealfarfetchd.quacklib.api.render.property.RenderProperty
+import therealfarfetchd.quacklib.api.render.property.RenderPropertyBlock
 import therealfarfetchd.quacklib.api.render.property.RenderPropertyConfigurationScope
 import therealfarfetchd.quacklib.api.tools.ModContext
 import java.io.InputStream
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
+import therealfarfetchd.quacklib.api.block.component.ExportedValue as BlockExportedValue
+import therealfarfetchd.quacklib.api.block.component.ImportedValue as BlockImportedValue
+import therealfarfetchd.quacklib.api.item.component.ExportedValue as ItemExportedValue
+import therealfarfetchd.quacklib.api.item.component.ImportedValue as ItemImportedValue
 
 /**
  * This is the "API", but this doesn't mean you should use it.
@@ -55,11 +66,20 @@ interface QuackLibAPI {
 
   fun <T> createBlockDataDelegate(part: BlockDataPart, name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, validValues: List<T>?): ReadWriteProperty<BlockDataPart, T>
 
-  fun <T, C : BlockComponentDataImport> createImportedValue(target: C): ImportedValue<T>
+  fun <T, C : BlockComponentDataImport> createImportedValueBlock(target: C): BlockImportedValue<T>
 
-  fun <T, C : BlockComponentDataExport> createExportedValue(target: C, op: (C, Block) -> T): ExportedValue<C, T>
+  fun <T, C : BlockComponentDataExport> createExportedValueBlock(target: C, op: (C, Block) -> T): BlockExportedValue<C, T>
 
-  fun <T, C : BlockComponentRenderProperties> addRenderProperty(target: C, ptype: KClass<*>, name: String, op: (RenderPropertyConfigurationScope<T>) -> Unit): RenderProperty<C, T>
+  fun <T, C : BlockComponentRenderProperties> addRenderPropertyBlock(target: C, ptype: KClass<*>, name: String, op: (RenderPropertyConfigurationScope<T>) -> Unit): RenderPropertyBlock<C, T>
+
+  fun <T> createItemDataDelegate(part: ItemDataPart, name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, validValues: List<T>?): ReadWriteProperty<ItemDataPart, T>
+
+  fun <T, C : ItemComponentDataImport> createImportedValueItem(target: C): ItemImportedValue<T>
+
+  fun <T, C : ItemComponentDataExport> createExportedValueItem(target: C, op: (C, Item) -> T): ItemExportedValue<C, T>
+
+  fun <T, C : ItemComponentRenderProperties> addRenderPropertyItem(target: C, ptype: KClass<*>, name: String, op: (RenderPropertyConfigurationScope<T>) -> Unit): RenderProperty<C, Item, T>
+
 
   fun <T : Any> registerCapability(type: KClass<T>)
 

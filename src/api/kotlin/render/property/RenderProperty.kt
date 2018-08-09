@@ -7,17 +7,25 @@ import therealfarfetchd.quacklib.api.core.Unsafe
 import therealfarfetchd.quacklib.api.objects.block.Block
 import kotlin.reflect.KClass
 
-interface RenderProperty<C : BlockComponentRenderProperties, out T> {
+interface RenderProperty<C : ComponentRenderProperties, in K, out T> {
 
   val name: String
 
-  fun getValue(b: Block): T
+  fun getValue(container: K): T
 
   fun getComponentClass(): KClass<out C>
+
+
+}
+
+interface RenderPropertyBlock<C : BlockComponentRenderProperties, out T> : RenderProperty<C, Block, T> {
 
   fun Unsafe.getMCProperty(): PropertyType<T>
 
 }
+
+
+interface ComponentRenderProperties
 
 sealed class PropertyType<out T> {
   class Standard<T>(val prop: IProperty<*>) : PropertyType<T>()
@@ -27,7 +35,7 @@ sealed class PropertyType<out T> {
 
 interface UnsafeExtRP : Unsafe {
 
-  fun <T> RenderProperty<*, T>.getMCProperty() =
+  fun <T> RenderPropertyBlock<*, T>.getMCProperty() =
     self.getMCProperty()
 
 }

@@ -6,7 +6,7 @@
 //import net.minecraft.util.math.BlockPos
 //import net.minecraft.world.IBlockAccess
 //import net.minecraft.world.World
-//import therealfarfetchd.quacklib.api.block.component.ImportedValue
+//import therealfarfetchd.quacklib.api.item.component.ImportedValue
 //import therealfarfetchd.quacklib.api.block.data.BlockDataPart
 //import therealfarfetchd.quacklib.api.block.data.PartAccessToken
 //import therealfarfetchd.quacklib.block.impl.DataContainer

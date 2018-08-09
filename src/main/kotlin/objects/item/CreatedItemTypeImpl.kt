@@ -6,6 +6,7 @@ import therealfarfetchd.quacklib.api.core.unsafe
 import therealfarfetchd.quacklib.api.item.component.ItemComponent
 import therealfarfetchd.quacklib.api.item.init.ItemConfiguration
 import therealfarfetchd.quacklib.api.objects.item.Item
+import therealfarfetchd.quacklib.api.objects.item.ItemBehavior
 import therealfarfetchd.quacklib.api.objects.item.ItemType
 import therealfarfetchd.quacklib.api.objects.item.MCItemType
 
@@ -20,6 +21,10 @@ class CreatedItemTypeImpl(override val registryName: ResourceLocation, val def: 
   override fun create(amount: Int, meta: Int): Item =
     realInstance?.create()
     ?: crash()
+
+  override val behavior: ItemBehavior
+    get() = realInstance?.behavior
+            ?: crash()
 
   override val components: List<ItemComponent>
     get() = realInstance?.components

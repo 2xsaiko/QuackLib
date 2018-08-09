@@ -3,9 +3,11 @@ package therealfarfetchd.quacklib.core.init
 import net.minecraft.util.ResourceLocation
 import therealfarfetchd.quacklib.api.item.component.ItemComponent
 import therealfarfetchd.quacklib.api.item.init.ItemConfigurationScope
+import therealfarfetchd.quacklib.api.item.init.ItemLinkScope
 import therealfarfetchd.quacklib.api.render.model.DataSource
 import therealfarfetchd.quacklib.api.render.model.Model
 import therealfarfetchd.quacklib.api.render.model.accepts
+import therealfarfetchd.quacklib.item.init.ItemLinkScopeImpl
 import kotlin.reflect.jvm.jvmName
 
 class ItemConfigurationScopeImpl(modid: String, override val name: String, val init: InitializationContextImpl) : ItemConfigurationScope {
@@ -24,6 +26,10 @@ class ItemConfigurationScopeImpl(modid: String, override val name: String, val i
   override fun <T : Model> apply(renderer: T): T {
     renderers += renderer
     return renderer
+  }
+
+  override fun link(op: ItemLinkScope.() -> Unit) {
+    ItemLinkScopeImpl(rl).also(op)
   }
 
   fun validate(): Boolean {

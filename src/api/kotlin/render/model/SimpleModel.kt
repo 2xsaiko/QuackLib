@@ -4,7 +4,11 @@ import net.minecraft.util.ResourceLocation
 import therealfarfetchd.math.Mat4
 import therealfarfetchd.quacklib.api.block.render.BlockRenderState
 import therealfarfetchd.quacklib.api.core.modinterface.QuackLibAPI
+import therealfarfetchd.quacklib.api.item.render.ItemRenderState
+import therealfarfetchd.quacklib.api.objects.block.Block
 import therealfarfetchd.quacklib.api.objects.block.BlockType
+import therealfarfetchd.quacklib.api.objects.item.Item
+import therealfarfetchd.quacklib.api.objects.item.ItemType
 import therealfarfetchd.quacklib.api.render.Quad
 import therealfarfetchd.quacklib.api.render.property.RenderProperty
 import therealfarfetchd.quacklib.api.render.texture.AtlasTexture
@@ -100,14 +104,23 @@ abstract class SimpleModel : Model {
 
   @Suppress("unused")
   inner class RenderParam<T> internal constructor() {
-    private val rps = mutableMapOf<ResourceLocation, RenderProperty<*, T>>()
+    private val rpbs = mutableMapOf<ResourceLocation, RenderProperty<*, Block, T>>()
+    private val rpis = mutableMapOf<ResourceLocation, RenderProperty<*, Item, T>>()
 
-    fun setImpl(block: ResourceLocation, export: RenderProperty<*, T>) {
-      rps[block] = export
+    fun setImplBlock(block: ResourceLocation, export: RenderProperty<*, Block, T>) {
+      rpbs[block] = export
     }
 
-    fun getValue(block: BlockType, state: BlockRenderState): T {
-      return state.getValue(rps.getValue(block.registryName))
+    fun getValueBlock(block: BlockType, state: BlockRenderState): T {
+      return state.getValue(rpbs.getValue(block.registryName))
+    }
+
+    fun setImplItem(item: ResourceLocation, export: RenderProperty<*, Item, T>) {
+      rpis[item] = export
+    }
+
+    fun getValueItem(item: ItemType, state: ItemRenderState): T {
+      return state.getValue(rpis.getValue(item.registryName))
     }
   }
 

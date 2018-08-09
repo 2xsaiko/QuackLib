@@ -22,12 +22,12 @@ import therealfarfetchd.quacklib.api.objects.item.ItemType
 
 sealed class DataSource<D : DynDataSource> {
   object Unknown : DataSource<DynDataSource.Unknown>()
-  class Block(val bt: BlockType, val state: BlockRenderState) : DataSource<DynDataSource.Block>()
-  class Item(val it: ItemType, val state: ItemRenderState) : DataSource<DynDataSource.Item>()
+  data class Block(val bt: BlockType, val state: BlockRenderState) : DataSource<DynDataSource.Block>()
+  data class Item(val it: ItemType, val state: ItemRenderState) : DataSource<DynDataSource.Item>()
 }
 
 sealed class DynDataSource {
   object Unknown : DynDataSource()
-  class Block(val block: therealfarfetchd.quacklib.api.objects.block.Block, partialTicks: Float) : DynDataSource()
-  class Item(val item: therealfarfetchd.quacklib.api.objects.item.Item, partialTicks: Float) : DynDataSource()
+  class Block(val block: therealfarfetchd.quacklib.api.objects.block.Block, val partialTicks: Float) : DynDataSource()
+  class Item(val item: therealfarfetchd.quacklib.api.objects.item.Item, val partialTicks: Float) : DynDataSource()
 }

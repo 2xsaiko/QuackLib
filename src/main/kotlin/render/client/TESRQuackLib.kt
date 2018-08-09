@@ -22,7 +22,7 @@ import therealfarfetchd.quacklib.render.texture.AtlasTextureImpl
 
 private val textureGetter = { location: ResourceLocation -> AtlasTextureImpl(Minecraft.getMinecraft().textureMapBlocks.getAtlasSprite(location.toString())) }
 
-class TESRQuackLib : TileEntitySpecialRenderer<TileQuackLib>() {
+object TESRQuackLib : TileEntitySpecialRenderer<TileQuackLib>() {
 
   override fun render(te: TileQuackLib, x: Double, y: Double, z: Double, partialTicks: Float, destroyStage: Int, alpha: Float) {
     renderFastBridge(te, x, y, z, partialTicks, destroyStage, alpha)

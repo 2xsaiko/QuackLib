@@ -2,11 +2,17 @@ package therealfarfetchd.quacklib.core
 
 //import therealfarfetchd.quacklib.block.multipart.cbmp.MultipartAPIImpl as CBMPAPI
 import net.minecraft.util.ResourceLocation
-import therealfarfetchd.quacklib.api.block.component.*
+import therealfarfetchd.quacklib.api.block.component.BlockComponentDataExport
+import therealfarfetchd.quacklib.api.block.component.BlockComponentDataImport
+import therealfarfetchd.quacklib.api.block.component.BlockComponentRenderProperties
 import therealfarfetchd.quacklib.api.block.data.BlockDataPart
 import therealfarfetchd.quacklib.api.block.data.DataPartSerializationRegistry
 import therealfarfetchd.quacklib.api.core.UnsafeScope
 import therealfarfetchd.quacklib.api.core.modinterface.QuackLibAPI
+import therealfarfetchd.quacklib.api.item.component.ItemComponentDataExport
+import therealfarfetchd.quacklib.api.item.component.ItemComponentDataImport
+import therealfarfetchd.quacklib.api.item.component.ItemComponentRenderProperties
+import therealfarfetchd.quacklib.api.item.data.ItemDataPart
 import therealfarfetchd.quacklib.api.objects.block.Block
 import therealfarfetchd.quacklib.api.objects.block.BlockType
 import therealfarfetchd.quacklib.api.objects.block.MCBlockType
@@ -14,6 +20,7 @@ import therealfarfetchd.quacklib.api.objects.block.orEmpty
 import therealfarfetchd.quacklib.api.objects.item.*
 import therealfarfetchd.quacklib.api.render.model.ModelAPI
 import therealfarfetchd.quacklib.api.render.property.RenderProperty
+import therealfarfetchd.quacklib.api.render.property.RenderPropertyBlock
 import therealfarfetchd.quacklib.api.render.property.RenderPropertyConfigurationScope
 import therealfarfetchd.quacklib.api.tools.Logger
 import therealfarfetchd.quacklib.api.tools.isDebugMode
@@ -32,8 +39,8 @@ import therealfarfetchd.quacklib.objects.item.DeferredItemTypeImpl
 import therealfarfetchd.quacklib.objects.item.ItemImpl
 import therealfarfetchd.quacklib.objects.item.ItemTypeImpl
 import therealfarfetchd.quacklib.render.model.ModelAPIImpl
+import therealfarfetchd.quacklib.render.property.RenderPropertyBlockImpl
 import therealfarfetchd.quacklib.render.property.RenderPropertyConfigurationScopeImpl
-import therealfarfetchd.quacklib.render.property.RenderPropertyImpl
 import therealfarfetchd.quacklib.tools.ModContext
 import therealfarfetchd.quacklib.tools.getCallStack
 import therealfarfetchd.quacklib.tools.getResourceFromName
@@ -43,6 +50,10 @@ import java.io.StringWriter
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
+import therealfarfetchd.quacklib.api.block.component.ExportedValue as BlockExportedValue
+import therealfarfetchd.quacklib.api.block.component.ImportedValue as BlockImportedValue
+import therealfarfetchd.quacklib.api.item.component.ExportedValue as ItemExportedValue
+import therealfarfetchd.quacklib.api.item.component.ImportedValue as ItemImportedValue
 import therealfarfetchd.quacklib.block.multipart.mcmp.MultipartAPIImpl as MCMPAPI
 
 object APIImpl : QuackLibAPI {
@@ -102,15 +113,15 @@ object APIImpl : QuackLibAPI {
     return delegate
   }
 
-  override fun <T, C : BlockComponentDataImport> createImportedValue(target: C): ImportedValue<T> {
+  override fun <T, C : BlockComponentDataImport> createImportedValueBlock(target: C): BlockImportedValue<T> {
     return ImportedValueImpl()
   }
 
-  override fun <T, C : BlockComponentDataExport> createExportedValue(target: C, op: (C, Block) -> T): ExportedValue<C, T> {
+  override fun <T, C : BlockComponentDataExport> createExportedValueBlock(target: C, op: (C, Block) -> T): BlockExportedValue<C, T> {
     return ExportedValueImpl { data -> op(target, data) }
   }
 
-  override fun <T, C : BlockComponentRenderProperties> addRenderProperty(target: C, ptype: KClass<*>, name: String, op: (RenderPropertyConfigurationScope<T>) -> Unit): RenderProperty<C, T> {
+  override fun <T, C : BlockComponentRenderProperties> addRenderPropertyBlock(target: C, ptype: KClass<*>, name: String, op: (RenderPropertyConfigurationScope<T>) -> Unit): RenderPropertyBlock<C, T> {
     val hasAccess = getCallStack()
       .drop(1) // this
       .first().methodName == "<init>"
@@ -119,11 +130,27 @@ object APIImpl : QuackLibAPI {
 
     val rcs = RenderPropertyConfigurationScopeImpl<T>(name).also(op)
 
-    val rp = RenderPropertyImpl(target::class, target.rl, name, ptype, rcs.outputOp, { rcs.constraints.all { op -> op(it) } }, null)
+    val rp = RenderPropertyBlockImpl(target::class, target.rl, name, ptype, rcs.outputOp, { rcs.constraints.all { op -> op(it) } }, null)
 
     ExtraData.get(target, ComponentRenderProps.Key).props += rp
 
     return rp
+  }
+
+  override fun <T> createItemDataDelegate(part: ItemDataPart, name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, validValues: List<T>?): ReadWriteProperty<ItemDataPart, T> {
+    TODO("not implemented")
+  }
+
+  override fun <T, C : ItemComponentDataImport> createImportedValueItem(target: C): ItemImportedValue<T> {
+    TODO("not implemented")
+  }
+
+  override fun <T, C : ItemComponentDataExport> createExportedValueItem(target: C, op: (C, Item) -> T): ItemExportedValue<C, T> {
+    TODO("not implemented")
+  }
+
+  override fun <T, C : ItemComponentRenderProperties> addRenderPropertyItem(target: C, ptype: KClass<*>, name: String, op: (RenderPropertyConfigurationScope<T>) -> Unit): RenderProperty<C, Item, T> {
+    TODO("not implemented")
   }
 
   override fun notifySend(title: String, body: String?, expireTime: Long, icon: ResourceLocation?) {

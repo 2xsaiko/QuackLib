@@ -46,7 +46,7 @@ class StandardBlockBehavior(val type: BlockType) : BlockBehavior {
   val cPlacement = getComponentsOfType<BlockComponentPlacement<BlockDataPart>>()
 
   private fun getContainer(block: Block) =
-    unsafe { (block.getMCTile() as?TileQuackLib)?.c }
+    unsafe { (block.getMCTile() as? TileQuackLib)?.c }
 
   override fun <T : BlockDataPart> getPart(block: Block, token: PartAccessToken<T>): T {
     if (token !is PartAccessTokenImpl<T>) error("Invalid token: $token")

@@ -2,6 +2,7 @@ package therealfarfetchd.quacklib.render.model
 
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.ResourceLocation
+import therealfarfetchd.math.Vec2
 import therealfarfetchd.math.Vec3
 import therealfarfetchd.math.Vec3i
 import therealfarfetchd.quacklib.api.core.extensions.letIf
@@ -9,6 +10,7 @@ import therealfarfetchd.quacklib.api.core.extensions.toVec3i
 import therealfarfetchd.quacklib.api.render.Quad
 import therealfarfetchd.quacklib.api.render.mkQuad
 import therealfarfetchd.quacklib.api.render.model.BoxConfigurationScope
+import therealfarfetchd.quacklib.api.render.model.BoxConfigurationScope.TextureConfigScope
 import therealfarfetchd.quacklib.api.render.model.SimpleModel
 import therealfarfetchd.quacklib.api.render.texture.AtlasTexture
 import therealfarfetchd.quacklib.api.tools.Facing
@@ -23,7 +25,7 @@ class BoxConfigurationScopeImpl(val ctx: SimpleModel.ModelContext) : BoxConfigur
   private var cull = true
   private var cullFace = BoxConfigurationScope.CullFace.Back
 
-  private val textures = mutableMapOf<Facing, SimpleModel.PreparedTexture>()
+  private val textures = mutableMapOf<Facing, Pair<SimpleModel.PreparedTexture, TextureConfigScope.() -> Unit>>()
 
   @Suppress("WHEN_ENUM_CAN_BE_NULL_IN_JAVA")
   override fun getQuads(getTexture: (ResourceLocation) -> AtlasTexture): List<Quad> {
@@ -41,7 +43,11 @@ class BoxConfigurationScopeImpl(val ctx: SimpleModel.ModelContext) : BoxConfigur
         EnumFacing.AxisDirection.NEGATIVE -> (one + fv) * to - fv * from
       }
 
-      mkQuad(getTexture(texture.resource), facing, v1, v2).letIf(facing.axisDirection == EnumFacing.AxisDirection.NEGATIVE) { it.flipTexturedSide }
+      val (tex, mod) = texture
+
+      val tc = TextureConfigScopeImpl().also(mod)
+
+      tc.pipeQuad(mkQuad(getTexture(tex.resource), facing, v1, v2).letIf(facing.axisDirection == EnumFacing.AxisDirection.NEGATIVE) { it.flipTexturedSide })
     }
   }
 
@@ -75,9 +81,41 @@ class BoxConfigurationScopeImpl(val ctx: SimpleModel.ModelContext) : BoxConfigur
     cullFace = s
   }
 
-  override fun texture(t: SimpleModel.PreparedTexture?, side0: Facing) {
+  override fun texture(t: SimpleModel.PreparedTexture?, side0: Facing, op: TextureConfigScope.() -> Unit) {
     if (t == null) textures.remove(side0)
-    else textures[side0] = t
+    else textures[side0] = Pair(t, op)
+  }
+
+  class TextureConfigScopeImpl : TextureConfigScope {
+
+    var uv: Pair<Vec2, Vec2>? = null
+    var rotation: Int = 0
+
+    override fun uv(x1: Float, y1: Float, x2: Float, y2: Float) {
+      uv = Pair(Vec2(x1, y1), Vec2(x2, y2))
+    }
+
+    override fun rotate(angle: Int) {
+      require(angle % 90 == 0) { "Angle must be a multiple of 90°!" }
+      rotation += angle
+    }
+
+    fun pipeQuad(q: Quad): Quad {
+      // grrr that shouldn't be a warning, just let me make parameters mutable
+      @Suppress("NAME_SHADOWING")
+      var q = q
+
+      uv?.also { uv ->
+        val (v1, v3) = uv
+        val v2 = Vec2(v3.x, v1.y)
+        val v4 = Vec2(v1.x, v3.y)
+
+        q = q.copy(tex1 = v1, tex2 = v2, tex3 = v3, tex4 = v4)
+      }
+
+      return q.rotateTexture(rotation)
+    }
+
   }
 
 }

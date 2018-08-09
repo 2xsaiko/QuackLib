@@ -24,6 +24,8 @@ class ItemImpl(
       stack.count = value
     }
 
+  override val behavior = type.behavior
+
   override fun copy(): Item =
     ItemImpl(type, stack.copy())
 

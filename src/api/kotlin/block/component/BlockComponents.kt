@@ -17,6 +17,7 @@ import therealfarfetchd.quacklib.api.core.init.Applyable
 import therealfarfetchd.quacklib.api.objects.block.Block
 import therealfarfetchd.quacklib.api.objects.item.Item
 import therealfarfetchd.quacklib.api.objects.world.World
+import therealfarfetchd.quacklib.api.render.property.ComponentRenderProperties
 import therealfarfetchd.quacklib.api.tools.Facing
 import therealfarfetchd.quacklib.api.tools.PositionGrid
 
@@ -68,16 +69,13 @@ interface BlockComponentData<T : BlockDataPart> : TE, Reg {
     error("Updating not implemented")
 
   val Block.part
-    get() = this[this@BlockComponentData.part]
+    get() = this.get(this@BlockComponentData.part)
 
 }
 
-interface BlockComponentRenderProperties : Base, Reg {
-
-}
+interface BlockComponentRenderProperties : Base, Reg, ComponentRenderProperties
 
 interface BlockComponentDataExport : Base
-
 
 interface BlockComponentDataImport : Base
 

@@ -16,6 +16,7 @@ import therealfarfetchd.quacklib.api.core.mod.BaseMod
 import therealfarfetchd.quacklib.api.core.mod.ModProxy
 import therealfarfetchd.quacklib.api.core.modinterface.item
 import therealfarfetchd.quacklib.api.core.unsafe
+import therealfarfetchd.quacklib.api.render.model.Model
 import therealfarfetchd.quacklib.api.tools.Logger
 import therealfarfetchd.quacklib.block.impl.BlockQuackLib
 import therealfarfetchd.quacklib.block.init.BlockConfigurationScopeImpl
@@ -27,6 +28,7 @@ import therealfarfetchd.quacklib.item.impl.ItemQuackLib
 import therealfarfetchd.quacklib.item.impl.TabQuackLib
 import therealfarfetchd.quacklib.objects.block.BlockTypeImpl
 import therealfarfetchd.quacklib.objects.item.ItemTypeImpl
+import therealfarfetchd.quacklib.render.client.model.ItemTESRQuackLib
 import therealfarfetchd.quacklib.tools.progressbar
 
 sealed class CommonProxy : ModProxy {
@@ -101,6 +103,9 @@ sealed class CommonProxy : ModProxy {
         Logger.info("Adding ${it.describe()}")
         val type = ItemTypeImpl(it)
         val item = ItemQuackLib(type)
+        if (it.renderers.any(Model::needsDynamicRender)) {
+          item.tileEntityItemStackRenderer = ItemTESRQuackLib
+        }
         ItemTypeImpl.addItem(type, item)
         e.registry.register(item)
       }
