@@ -25,14 +25,13 @@ import therealfarfetchd.quacklib.api.render.property.RenderPropertyConfiguration
 import therealfarfetchd.quacklib.api.tools.Logger
 import therealfarfetchd.quacklib.api.tools.isDebugMode
 import therealfarfetchd.quacklib.block.component.ComponentRenderProps
-import therealfarfetchd.quacklib.block.component.ExportedValueImpl
-import therealfarfetchd.quacklib.block.component.ImportedValueImpl
 import therealfarfetchd.quacklib.block.data.DataPartSerializationRegistryImpl
-import therealfarfetchd.quacklib.block.data.ValuePropertiesImpl
 import therealfarfetchd.quacklib.block.data.get
 import therealfarfetchd.quacklib.block.data.set
 import therealfarfetchd.quacklib.block.multipart.MultipartAPIInternal
 import therealfarfetchd.quacklib.hax.ExtraData
+import therealfarfetchd.quacklib.item.data.get
+import therealfarfetchd.quacklib.item.data.set
 import therealfarfetchd.quacklib.objects.block.BlockTypeImpl
 import therealfarfetchd.quacklib.objects.block.DeferredBlockTypeImpl
 import therealfarfetchd.quacklib.objects.item.DeferredItemTypeImpl
@@ -41,6 +40,7 @@ import therealfarfetchd.quacklib.objects.item.ItemTypeImpl
 import therealfarfetchd.quacklib.render.model.ModelAPIImpl
 import therealfarfetchd.quacklib.render.property.RenderPropertyBlockImpl
 import therealfarfetchd.quacklib.render.property.RenderPropertyConfigurationScopeImpl
+import therealfarfetchd.quacklib.render.property.RenderPropertyItemImpl
 import therealfarfetchd.quacklib.tools.ModContext
 import therealfarfetchd.quacklib.tools.getCallStack
 import therealfarfetchd.quacklib.tools.getResourceFromName
@@ -54,7 +54,13 @@ import therealfarfetchd.quacklib.api.block.component.ExportedValue as BlockExpor
 import therealfarfetchd.quacklib.api.block.component.ImportedValue as BlockImportedValue
 import therealfarfetchd.quacklib.api.item.component.ExportedValue as ItemExportedValue
 import therealfarfetchd.quacklib.api.item.component.ImportedValue as ItemImportedValue
+import therealfarfetchd.quacklib.block.component.ExportedValueImpl as BlockExportedValueImpl
+import therealfarfetchd.quacklib.block.component.ImportedValueImpl as BlockImportedValueImpl
+import therealfarfetchd.quacklib.block.data.ValuePropertiesImpl as BlockValuePropertiesImpl
 import therealfarfetchd.quacklib.block.multipart.mcmp.MultipartAPIImpl as MCMPAPI
+import therealfarfetchd.quacklib.item.component.ExportedValueImpl as ItemExportedValueImpl
+import therealfarfetchd.quacklib.item.component.ImportedValueImpl as ItemImportedValueImpl
+import therealfarfetchd.quacklib.item.data.ValuePropertiesImpl as ItemValuePropertiesImpl
 
 object APIImpl : QuackLibAPI {
 
@@ -108,27 +114,27 @@ object APIImpl : QuackLibAPI {
 
     if (name in part.defs) error("Duplicate name")
 
-    part.addDefinition(name, ValuePropertiesImpl(name, type as KClass<Any>, default, persistent, sync, validValues))
+    part.addDefinition(name, BlockValuePropertiesImpl(name, type as KClass<Any>, default, persistent, sync, validValues))
 
     return delegate
   }
 
   override fun <T, C : BlockComponentDataImport> createImportedValueBlock(target: C): BlockImportedValue<T> {
-    return ImportedValueImpl()
+    return BlockImportedValueImpl()
   }
 
   override fun <T, C : BlockComponentDataExport> createExportedValueBlock(target: C, op: (C, Block) -> T): BlockExportedValue<C, T> {
-    return ExportedValueImpl { data -> op(target, data) }
+    return BlockExportedValueImpl { data -> op(target, data) }
   }
 
-  override fun <T, C : BlockComponentRenderProperties> addRenderPropertyBlock(target: C, ptype: KClass<*>, name: String, op: (RenderPropertyConfigurationScope<T>) -> Unit): RenderPropertyBlock<C, T> {
+  override fun <T, C : BlockComponentRenderProperties> addRenderPropertyBlock(target: C, ptype: KClass<*>, name: String, op: (RenderPropertyConfigurationScope<Block, T>) -> Unit): RenderPropertyBlock<C, T> {
     val hasAccess = getCallStack()
       .drop(1) // this
       .first().methodName == "<init>"
 
     if (!hasAccess) error("Render properties need to be defined in the component constructor!")
 
-    val rcs = RenderPropertyConfigurationScopeImpl<T>(name).also(op)
+    val rcs = RenderPropertyConfigurationScopeImpl<Block, T>(name).also(op)
 
     val rp = RenderPropertyBlockImpl(target::class, target.rl, name, ptype, rcs.outputOp, { rcs.constraints.all { op -> op(it) } }, null)
 
@@ -138,19 +144,46 @@ object APIImpl : QuackLibAPI {
   }
 
   override fun <T> createItemDataDelegate(part: ItemDataPart, name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, validValues: List<T>?): ReadWriteProperty<ItemDataPart, T> {
-    TODO("not implemented")
+    val delegate = object : ReadWriteProperty<ItemDataPart, T> {
+
+      @Suppress("UNCHECKED_CAST")
+      override fun getValue(thisRef: ItemDataPart, property: KProperty<*>): T {
+        return part.storage.get(name) as T
+      }
+
+      override fun setValue(thisRef: ItemDataPart, property: KProperty<*>, value: T) {
+        part.storage.set(name, value)
+      }
+
+    }
+
+    if (name in part.defs) error("Duplicate name")
+
+    part.addDefinition(name, ItemValuePropertiesImpl(name, type as KClass<Any>, default, persistent, sync, validValues))
+
+    return delegate
   }
 
   override fun <T, C : ItemComponentDataImport> createImportedValueItem(target: C): ItemImportedValue<T> {
-    TODO("not implemented")
+    return ItemImportedValueImpl()
   }
 
   override fun <T, C : ItemComponentDataExport> createExportedValueItem(target: C, op: (C, Item) -> T): ItemExportedValue<C, T> {
-    TODO("not implemented")
+    return ItemExportedValueImpl { data -> op(target, data) }
   }
 
-  override fun <T, C : ItemComponentRenderProperties> addRenderPropertyItem(target: C, ptype: KClass<*>, name: String, op: (RenderPropertyConfigurationScope<T>) -> Unit): RenderProperty<C, Item, T> {
-    TODO("not implemented")
+  override fun <T, C : ItemComponentRenderProperties> addRenderPropertyItem(target: C, ptype: KClass<*>, name: String, op: (RenderPropertyConfigurationScope<Item, T>) -> Unit): RenderProperty<C, Item, T> {
+    val hasAccess = getCallStack()
+      .drop(1) // this
+      .first().methodName == "<init>"
+
+    if (!hasAccess) error("Render properties need to be defined in the component constructor!")
+
+    val rcs = RenderPropertyConfigurationScopeImpl<Item, T>(name).also(op)
+
+    val rp = RenderPropertyItemImpl(target::class, name, rcs.outputOp, { rcs.constraints.all { op -> op(it) } }, null)
+
+    return rp
   }
 
   override fun notifySend(title: String, body: String?, expireTime: Long, icon: ResourceLocation?) {

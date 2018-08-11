@@ -10,6 +10,7 @@ import net.minecraftforge.common.capabilities.Capability
 import therealfarfetchd.quacklib.api.block.component.BlockComponentCapability
 import therealfarfetchd.quacklib.api.block.component.BlockComponentTickable
 import therealfarfetchd.quacklib.api.objects.block.BlockType
+import therealfarfetchd.quacklib.core.QuackLib
 import therealfarfetchd.quacklib.objects.block.BlockImpl
 
 open class TileQuackLib() : TileEntity() {
@@ -74,7 +75,7 @@ open class TileQuackLib() : TileEntity() {
     }
   }
 
-  override fun hasFastRenderer(): Boolean = true
+  override fun hasFastRenderer(): Boolean = QuackLib.proxy.canRenderFast(c.type)
 
   override fun hasCapability(capability: Capability<*>, facing: EnumFacing?): Boolean =
     cCapability.any { it.hasCapability(getBlockData(), capability, facing) } ||

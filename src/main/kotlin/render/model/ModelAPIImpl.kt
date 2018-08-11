@@ -11,13 +11,13 @@ import therealfarfetchd.quacklib.api.render.texture.AtlasTexture
 object ModelAPIImpl : ModelAPI {
 
   override fun getStaticRender(model: SimpleModel, data: DataSource<*>, texture: (ResourceLocation) -> AtlasTexture): List<Quad> {
-    val r = ModelContextImpl(data, texture)
+    val r = ModelContextImpl(data, texture, model.useDynamic)
     with(model) { r.addObjects() }
     return r.getQuads()
   }
 
   override fun <T : DynDataSource> getDynamicRender(model: SimpleModel, data: DataSource<T>, dyndata: T, texture: (ResourceLocation) -> AtlasTexture): List<Quad> {
-    val r = ModelContextImpl(data, texture) // TODO replace with faster context that doesn't evaluate all the static models
+    val r = ModelContextImpl(data, texture, model.useDynamic) // TODO replace with faster context that doesn't evaluate all the static models
     with(model) { r.addObjects() }
     return r.dynops.flatMap {
       val dyn = ModelContextImpl.Dynamic(it, data, dyndata, texture)

@@ -9,6 +9,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraft.world.World
 import org.apache.commons.lang3.tuple.Pair
+import therealfarfetchd.math.Mat4
 import therealfarfetchd.quacklib.api.core.extensions.toMatrix4f
 import therealfarfetchd.quacklib.render.client.ModelCache
 import therealfarfetchd.quacklib.render.vanilla.toTransformType
@@ -25,7 +26,7 @@ open class BakedModelCached(val cache: ModelCache, val rl: ModelResourceLocation
     return cache.getQuadsBlock(rl, format, state, side, rand)
   }
 
-  override fun isBuiltInRenderer(): Boolean = cache.isBuiltInRenderer(rl)
+  override fun isBuiltInRenderer(): Boolean = false
 
   override fun isAmbientOcclusion(): Boolean = cache.isAmbientOcclusion(rl)
 
@@ -35,7 +36,10 @@ open class BakedModelCached(val cache: ModelCache, val rl: ModelResourceLocation
 
   override fun handlePerspective(cameraTransformType: ItemCameraTransforms.TransformType): Pair<out IBakedModel, Matrix4f> {
     val tr = cache.getTransformation(rl)
-    return Pair.of(this, tr.getTransformationMatrix(cameraTransformType.toTransformType())?.toMatrix4f())
+    val mat = tr.getTransformationMatrix(cameraTransformType.toTransformType())?.let { orig ->
+      Mat4.translate(-0.5f, -0.5f, -0.5f) * orig * Mat4.translate(0.5f, 0.5f, 0.5f)
+    }
+    return Pair.of(this, mat?.toMatrix4f())
   }
 
   inner class ItemOverrides : ItemOverrideList() {

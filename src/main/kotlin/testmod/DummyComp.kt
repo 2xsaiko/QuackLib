@@ -15,11 +15,11 @@ class DummyComp : BlockComponentRenderProperties, BlockComponentCollision {
   override val rl: ResourceLocation = ResourceLocation("qltestmod:dummy")
 
   val rot = renderProperty<Float>("rotation") {
-    output { ((it.worldMutable?.totalTime ?: 0L) * 0.5f % 360) }
+    output { ((System.currentTimeMillis() % (720 * 50) / 50.0f) * 0.5f) }
   } fix this
 
   val scale = renderProperty<Float>("scale") {
-    output { (sin((it.worldMutable?.totalTime ?: 0L) * 0.1f) + 1.75f) / 2.75f }
+    output { (sin((System.currentTimeMillis() % (31415 * 50) / 50f) * 0.1f) + 1.75f) / 2.75f }
   } fix this
 
   override fun getCollisionBoundingBoxes(block: Block): List<AxisAlignedBB> {
@@ -27,4 +27,3 @@ class DummyComp : BlockComponentRenderProperties, BlockComponentCollision {
   }
 
 }
-

@@ -10,7 +10,7 @@ interface ItemConfigurationScope : ItemConfiguration {
   /**
    *
    */
-  fun apply(component: ItemComponent)
+  fun <T : ItemComponent> apply(component: T): T
 
   /**
    *

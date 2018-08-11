@@ -61,8 +61,11 @@ object TESRQuackLib : TileEntitySpecialRenderer<TileQuackLib>() {
     val state = te.blockType.getExtendedState(te.world.getBlockState(te.pos).getActualState(te.world, te.pos), te.world, te.pos)
     val model = (block.type as BlockTypeImpl).conf.renderers
 
+    val source = DataSource.Block(block.type, BlockRenderStateImpl(block.type, state))
+    val dynsource = DynDataSource.Block(block, partialTicks)
+
     val quads = model
-      .flatMap { it.getDynamicRender(DataSource.Block(block.type, BlockRenderStateImpl(block.type, state)), DynDataSource.Block(block, partialTicks), textureGetter) }
+      .flatMap { it.getDynamicRender(source, dynsource, textureGetter) }
       .map { it.translate(Vec3(x.toFloat(), y.toFloat(), z.toFloat()) - block.pos) }
 
     if (quads.isNotEmpty()) {

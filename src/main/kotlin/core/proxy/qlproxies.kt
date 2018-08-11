@@ -25,6 +25,7 @@ import therealfarfetchd.math.Random
 import therealfarfetchd.quacklib.api.core.mod.BaseMod
 import therealfarfetchd.quacklib.api.core.modinterface.block
 import therealfarfetchd.quacklib.api.core.unsafe
+import therealfarfetchd.quacklib.api.objects.block.BlockType
 import therealfarfetchd.quacklib.api.tools.access
 import therealfarfetchd.quacklib.api.tools.isDebugMode
 import therealfarfetchd.quacklib.block.impl.BlockExtraDebug
@@ -150,6 +151,11 @@ sealed class QLCommonProxy {
 
   abstract fun addNotification(title: String, body: String?, expireTime: Long, icon: ResourceLocation?)
 
+  /**
+   * Can this block render as a FastTESR.
+   */
+  abstract fun canRenderFast(type: BlockType): Boolean
+
 }
 
 class QLClientProxy : QLCommonProxy() {
@@ -203,6 +209,10 @@ class QLClientProxy : QLCommonProxy() {
     mc.toastGui.add(NotificationQuackLib(title, body, expireTime, icon))
   }
 
+  override fun canRenderFast(type: BlockType): Boolean {
+    return true // TODO implement GL capabilities for model
+  }
+
 }
 
 @Suppress("CanSealedSubClassBeObject")
@@ -216,5 +226,7 @@ class QLServerProxy : QLCommonProxy() {
       }
     }
   }
+
+  override fun canRenderFast(type: BlockType): Boolean = true
 
 }

@@ -15,7 +15,6 @@ interface RenderProperty<C : ComponentRenderProperties, in K, out T> {
 
   fun getComponentClass(): KClass<out C>
 
-
 }
 
 interface RenderPropertyBlock<C : BlockComponentRenderProperties, out T> : RenderProperty<C, Block, T> {

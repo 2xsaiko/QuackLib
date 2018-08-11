@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation
 import net.minecraft.client.renderer.vertex.VertexFormat
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
+import therealfarfetchd.quacklib.api.core.modinterface.item
 import therealfarfetchd.quacklib.render.client.ModelCache
 
 class BakedModelItemCached(cache: ModelCache, rl: ModelResourceLocation, format: VertexFormat, var stack: ItemStack = ItemStack.EMPTY) : BakedModelCached(cache, rl, format) {
@@ -14,6 +15,9 @@ class BakedModelItemCached(cache: ModelCache, rl: ModelResourceLocation, format:
   override fun getQuads(state: IBlockState?, side: EnumFacing?, rand: Long): List<BakedQuad> {
     return cache.getQuadsItem(rl, format, stack, side, rand)
   }
+
+  override fun isBuiltInRenderer(): Boolean =
+    cache.needsDynamicRenderer(item(stack.item))
 
   override fun getOverrides(): ItemOverrideList = ItemOverrideList.NONE
 

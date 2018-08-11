@@ -33,11 +33,14 @@ object QLTestMod : BaseMod() {
     }
 
     val testBlockItem = addPlacementItem(testBlock) {
+      val comp = apply(DummyCompItem())
+
       val model = apply(TestModel())
 
       link {
         model {
-
+          comp.rot provides rotFloating
+          comp.scale provides scaleFloating
         }
       }
     }

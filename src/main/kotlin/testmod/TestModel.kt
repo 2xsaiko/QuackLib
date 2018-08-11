@@ -3,7 +3,7 @@ package therealfarfetchd.quacklib.testmod
 import therealfarfetchd.quacklib.api.render.model.DataSource
 import therealfarfetchd.quacklib.api.render.model.SimpleModel
 
-class TestModel : SimpleModel() {
+class TestModel : SimpleModel(useDynamic = true) {
   private val base = useTexture("minecraft:blocks/piston_bottom")
   private val cube = useTexture("minecraft:blocks/red_sand")
 
@@ -17,13 +17,15 @@ class TestModel : SimpleModel() {
       val rot = when (
         val d = data) {
         is DataSource.Block -> d.state[rotFloating]
+        is DataSource.Item -> d.state[rotFloating]
         else -> 0f
       }
 
       val scale = when (
         val d = data) {
         is DataSource.Block -> d.state[scaleFloating]
-        else -> 0f
+        is DataSource.Item -> d.state[scaleFloating]
+        else -> 0.5f
       }
 
       translate(8f, 8f, 8f)

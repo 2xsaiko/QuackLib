@@ -75,7 +75,7 @@
 //      }
 //    }
 //
-//    override fun isBuiltInRenderer(): Boolean =
+//    override fun needsDynamicRenderer(): Boolean =
 //      builtinRenderer
 //
 //    override fun isAmbientOcclusion(): Boolean =

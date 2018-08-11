@@ -18,9 +18,10 @@ class ItemConfigurationScopeImpl(modid: String, override val name: String, val i
 
   override val renderers = mutableListOf<Model>()
 
-  override fun apply(component: ItemComponent) {
+  override fun <T : ItemComponent> apply(component: T): T {
     components += component
     component.onApplied(this)
+    return component
   }
 
   override fun <T : Model> apply(renderer: T): T {

@@ -57,24 +57,6 @@ class BakedModelBuilder private constructor() {
     p.forEach(::addQuad)
   }
 
-  private fun getCullFace(q: Quad): EnumFacing? {
-    val f = q.facing
-    val xyz = (f.directionVec.toVec3() + Vec3(1, 1, 1)) / 2
-    val useX = f.axis == EnumFacing.Axis.X
-    val useY = f.axis == EnumFacing.Axis.Y
-    val useZ = f.axis == EnumFacing.Axis.Z
-
-    if (
-      !q.xyzComponents().all {
-        (!useX || it.x == xyz.x) &&
-        (!useY || it.y == xyz.y) &&
-        (!useZ || it.z == xyz.z)
-      }
-    ) return null
-
-    return f
-  }
-
   @Suppress("OverridingDeprecatedMember")
   class BakedModel(
     private val particleTexture: TextureAtlasSprite,
@@ -130,6 +112,24 @@ class BakedModelBuilder private constructor() {
         builder.overrides,
         builder.transformation
       )
+    }
+
+    fun getCullFace(q: Quad): EnumFacing? {
+      val f = q.facing
+      val xyz = (f.directionVec.toVec3() + Vec3(1, 1, 1)) / 2
+      val useX = f.axis == EnumFacing.Axis.X
+      val useY = f.axis == EnumFacing.Axis.Y
+      val useZ = f.axis == EnumFacing.Axis.Z
+
+      if (
+        !q.xyzComponents().all {
+          (!useX || it.x == xyz.x) &&
+          (!useY || it.y == xyz.y) &&
+          (!useZ || it.z == xyz.z)
+        }
+      ) return null
+
+      return f
     }
 
     // shitty debug code, just in case I ever need it again

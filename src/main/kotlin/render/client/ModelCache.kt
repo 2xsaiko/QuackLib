@@ -11,6 +11,8 @@ import net.minecraft.util.EnumFacing
 import net.minecraft.util.ResourceLocation
 import therealfarfetchd.quacklib.api.core.modinterface.block
 import therealfarfetchd.quacklib.api.core.modinterface.item
+import therealfarfetchd.quacklib.api.objects.block.BlockType
+import therealfarfetchd.quacklib.api.objects.item.ItemType
 import therealfarfetchd.quacklib.api.render.Quad
 import therealfarfetchd.quacklib.api.render.model.DataSource
 import therealfarfetchd.quacklib.api.render.model.Model
@@ -42,13 +44,23 @@ class ModelCache {
   private val blockmodels = mutableMapOf<KeyBlock, List<BakedQuad>>()
   private val itemmodels = mutableMapOf<KeyItem, List<BakedQuad>>()
 
+  private val renderers = mutableMapOf<Any, List<Model>>()
+
   private val texGetter = { rl: ResourceLocation -> AtlasTextureImpl(Minecraft.getMinecraft().textureMapBlocks.getAtlasSprite(rl.toString())) }
+
+  private fun getModel(item: ItemType): List<Model> {
+    return renderers.computeIfAbsent(item) { (item as ItemTypeImpl).conf.renderers }
+  }
+
+  private fun getModel(block: BlockType): List<Model> {
+    return renderers.computeIfAbsent(block) { (block as BlockTypeImpl).conf.renderers }
+  }
 
   fun getQuadsBlock(rl: ModelResourceLocation, format: VertexFormat, state: IBlockState, side: EnumFacing?, rand: Long): List<BakedQuad> {
     val key = KeyBlock(state, side)
     return blockmodels.computeIfAbsent(key) {
       val block = block(state.block)
-      val quads = (block as BlockTypeImpl).conf.renderers.flatMap { it.getStaticRender(DataSource.Block(block, BlockRenderStateImpl(block, state)), texGetter) }
+      val quads = getModel(block).flatMap { it.getStaticRender(DataSource.Block(block, BlockRenderStateImpl(block, state)), texGetter) }
       quads.filter { isQuadAtFace(it, side) }.map { it.bake(format) }
     }
   }
@@ -57,17 +69,13 @@ class ModelCache {
     val key = KeyItem(rl, side)
     return itemmodels.computeIfAbsent(key) {
       val item = item(stack.item)
-      val quads = (item as ItemTypeImpl).conf.renderers.flatMap { it.getStaticRender(DataSource.Item(item, ItemRenderStateImpl(item, stack)), texGetter) }
+      val quads = getModel(item).flatMap { it.getStaticRender(DataSource.Item(item, ItemRenderStateImpl(item, stack)), texGetter) }
       quads.filter { isQuadAtFace(it, side) }.map { it.bake(format) }
     }
   }
 
   fun getParticleTexture(rl: ModelResourceLocation): TextureAtlasSprite {
     return Minecraft.getMinecraft().textureMapBlocks.missingSprite
-  }
-
-  fun isBuiltInRenderer(rl: ModelResourceLocation): Boolean {
-    return false
   }
 
   fun isAmbientOcclusion(rl: ModelResourceLocation): Boolean {
@@ -82,15 +90,15 @@ class ModelCache {
     return BakedModelBuilder.defaultBlock
   }
 
+  fun needsDynamicRenderer(item: ItemType): Boolean {
+    return getModel(item).any { it.needsDynamicRender() }
+  }
+
   data class KeyBlock(val state: IBlockState, val side: EnumFacing?)
   data class KeyItem(val rl: ModelResourceLocation, val side: EnumFacing?)
 
 }
 
 fun isQuadAtFace(q: Quad, f: EnumFacing?): Boolean {
-  if (f == null) {
-    return true // TODO
-  } else {
-    return false // TODO
-  }
+  return BakedModelBuilder.getCullFace(q) == f
 }

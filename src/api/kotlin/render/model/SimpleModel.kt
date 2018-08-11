@@ -20,7 +20,7 @@ annotation class SimpleModelDSL
 
 typealias ObjectBuilderProvider<T> = (SimpleModel.ModelContext) -> T
 
-abstract class SimpleModel : Model {
+abstract class SimpleModel(val useDynamic: Boolean = false) : Model {
 
   private val atlasTexs = mutableListOf<PreparedTexture>()
 
@@ -35,7 +35,7 @@ abstract class SimpleModel : Model {
   final override fun <T : DataSource<D>, D : DynDataSource> getDynamicRender(data: T, dyndata: D, getTexture: (ResourceLocation) -> AtlasTexture): List<Quad> =
     QuackLibAPI.impl.modelAPI.getDynamicRender(this, data, dyndata, getTexture)
 
-  final override fun needsDynamicRender(): Boolean = true
+  final override fun needsDynamicRender(): Boolean = useDynamic
 
   fun useTexture(resource: String, addToAtlas: Boolean = true): PreparedTexture =
     useTexture(QuackLibAPI.impl.getResourceFromContext(resource), addToAtlas)
