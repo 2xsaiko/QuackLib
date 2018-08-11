@@ -9,6 +9,7 @@ import therealfarfetchd.quacklib.api.objects.item.Item
 import therealfarfetchd.quacklib.api.objects.item.ItemBehavior
 import therealfarfetchd.quacklib.api.objects.item.ItemType
 import therealfarfetchd.quacklib.api.objects.item.MCItemType
+import therealfarfetchd.quacklib.api.render.model.Model
 
 class CreatedItemTypeImpl(override val registryName: ResourceLocation, val def: ItemConfiguration) : ItemType {
 
@@ -29,6 +30,10 @@ class CreatedItemTypeImpl(override val registryName: ResourceLocation, val def: 
   override val components: List<ItemComponent>
     get() = realInstance?.components
             ?: def.components
+
+  override val model: Model
+    get() = realInstance?.model
+            ?: def.model
 
   override fun Unsafe.toMCItemType(): MCItemType = unsafe { realInstance?.toMCItemType() }
                                                    ?: crash()

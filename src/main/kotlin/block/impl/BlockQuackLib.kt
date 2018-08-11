@@ -62,7 +62,7 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
 
   val cData = getComponentsOfType<BlockComponentData<*>>()
 
-  val needsTile = getComponentsOfType<BlockComponentNeedTE>().isNotEmpty() || (type as BlockTypeImpl).conf.renderers.any { it.needsDynamicRender() }
+  val needsTile = getComponentsOfType<BlockComponentNeedTE>().isNotEmpty() || type.model.needsDynamicRender()
   val needsTick = getComponentsOfType<BlockComponentTickable>().isNotEmpty()
 
   lateinit var propRetrievers: SetPropertyRetrievers
@@ -245,7 +245,8 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
 
   // rendering (?)
   override fun isFullCube(state: MCBlock): Boolean {
-    return type.behavior.isNormalBlock()
+    return true
+    //    return type.behavior.isNormalBlock()
   }
 
   // TODO

@@ -9,6 +9,7 @@ import therealfarfetchd.quacklib.api.objects.ComponentHost
 import therealfarfetchd.quacklib.api.objects.Instance
 import therealfarfetchd.quacklib.api.objects.Instantiable
 import therealfarfetchd.quacklib.api.objects.Registered
+import therealfarfetchd.quacklib.api.render.model.Model
 
 typealias MCItemType = net.minecraft.item.Item
 typealias MCItem = net.minecraft.item.ItemStack
@@ -16,6 +17,8 @@ typealias MCItem = net.minecraft.item.ItemStack
 interface ItemType : Instantiable, Registered, ComponentHost<ItemComponent> {
 
   fun create(amount: Int = 1, meta: Int = 0): Item
+
+  val model: Model
 
   val behavior: ItemBehavior
 

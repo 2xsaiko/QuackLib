@@ -48,6 +48,16 @@ abstract class SimpleModel(val useDynamic: Boolean = false) : Model {
 
   fun <T> useRenderParam(): RenderParam<T> = RenderParam()
 
+  final override fun getParticleTexture(getTexture: (ResourceLocation) -> AtlasTexture): AtlasTexture {
+    return if (getParticleTexture().isAtlasTex) {
+      getTexture(getParticleTexture().resource)
+    } else {
+      getTexture(ResourceLocation("quacklib", "error"))
+    }
+  }
+
+  abstract fun getParticleTexture(): PreparedTexture
+
   abstract fun ModelContext.addObjects()
 
   @SimpleModelDSL
@@ -61,7 +71,7 @@ abstract class SimpleModel(val useDynamic: Boolean = false) : Model {
 
     fun addQuad(q: Quad)
 
-    fun addQuads(q: List<Quad>) =
+    fun addQuads(q: Iterable<Quad>) =
       q.forEach(::addQuad)
 
     fun <T : ModelConfigurationScope> add(prov: ObjectBuilderProvider<T>, op: T.() -> Unit)

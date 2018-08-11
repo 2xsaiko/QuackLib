@@ -25,7 +25,7 @@ interface ItemConfiguration : Describable {
   /**
    *
    */
-  val renderers: List<Model>
+  val model: Model
 
   override fun describe(): String = "Item $name"
 

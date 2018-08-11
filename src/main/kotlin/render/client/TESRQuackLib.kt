@@ -15,7 +15,6 @@ import therealfarfetchd.quacklib.api.render.model.DataSource
 import therealfarfetchd.quacklib.api.render.model.DynDataSource
 import therealfarfetchd.quacklib.block.impl.TileQuackLib
 import therealfarfetchd.quacklib.block.render.BlockRenderStateImpl
-import therealfarfetchd.quacklib.objects.block.BlockTypeImpl
 import therealfarfetchd.quacklib.objects.block.toBlock
 import therealfarfetchd.quacklib.render.client.model.BakedModelBuilder
 import therealfarfetchd.quacklib.render.texture.AtlasTextureImpl
@@ -59,13 +58,12 @@ object TESRQuackLib : TileEntitySpecialRenderer<TileQuackLib>() {
     val block = te.toBlock()
     // FIXME: better way to do this?
     val state = te.blockType.getExtendedState(te.world.getBlockState(te.pos).getActualState(te.world, te.pos), te.world, te.pos)
-    val model = (block.type as BlockTypeImpl).conf.renderers
+    val model = block.type.model
 
     val source = DataSource.Block(block.type, BlockRenderStateImpl(block.type, state))
     val dynsource = DynDataSource.Block(block, partialTicks)
 
-    val quads = model
-      .flatMap { it.getDynamicRender(source, dynsource, textureGetter) }
+    val quads = model.getDynamicRender(source, dynsource, textureGetter)
       .map { it.translate(Vec3(x.toFloat(), y.toFloat(), z.toFloat()) - block.pos) }
 
     if (quads.isNotEmpty()) {

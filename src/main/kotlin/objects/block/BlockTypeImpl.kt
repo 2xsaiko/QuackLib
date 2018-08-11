@@ -12,7 +12,9 @@ import therealfarfetchd.quacklib.api.objects.block.Block
 import therealfarfetchd.quacklib.api.objects.block.BlockBehavior
 import therealfarfetchd.quacklib.api.objects.block.BlockType
 import therealfarfetchd.quacklib.api.objects.block.MCBlockType
+import therealfarfetchd.quacklib.api.render.model.Model
 import therealfarfetchd.quacklib.block.impl.BlockQuackLib
+import therealfarfetchd.quacklib.render.client.model.ModelError
 import kotlin.reflect.KClass
 
 class BlockTypeImpl(val conf: BlockConfiguration) : BlockType {
@@ -20,6 +22,8 @@ class BlockTypeImpl(val conf: BlockConfiguration) : BlockType {
   lateinit var block: MCBlockType
 
   override val components: List<BlockComponent> = conf.components
+
+  override val model: Model = conf.model
 
   val componentPresence: MutableMap<KClass<out BlockComponent>, Boolean> = mutableMapOf()
 
@@ -104,6 +108,9 @@ class BlockTypeImpl(val conf: BlockConfiguration) : BlockType {
 
     override val components: List<BlockComponent>
       get() = emptyList()
+
+    override val model: Model
+      get() = ModelError
 
     override fun toString(): String {
       return "Block '$registryName'"

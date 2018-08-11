@@ -11,6 +11,7 @@ import therealfarfetchd.quacklib.api.objects.block.Block
 import therealfarfetchd.quacklib.api.objects.block.BlockBehavior
 import therealfarfetchd.quacklib.api.objects.block.BlockType
 import therealfarfetchd.quacklib.api.objects.block.MCBlockType
+import therealfarfetchd.quacklib.api.render.model.Model
 
 class DeferredBlockTypeImpl(override val registryName: ResourceLocation) : BlockType {
 
@@ -22,6 +23,10 @@ class DeferredBlockTypeImpl(override val registryName: ResourceLocation) : Block
 
   override val components: List<BlockComponent>
     get() = realInstance?.components
+            ?: crash()
+
+  override val model: Model
+    get() = realInstance?.model
             ?: crash()
 
   override val behavior: BlockBehavior

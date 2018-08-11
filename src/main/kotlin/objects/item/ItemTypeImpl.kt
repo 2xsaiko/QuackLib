@@ -8,13 +8,17 @@ import therealfarfetchd.quacklib.api.item.init.ItemConfiguration
 import therealfarfetchd.quacklib.api.objects.item.Item
 import therealfarfetchd.quacklib.api.objects.item.ItemType
 import therealfarfetchd.quacklib.api.objects.item.MCItemType
+import therealfarfetchd.quacklib.api.render.model.Model
 import therealfarfetchd.quacklib.item.impl.ItemQuackLib
+import therealfarfetchd.quacklib.render.client.model.ModelError
 
 class ItemTypeImpl(val conf: ItemConfiguration) : ItemType {
 
   lateinit var item: MCItemType
 
   override val components: List<ItemComponent> = conf.components
+
+  override val model: Model = conf.model
 
   override val behavior = StandardItemBehavior(this)
 
@@ -61,7 +65,11 @@ class ItemTypeImpl(val conf: ItemConfiguration) : ItemType {
 
   class Vanilla(val item: MCItemType) : ItemType {
 
-    override val components: List<ItemComponent> = emptyList()
+    override val components: List<ItemComponent>
+      get() = emptyList()
+
+    override val model: Model
+      get() = ModelError
 
     override val behavior = VanillaItemBehavior(item)
 

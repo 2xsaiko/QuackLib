@@ -17,7 +17,6 @@ import therealfarfetchd.quacklib.api.objects.item.toItem
 import therealfarfetchd.quacklib.api.render.model.DataSource
 import therealfarfetchd.quacklib.api.render.model.DynDataSource
 import therealfarfetchd.quacklib.item.render.ItemRenderStateImpl
-import therealfarfetchd.quacklib.objects.item.ItemTypeImpl
 import therealfarfetchd.quacklib.render.bake
 import therealfarfetchd.quacklib.render.texture.AtlasTextureImpl
 
@@ -40,7 +39,7 @@ object ItemTESRQuackLib : TileEntityItemStackRenderer() {
     val type = item.type
     val source = DataSource.Item(type, ItemRenderStateImpl(type, stack))
     val dynsource = DynDataSource.Item(item, partialTicks)
-    val dm = (type as ItemTypeImpl).conf.renderers.flatMap { it.getDynamicRender(source, dynsource, textureGetter) }
+    val dm = type.model.getDynamicRender(source, dynsource, textureGetter)
 
     renderQuads(renderer, dm.map { it.bake(DefaultVertexFormats.ITEM) }, -1, stack)
 

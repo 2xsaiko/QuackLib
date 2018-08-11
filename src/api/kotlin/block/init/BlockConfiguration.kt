@@ -54,7 +54,7 @@ interface BlockConfiguration : Describable {
   /**
    *
    */
-  val renderers: List<Model>
+  val model: Model
 
   /**
    * The item this block is represented by.

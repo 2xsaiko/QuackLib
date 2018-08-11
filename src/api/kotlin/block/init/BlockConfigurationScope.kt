@@ -46,7 +46,7 @@ interface BlockConfigurationScope : BlockConfiguration {
   /**
    *
    */
-  fun <T : Model> apply(renderer: T): T
+  fun <T : Model> useModel(model: T): T
 
   /**
    *

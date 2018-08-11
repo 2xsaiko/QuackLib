@@ -22,7 +22,7 @@ object QLTestMod : BaseMod() {
 
       val comp = apply(DummyComp())
 
-      val model = apply(TestModel())
+      val model = useModel(TestModel())
 
       link {
         model {
@@ -35,7 +35,7 @@ object QLTestMod : BaseMod() {
     val testBlockItem = addPlacementItem(testBlock) {
       val comp = apply(DummyCompItem())
 
-      val model = apply(TestModel())
+      val model = useModel(TestModel())
 
       link {
         model {

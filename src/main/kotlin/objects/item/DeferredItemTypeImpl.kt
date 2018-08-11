@@ -8,6 +8,7 @@ import therealfarfetchd.quacklib.api.objects.item.Item
 import therealfarfetchd.quacklib.api.objects.item.ItemBehavior
 import therealfarfetchd.quacklib.api.objects.item.ItemType
 import therealfarfetchd.quacklib.api.objects.item.MCItemType
+import therealfarfetchd.quacklib.api.render.model.Model
 
 class DeferredItemTypeImpl(override val registryName: ResourceLocation) : ItemType {
 
@@ -30,6 +31,10 @@ class DeferredItemTypeImpl(override val registryName: ResourceLocation) : ItemTy
 
   override val components: List<ItemComponent>
     get() = realInstance?.components
+            ?: crash()
+
+  override val model: Model
+    get() = realInstance?.model
             ?: crash()
 
   @Suppress("NOTHING_TO_INLINE")

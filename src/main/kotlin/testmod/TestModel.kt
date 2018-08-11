@@ -10,6 +10,8 @@ class TestModel : SimpleModel(useDynamic = true) {
   val rotFloating = useRenderParam<Float>()
   val scaleFloating = useRenderParam<Float>()
 
+  override fun getParticleTexture(): PreparedTexture = base
+
   override fun ModelContext.addObjects() {
     coordsScale(16)
 
@@ -48,5 +50,16 @@ class TestModel : SimpleModel(useDynamic = true) {
 
       textureAll(base)
     }
+
+    // add(Box) {
+    //   texture(cube, EnumFacing.NORTH, EnumFacing.DOWN)
+    // }
+    //
+    // val texture = texture(cube) as AtlasTexture
+    // addQuad(mkQuad(texture, EnumFacing.UP, Vec3(0, 1, 0), Vec3(1, 0, 1)).copy(vert2 = Vec3(0, 0, 1), vert4 = Vec3(1, 1, 0)))
+    // val slope = Quad(texture, Vec3(0,0,0), Vec3(0,0,1), Vec3(0, 1, 0), Vec3(0, 1, 0), Vec2(0, 0), Vec2(1, 0), Vec2(0, 1), Vec2(0, 1), Vec2.Origin, Color.WHITE)
+    // addQuad(slope)
+    // addQuad(slope.mirror(EnumFacing.Axis.X))
+
   }
 }

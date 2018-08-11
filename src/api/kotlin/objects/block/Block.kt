@@ -13,6 +13,7 @@ import therealfarfetchd.quacklib.api.objects.Instantiable
 import therealfarfetchd.quacklib.api.objects.Registered
 import therealfarfetchd.quacklib.api.objects.world.World
 import therealfarfetchd.quacklib.api.objects.world.WorldMutable
+import therealfarfetchd.quacklib.api.render.model.Model
 import therealfarfetchd.quacklib.api.tools.PositionGrid
 
 typealias MCBlockType = net.minecraft.block.Block
@@ -35,8 +36,20 @@ interface BlockType : Instantiable, Registered, ComponentHost<BlockComponent> {
 
   val validTools: Set<Tool>
 
+  val model: Model
+
   fun Unsafe.toMCBlockType(): MCBlockType
 
+}
+
+enum class BlockRender {
+  Opaque,
+  Translucent,
+}
+
+enum class BlockGeometry {
+  FullBlock,
+  NonFull,
 }
 
 interface Block : Instance<BlockType>, BehaviorDelegate {

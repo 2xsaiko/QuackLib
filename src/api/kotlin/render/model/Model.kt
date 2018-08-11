@@ -60,6 +60,11 @@ interface Model {
 
   fun getUsedTextures(): List<ResourceLocation>
 
+  // TODO: ugh
+  fun isItemTransformation(): Boolean = false
+
+  fun getParticleTexture(getTexture: (ResourceLocation) -> AtlasTexture): AtlasTexture
+
   fun <T : DataSource<D>, D : DynDataSource> getDynamicRender(data: T, dyndata: D, getTexture: (ResourceLocation) -> AtlasTexture): List<Quad>
 
   fun needsDynamicRender(): Boolean

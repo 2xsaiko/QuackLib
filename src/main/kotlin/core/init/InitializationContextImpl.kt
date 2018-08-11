@@ -1,9 +1,12 @@
 package therealfarfetchd.quacklib.core.init
 
+import net.minecraftforge.common.MinecraftForge
 import therealfarfetchd.quacklib.api.block.init.BlockConfigurationScope
 import therealfarfetchd.quacklib.api.core.init.InitializationContext
 import therealfarfetchd.quacklib.api.core.mod.BaseMod
 import therealfarfetchd.quacklib.api.core.modinterface.item
+import therealfarfetchd.quacklib.api.events.init.block.EventBlockCreation
+import therealfarfetchd.quacklib.api.events.init.item.EventItemCreation
 import therealfarfetchd.quacklib.api.item.init.ItemConfigurationScope
 import therealfarfetchd.quacklib.api.item.init.TabConfigurationScope
 import therealfarfetchd.quacklib.api.objects.block.BlockType
@@ -20,12 +23,14 @@ class InitializationContextImpl(val mod: BaseMod) : InitializationContext {
 
   override fun addBlock(name: String, op: BlockConfigurationScope.() -> Unit): BlockType {
     val conf = BlockConfigurationScopeImpl(mod.modid, name, this).also(op)
+    MinecraftForge.EVENT_BUS.post(EventBlockCreation(conf))
     (mod.proxy as CommonProxy).addBlockTemplate(conf)
     return CreatedBlockTypeImpl(conf.rl, conf)
   }
 
   override fun addItem(name: String, op: ItemConfigurationScope.() -> Unit): ItemType {
     val conf = ItemConfigurationScopeImpl(mod.modid, name, this).also(op)
+    MinecraftForge.EVENT_BUS.post(EventItemCreation(conf))
     (mod.proxy as CommonProxy).addItemTemplate(conf)
     return CreatedItemTypeImpl(conf.rl, conf)
   }

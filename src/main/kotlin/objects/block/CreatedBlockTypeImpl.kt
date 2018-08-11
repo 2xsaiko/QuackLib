@@ -12,6 +12,7 @@ import therealfarfetchd.quacklib.api.objects.block.Block
 import therealfarfetchd.quacklib.api.objects.block.BlockBehavior
 import therealfarfetchd.quacklib.api.objects.block.BlockType
 import therealfarfetchd.quacklib.api.objects.block.MCBlockType
+import therealfarfetchd.quacklib.api.render.model.Model
 
 class CreatedBlockTypeImpl(override val registryName: ResourceLocation, val def: BlockConfiguration) : BlockType {
 
@@ -29,6 +30,10 @@ class CreatedBlockTypeImpl(override val registryName: ResourceLocation, val def:
   override val components: List<BlockComponent>
     get() = realInstance?.components
             ?: def.components
+
+  override val model: Model
+    get() = realInstance?.model
+            ?: def.model
 
   override val behavior: BlockBehavior
     get() = realInstance?.behavior
