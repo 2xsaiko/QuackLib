@@ -42,7 +42,7 @@ open class BakedModelCached(val cache: ModelCache, val rl: ModelResourceLocation
     return Pair.of(this, mat?.toMatrix4f())
   }
 
-  inner class ItemOverrides : ItemOverrideList() {
+  inner class ItemOverrides : ItemOverrideList(emptyList()) {
     override fun handleItemState(originalModel: IBakedModel, stack: ItemStack, world: World?, entity: EntityLivingBase?): IBakedModel {
       return BakedModelItemCached(cache, rl, format, stack)
     }
