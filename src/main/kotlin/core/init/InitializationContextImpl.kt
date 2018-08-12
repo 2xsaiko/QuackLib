@@ -40,8 +40,12 @@ class InitializationContextImpl(val mod: BaseMod) : InitializationContext {
     val definition = (mod.proxy as CommonProxy).blockTemplates.firstOrNull { it.rl == block.registryName }
 
     val item = addItem(name) {
-      if (definition != null && definition.isMultipart) apply(APIImpl.multipartAPI.createPlacementComponent(block))
-      else apply(ComponentPlaceBlock(block))
+      if (definition != null) {
+        if (definition.isMultipart) apply(APIImpl.multipartAPI.createPlacementComponent(block))
+        else apply(ComponentPlaceBlock(block))
+        useModel(definition.model)
+      }
+
       op(this)
     }
 

@@ -8,9 +8,9 @@ import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.renderer.texture.TextureMap
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
-import net.minecraft.util.ResourceLocation
 import org.lwjgl.opengl.GL11
 import therealfarfetchd.math.Vec3
+import therealfarfetchd.quacklib.api.render.Quad
 import therealfarfetchd.quacklib.api.render.model.DataSource
 import therealfarfetchd.quacklib.api.render.model.DynDataSource
 import therealfarfetchd.quacklib.block.impl.TileQuackLib
@@ -18,8 +18,6 @@ import therealfarfetchd.quacklib.block.render.BlockRenderStateImpl
 import therealfarfetchd.quacklib.objects.block.toBlock
 import therealfarfetchd.quacklib.render.client.model.BakedModelBuilder
 import therealfarfetchd.quacklib.render.texture.AtlasTextureImpl
-
-private val textureGetter = { location: ResourceLocation -> AtlasTextureImpl(Minecraft.getMinecraft().textureMapBlocks.getAtlasSprite(location.toString())) }
 
 object TESRQuackLib : TileEntitySpecialRenderer<TileQuackLib>() {
 
@@ -63,8 +61,12 @@ object TESRQuackLib : TileEntitySpecialRenderer<TileQuackLib>() {
     val source = DataSource.Block(block.type, BlockRenderStateImpl(block.type, state))
     val dynsource = DynDataSource.Block(block, partialTicks)
 
-    val quads = model.getDynamicRender(source, dynsource, textureGetter)
-      .map { it.translate(Vec3(x.toFloat(), y.toFloat(), z.toFloat()) - block.pos) }
+    val quads = try {
+      model.getDynamicRender(source, dynsource, texGetter)
+        .map { it.translate(Vec3(x.toFloat(), y.toFloat(), z.toFloat()) - block.pos) }
+    } catch (e: Exception) {
+      emptyList<Quad>()
+    }
 
     if (quads.isNotEmpty()) {
       val model = BakedModelBuilder(DefaultVertexFormats.BLOCK) {

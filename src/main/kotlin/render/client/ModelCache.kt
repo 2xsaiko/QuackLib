@@ -11,6 +11,7 @@ import net.minecraft.util.EnumFacing
 import net.minecraft.util.ResourceLocation
 import therealfarfetchd.quacklib.api.core.modinterface.block
 import therealfarfetchd.quacklib.api.core.modinterface.item
+import therealfarfetchd.quacklib.api.core.modinterface.logException
 import therealfarfetchd.quacklib.api.objects.block.BlockType
 import therealfarfetchd.quacklib.api.objects.item.ItemType
 import therealfarfetchd.quacklib.api.render.Quad
@@ -26,6 +27,8 @@ import therealfarfetchd.quacklib.render.client.model.BakedModelBuilder
 import therealfarfetchd.quacklib.render.client.model.ModelError
 import therealfarfetchd.quacklib.render.texture.AtlasTextureImpl
 import therealfarfetchd.quacklib.render.vanilla.Transformation
+
+val texGetter = { rl: ResourceLocation -> AtlasTextureImpl(Minecraft.getMinecraft().textureMapBlocks.getAtlasSprite(rl.toString())) }
 
 class ModelCache {
 
@@ -50,8 +53,6 @@ class ModelCache {
 
   private val models = mutableMapOf<Any, Model>()
 
-  private val texGetter = { rl: ResourceLocation -> AtlasTextureImpl(Minecraft.getMinecraft().textureMapBlocks.getAtlasSprite(rl.toString())) }
-
   private fun getModel(item: ItemType): Model {
     return models.computeIfAbsent(item) { item.model }
   }
@@ -68,6 +69,7 @@ class ModelCache {
       val quads = try {
         getModel(block).getStaticRender(src, texGetter)
       } catch (e: Exception) {
+        logException(e)
         ModelError.getStaticRender(src, texGetter)
       }
       quads.filter { isQuadAtFace(it, side) }.map { it.bake(format) }
@@ -78,7 +80,13 @@ class ModelCache {
     val key = KeyItem(rl, side)
     return itemmodels.computeIfAbsent(key) {
       val item = item(stack.item)
-      val quads = getModel(item).getStaticRender(DataSource.Item(item, ItemRenderStateImpl(item, stack)), texGetter)
+      val src = DataSource.Item(item, ItemRenderStateImpl(item, stack))
+      val quads = try {
+        getModel(item).getStaticRender(src, texGetter)
+      } catch (e: Exception) {
+        logException(e)
+        ModelError.getStaticRender(src, texGetter)
+      }
       quads.filter { isQuadAtFace(it, side) }.map { it.bake(format) }
     }
   }
