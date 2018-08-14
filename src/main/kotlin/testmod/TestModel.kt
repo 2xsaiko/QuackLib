@@ -1,9 +1,11 @@
 package therealfarfetchd.quacklib.testmod
 
+import net.minecraft.client.renderer.GlStateManager
+import org.lwjgl.opengl.GL11
 import therealfarfetchd.quacklib.api.render.model.DataSource
 import therealfarfetchd.quacklib.api.render.model.SimpleModel
 
-class TestModel : SimpleModel(useDynamic = true) {
+class TestModel : SimpleModel(useDynamic = true, useGL = true) {
   private val base = useTexture("minecraft:blocks/piston_bottom")
   private val cube = useTexture("minecraft:blocks/red_sand")
 
@@ -49,6 +51,21 @@ class TestModel : SimpleModel(useDynamic = true) {
       to(16f, 2f, 16f)
 
       textureAll(base)
+    }
+
+    gl {
+      GlStateManager.disableDepth()
+      GL11.glBegin(GL11.GL_LINES)
+      GL11.glVertex3f(0f, 0f, 0f)
+      GL11.glVertex3f(1f, 1f, 1f)
+      GL11.glVertex3f(1f, 0f, 0f)
+      GL11.glVertex3f(0f, 1f, 1f)
+      GL11.glVertex3f(0f, 0f, 1f)
+      GL11.glVertex3f(1f, 1f, 0f)
+      GL11.glVertex3f(0f, 1f, 0f)
+      GL11.glVertex3f(1f, 0f, 1f)
+      GL11.glEnd()
+      GlStateManager.enableDepth()
     }
 
     // add(Box) {

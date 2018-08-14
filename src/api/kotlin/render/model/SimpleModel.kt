@@ -20,7 +20,7 @@ annotation class SimpleModelDSL
 
 typealias ObjectBuilderProvider<T> = (SimpleModel.ModelContext) -> T
 
-abstract class SimpleModel(val useDynamic: Boolean = false) : Model {
+abstract class SimpleModel(val useDynamic: Boolean = false, val useGL: Boolean = false) : Model {
 
   private val atlasTexs = mutableListOf<PreparedTexture>()
 
@@ -35,7 +35,12 @@ abstract class SimpleModel(val useDynamic: Boolean = false) : Model {
   final override fun <T : DataSource<D>, D : DynDataSource> getDynamicRender(data: T, dyndata: D, getTexture: (ResourceLocation) -> AtlasTexture): List<Quad> =
     QuackLibAPI.impl.modelAPI.getDynamicRender(this, data, dyndata, getTexture)
 
+  override fun <T : DataSource<D>, D : DynDataSource> renderGl(data: T, dyndata: D, getTexture: (ResourceLocation) -> AtlasTexture) =
+    QuackLibAPI.impl.modelAPI.renderGl(this, data, dyndata, getTexture)
+
   final override fun needsDynamicRender(): Boolean = useDynamic
+
+  final override fun needsGlRender(): Boolean = useGL
 
   fun useTexture(resource: String, addToAtlas: Boolean = true): PreparedTexture =
     useTexture(QuackLibAPI.impl.getResourceFromContext(resource), addToAtlas)
@@ -61,9 +66,14 @@ abstract class SimpleModel(val useDynamic: Boolean = false) : Model {
   abstract fun ModelContext.addObjects()
 
   @SimpleModelDSL
-  interface ModelContext : ModelTemplates {
+  interface BaseContext {
 
     val data: DataSource<*>
+
+  }
+
+  @SimpleModelDSL
+  interface ModelContextBase : BaseContext, ModelTemplates {
 
     val coordsScale: Float
 
@@ -93,20 +103,26 @@ abstract class SimpleModel(val useDynamic: Boolean = false) : Model {
       trPop()
     }
 
+  }
+
+  interface ModelContext : ModelContextBase {
+
     fun dynamic(op: Dynamic.() -> Unit)
+
+    fun gl(op: GlContext.() -> Unit)
 
   }
 
   @SimpleModelDSL
-  interface Dynamic : ModelContext {
+  interface Dynamic : ModelContextBase {
 
     val dyndata: DynDataSource
 
-    @Suppress("DeprecatedCallableAddReplaceWith")
-    @Deprecated("Can't have nested dynamic blocks!", level = DeprecationLevel.ERROR)
-    override fun dynamic(op: Dynamic.() -> Unit) {
-      error("Can't have nested dynamic blocks!")
-    }
+  }
+
+  interface GlContext : BaseContext {
+
+    val dyndata: DynDataSource
 
   }
 

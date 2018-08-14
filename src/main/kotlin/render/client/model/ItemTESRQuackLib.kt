@@ -3,6 +3,7 @@ package therealfarfetchd.quacklib.render.client.model
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.BufferBuilder
 import net.minecraft.client.renderer.EntityRenderer
+import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.renderer.block.model.BakedQuad
 import net.minecraft.client.renderer.block.model.IBakedModel
@@ -38,15 +39,26 @@ object ItemTESRQuackLib : TileEntityItemStackRenderer() {
     val type = item.type
     val source = DataSource.Item(type, ItemRenderStateImpl(type, stack))
     val dynsource = DynDataSource.Item(item, partialTicks)
-    val dm = try {
-      type.model.getDynamicRender(source, dynsource, texGetter)
-    } catch (e: Exception) {
-      emptyList<Quad>()
+    if (type.model.needsDynamicRender()) {
+      val dm = try {
+        type.model.getDynamicRender(source, dynsource, texGetter)
+      } catch (e: Exception) {
+        emptyList<Quad>()
+      }
+
+      renderQuads(renderer, dm.map { it.bake(DefaultVertexFormats.ITEM) }, -1, stack)
     }
 
-    renderQuads(renderer, dm.map { it.bake(DefaultVertexFormats.ITEM) }, -1, stack)
-
     tessellator.draw()
+
+    if (type.model.needsGlRender()) {
+      GlStateManager.pushMatrix()
+      GlStateManager.disableBlend()
+      GlStateManager.enableCull()
+
+      type.model.renderGl(source, dynsource, texGetter)
+      GlStateManager.popMatrix()
+    }
   }
 
   private fun renderModel(renderer: BufferBuilder, model: IBakedModel, stack: ItemStack) {

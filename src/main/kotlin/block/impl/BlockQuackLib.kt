@@ -41,6 +41,7 @@ import therealfarfetchd.quacklib.hax.ExtraData
 import therealfarfetchd.quacklib.objects.block.BlockImpl
 import therealfarfetchd.quacklib.objects.block.BlockTypeImpl
 import therealfarfetchd.quacklib.objects.world.toWorld
+import therealfarfetchd.quacklib.render.model.needsTESR
 import java.util.*
 import kotlin.math.roundToInt
 import kotlin.reflect.jvm.jvmName
@@ -62,7 +63,7 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
 
   val cData = getComponentsOfType<BlockComponentData<*>>()
 
-  val needsTile = getComponentsOfType<BlockComponentNeedTE>().isNotEmpty() || type.model.needsDynamicRender()
+  val needsTile = getComponentsOfType<BlockComponentNeedTE>().isNotEmpty() || type.model.needsTESR()
   val needsTick = getComponentsOfType<BlockComponentTickable>().isNotEmpty()
 
   lateinit var propRetrievers: SetPropertyRetrievers

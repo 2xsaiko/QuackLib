@@ -26,8 +26,8 @@ sealed class DataSource<D : DynDataSource> {
   data class Item(val it: ItemType, val state: ItemRenderState) : DataSource<DynDataSource.Item>()
 }
 
-sealed class DynDataSource {
-  object Unknown : DynDataSource()
-  class Block(val block: therealfarfetchd.quacklib.api.objects.block.Block, val partialTicks: Float) : DynDataSource()
-  class Item(val item: therealfarfetchd.quacklib.api.objects.item.Item, val partialTicks: Float) : DynDataSource()
+sealed class DynDataSource(val partialTicks: Float) {
+  object Unknown : DynDataSource(1f)
+  class Block(val block: therealfarfetchd.quacklib.api.objects.block.Block, partialTicks: Float) : DynDataSource(partialTicks)
+  class Item(val item: therealfarfetchd.quacklib.api.objects.item.Item, partialTicks: Float) : DynDataSource(partialTicks)
 }

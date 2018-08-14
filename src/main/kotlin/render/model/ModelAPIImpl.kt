@@ -11,18 +11,29 @@ import therealfarfetchd.quacklib.api.render.texture.AtlasTexture
 object ModelAPIImpl : ModelAPI {
 
   override fun getStaticRender(model: SimpleModel, data: DataSource<*>, texture: (ResourceLocation) -> AtlasTexture): List<Quad> {
-    val r = ModelContextImpl(data, texture, model.useDynamic)
+    val r = ModelContextImpl(data, texture, model.useDynamic, model.useGL)
     with(model) { r.addObjects() }
     return r.getQuads()
   }
 
   override fun <T : DynDataSource> getDynamicRender(model: SimpleModel, data: DataSource<T>, dyndata: T, texture: (ResourceLocation) -> AtlasTexture): List<Quad> {
-    val r = ModelContextImpl(data, texture, model.useDynamic) // TODO replace with faster context that doesn't evaluate all the static models
+    // TODO cache????
+    val r = ModelContextImpl(data, texture, model.useDynamic, model.useGL) // TODO replace with faster context that doesn't evaluate all the static models
     with(model) { r.addObjects() }
     return r.dynops.flatMap {
       val dyn = ModelContextImpl.Dynamic(it, data, dyndata, texture)
       it.op(dyn)
       dyn.getQuads()
+    }
+  }
+
+  override fun <T : DynDataSource> renderGl(model: SimpleModel, data: DataSource<T>, dyndata: T, texture: (ResourceLocation) -> AtlasTexture) {
+    // TODO cache????
+    val r = ModelContextImpl(data, texture, model.useDynamic, model.useGL) // TODO replace with faster context that doesn't evaluate all the static models
+    with(model) { r.addObjects() }
+    for (state in r.glops) {
+      val ctx = ModelContextImpl.GlContext(data, dyndata)
+      state.op(ctx)
     }
   }
 

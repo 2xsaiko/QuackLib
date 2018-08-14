@@ -7,7 +7,12 @@ import therealfarfetchd.quacklib.api.render.model.*
 import therealfarfetchd.quacklib.api.render.texture.AtlasTexture
 import therealfarfetchd.quacklib.api.render.texture.Texture
 
-open class ModelContextImpl(override val data: DataSource<*>, val getTexture: (ResourceLocation) -> AtlasTexture, val allowDyn: Boolean) : SimpleModel.ModelContext {
+open class ModelContextImpl(
+  override val data: DataSource<*>,
+  val getTexture: (ResourceLocation) -> AtlasTexture,
+  val allowDyn: Boolean,
+  val allowGl: Boolean
+) : SimpleModel.ModelContext {
 
   override val Box: ObjectBuilderProvider<BoxConfigurationScope> = ::BoxConfigurationScopeImpl
   override val OBJ: ObjectBuilderProvider<ObjConfigurationScope> = ::ObjConfigurationScopeImpl
@@ -20,6 +25,7 @@ open class ModelContextImpl(override val data: DataSource<*>, val getTexture: (R
   var currentTransform = Mat4.Identity
 
   val dynops = mutableListOf<DynState>()
+  val glops = mutableListOf<GlState>()
 
   internal fun getQuads(): List<Quad> {
     return quads
@@ -77,9 +83,24 @@ open class ModelContextImpl(override val data: DataSource<*>, val getTexture: (R
     dynops += DynState(transformStack + currentTransform, coordsScale, op)
   }
 
+  override fun gl(op: SimpleModel.GlContext.() -> Unit) {
+    if (!allowGl) {
+      // FIXME this should be a validation error
+      error("Can't use GL drawing in this model! Try setting useGL to true")
+    }
+    glops += GlState(op)
+  }
+
   data class DynState(val trStack: List<Mat4>, val cscale: Float, val op: SimpleModel.Dynamic.() -> Unit)
 
-  class Dynamic(state: DynState, data: DataSource<*>, override val dyndata: DynDataSource, getTexture: (ResourceLocation) -> AtlasTexture) : ModelContextImpl(data, getTexture, true), SimpleModel.Dynamic {
+  data class GlState(val op: SimpleModel.GlContext.() -> Unit)
+
+  class Dynamic(
+    state: DynState,
+    data: DataSource<*>,
+    override val dyndata: DynDataSource,
+    getTexture: (ResourceLocation) -> AtlasTexture
+  ) : ModelContextImpl(data, getTexture, true, true), SimpleModel.Dynamic {
 
     init {
       transformStack += state.trStack.dropLast(1)
@@ -90,5 +111,7 @@ open class ModelContextImpl(override val data: DataSource<*>, val getTexture: (R
     override fun dynamic(op: SimpleModel.Dynamic.() -> Unit): Unit =
       error("Can't have nested dynamic blocks!")
   }
+
+  class GlContext(override val data: DataSource<*>, override val dyndata: DynDataSource) : SimpleModel.GlContext
 
 }

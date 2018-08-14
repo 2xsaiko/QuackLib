@@ -25,6 +25,7 @@ import therealfarfetchd.quacklib.objects.item.ItemTypeImpl
 import therealfarfetchd.quacklib.render.bake
 import therealfarfetchd.quacklib.render.client.model.BakedModelBuilder
 import therealfarfetchd.quacklib.render.client.model.ModelError
+import therealfarfetchd.quacklib.render.model.needsTESR
 import therealfarfetchd.quacklib.render.texture.AtlasTextureImpl
 import therealfarfetchd.quacklib.render.vanilla.Transformation
 
@@ -107,8 +108,8 @@ class ModelCache {
     return if (getModelForResource(rl).isItemTransformation()) BakedModelBuilder.defaultItem else BakedModelBuilder.defaultBlock
   }
 
-  fun needsDynamicRenderer(item: ItemType): Boolean {
-    return getModel(item).needsDynamicRender()
+  fun needsTESR(item: ItemType): Boolean {
+    return getModel(item).needsTESR()
   }
 
   private fun getModelForResource(rl: ModelResourceLocation): Model {

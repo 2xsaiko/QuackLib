@@ -22,8 +22,27 @@ import therealfarfetchd.quacklib.render.texture.AtlasTextureImpl
 object TESRQuackLib : TileEntitySpecialRenderer<TileQuackLib>() {
 
   override fun render(te: TileQuackLib, x: Double, y: Double, z: Double, partialTicks: Float, destroyStage: Int, alpha: Float) {
-    renderFastBridge(te, x, y, z, partialTicks, destroyStage, alpha)
+    val block = te.toBlock()
+    val model = block.type.model
 
+    if (model.needsDynamicRender())
+      renderFastBridge(te, x, y, z, partialTicks, destroyStage, alpha)
+
+    if (model.needsGlRender()) {
+      GlStateManager.pushMatrix()
+      GlStateManager.disableBlend()
+      GlStateManager.enableCull()
+      GlStateManager.translate(x, y, z)
+
+      // FIXME: better way to do this?
+      val state = te.blockType.getExtendedState(te.world.getBlockState(te.pos).getActualState(te.world, te.pos), te.world, te.pos)
+
+      val source = DataSource.Block(block.type, BlockRenderStateImpl(block.type, state))
+      val dynsource = DynDataSource.Block(block, partialTicks)
+
+      model.renderGl(source, dynsource, texGetter)
+      GlStateManager.popMatrix()
+    }
   }
 
   fun renderFastBridge(te: TileQuackLib, x: Double, y: Double, z: Double, partialTicks: Float, destroyStage: Int, alpha: Float) {

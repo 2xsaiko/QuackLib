@@ -17,7 +17,7 @@ class BakedModelItemCached(cache: ModelCache, rl: ModelResourceLocation, format:
   }
 
   override fun isBuiltInRenderer(): Boolean =
-    cache.needsDynamicRenderer(item(stack.item))
+    cache.needsTESR(item(stack.item))
 
   override fun getOverrides(): ItemOverrideList = ItemOverrideList.NONE
 

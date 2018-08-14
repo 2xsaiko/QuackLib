@@ -28,6 +28,7 @@ import therealfarfetchd.quacklib.item.impl.TabQuackLib
 import therealfarfetchd.quacklib.objects.block.BlockTypeImpl
 import therealfarfetchd.quacklib.objects.item.ItemTypeImpl
 import therealfarfetchd.quacklib.render.client.model.ItemTESRQuackLib
+import therealfarfetchd.quacklib.render.model.needsTESR
 import therealfarfetchd.quacklib.tools.progressbar
 
 sealed class CommonProxy : ModProxy {
@@ -102,7 +103,7 @@ sealed class CommonProxy : ModProxy {
         Logger.info("Adding ${it.describe()}")
         val type = ItemTypeImpl(it)
         val item = ItemQuackLib(type)
-        if (it.model.needsDynamicRender()) {
+        if (it.model.needsTESR()) {
           item.tileEntityItemStackRenderer = ItemTESRQuackLib
         }
         ItemTypeImpl.addItem(type, item)

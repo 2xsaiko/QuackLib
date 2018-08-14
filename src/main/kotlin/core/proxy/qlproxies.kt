@@ -210,7 +210,7 @@ class QLClientProxy : QLCommonProxy() {
   }
 
   override fun canRenderFast(type: BlockType): Boolean {
-    return true // TODO implement GL capabilities for model
+    return !type.model.needsGlRender()
   }
 
 }

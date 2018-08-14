@@ -5,53 +5,6 @@ import therealfarfetchd.quacklib.api.render.Quad
 import therealfarfetchd.quacklib.api.render.texture.AtlasTexture
 import kotlin.reflect.KClass
 
-//interface Model {
-//
-//
-//}
-//
-//interface StaticModel : Model {
-//
-//  fun getStaticRender(getTexture: (ResourceLocation) -> AtlasTexture): List<Quad>
-//
-//  fun getUsedTextures(): List<ResourceLocation>
-//
-//}
-//
-//interface DynamicModel : Model {
-//
-//  fun getDynamicRender(partialTicks: Float): List<Quad>
-//
-//}
-//
-//interface BlockModel : StaticModel {
-//
-//  fun getStaticRender(bt: BlockType, state: BlockRenderState, getTexture: (ResourceLocation) -> AtlasTexture): List<Quad> =
-//    getStaticRender(getTexture)
-//
-//}
-//
-//interface BlockModelDyn : DynamicModel {
-//
-//  fun getDynamicRender(partialTicks: Float, bt: BlockType, state: BlockRenderState): List<Quad> =
-//    getDynamicRender(partialTicks)
-//
-//}
-//
-//interface ItemModel : StaticModel {
-//
-//  fun getStaticRender(it: ItemType, state: ItemRenderState, getTexture: (ResourceLocation) -> AtlasTexture): List<Quad> =
-//    getStaticRender(getTexture)
-//
-//}
-//
-//interface ItemModelDyn : DynamicModel {
-//
-//  fun getDynamicRender(partialTicks: Float, it: ItemType, state: ItemRenderState): List<Quad> =
-//    getDynamicRender(partialTicks)
-//
-//}
-
 interface Model {
 
   fun <T : DataSource<*>> accepts(type: KClass<T>): Boolean
@@ -65,11 +18,12 @@ interface Model {
 
   fun getParticleTexture(getTexture: (ResourceLocation) -> AtlasTexture): AtlasTexture
 
-  fun <T : DataSource<D>, D : DynDataSource> getDynamicRender(data: T, dyndata: D, getTexture: (ResourceLocation) -> AtlasTexture): List<Quad>
+  fun <T : DataSource<D>, D : DynDataSource> getDynamicRender(data: T, dyndata: D, getTexture: (ResourceLocation) -> AtlasTexture): List<Quad> = emptyList()
 
-  fun needsDynamicRender(): Boolean
+  fun <T : DataSource<D>, D : DynDataSource> renderGl(data: T, dyndata: D, getTexture: (ResourceLocation) -> AtlasTexture) {}
+
+  fun needsDynamicRender(): Boolean = false
+
+  fun needsGlRender(): Boolean = false
 
 }
-
-inline fun <reified T : DataSource<*>> Model.accepts(): Boolean =
-  accepts(T::class)
