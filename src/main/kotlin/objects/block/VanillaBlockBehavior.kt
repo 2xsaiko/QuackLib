@@ -28,11 +28,11 @@ import therealfarfetchd.quacklib.api.tools.PositionGrid
 class VanillaBlockBehavior(val type: MCBlockType) : BlockBehavior {
 
   override fun <T : BlockDataPart> getPart(block: Block, token: PartAccessToken<T>): T {
-    TODO("not implemented")
+    error("Tried to get data part '$token' from vanilla block '$block'!")
   }
 
   override fun <T> getImported(block: Block, value: ImportedValue<T>): T {
-    TODO("not implemented")
+    error("Tried to get import '$value' from vanilla block '$block'!")
   }
 
   override fun onActivated(block: Block, player: EntityPlayer, hand: EnumHand, facing: Facing, hitVec: Vec3): Boolean = unsafe {

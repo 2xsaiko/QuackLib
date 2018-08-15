@@ -106,25 +106,34 @@ tasks.withType<Jar> {
       "mcversion" to project.minecraft.version
     ))
   }
-}
 
-java {
   manifest {
     attributes(mapOf(
       "FMLAT" to "quacklib_at.cfg",
       "FMLCorePlugin" to "therealfarfetchd.quacklib.hax.QuackLibPlugin",
-      "FMLCorePluginContainsMod" to "true"
+      "FMLCorePluginContainsMod" to "true",
+      "Maven-Artifact" to getMavenArtifactId(),
+      "Timestamp" to System.currentTimeMillis()
     ))
   }
+}
 
-  //  sourceSets {
-  //    "testmod" {
-  //      compileClasspath += "api"().output
-  //    }
-  //    "main" {
-  //      runtimeClasspath += "testmod"().output
-  //    }
-  //  }
+// java {
+//   sourceSets {
+//     "testmod" {
+//       compileClasspath += "api"().output
+//     }
+//     "main" {
+//       runtimeClasspath += "testmod"().output
+//     }
+//   }
+// }
+
+fun getMavenArtifactId(): String {
+  var version = project.version.toString()
+  if (System.getenv("BUILD_NUMBER") != null && System.getenv("SHOW_BUILD_NUMBER") != null)
+    version += "_" + System.getenv("BUILD_NUMBER")
+  return "$group:$name:$version"
 }
 
 fun DependencyHandler.deobfCompile(

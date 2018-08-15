@@ -4,4 +4,10 @@ import net.minecraft.util.ResourceLocation
 import therealfarfetchd.quacklib.api.block.data.BlockDataPart
 import therealfarfetchd.quacklib.api.block.data.PartAccessToken
 
-class PartAccessTokenImpl<out T : BlockDataPart>(val rl: ResourceLocation) : PartAccessToken<T>
+class PartAccessTokenImpl<out T : BlockDataPart>(val rl: ResourceLocation) : PartAccessToken<T> {
+
+  override fun toString(): String {
+    return rl.toString()
+  }
+
+}
