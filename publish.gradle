@@ -7,13 +7,16 @@ apply plugin: 'maven'
 apply plugin: 'maven-publish'
 
 task sourcesJar(type: Jar) {
-  from(sourceSets.main.allSource) {
-    classifier = "sources"
+  from(sourceSets.main.allSource)
+  from(sourceSets.api.allSource) {
+    into("api")
   }
+  classifier = "sources"
 }
 
 artifacts {
   archives sourcesJar
+  archives apiJar
 }
 
 uploadArchives {

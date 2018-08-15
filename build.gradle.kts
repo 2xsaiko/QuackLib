@@ -1,8 +1,8 @@
 @file:Suppress("PropertyName")
 
 import net.minecraftforge.gradle.user.IReobfuscator
+import net.minecraftforge.gradle.user.ReobfTaskFactory
 import net.minecraftforge.gradle.user.UserBaseExtension
-import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val mod_version: String by extra
@@ -44,8 +44,6 @@ apply {
 
 version = mod_version
 group = "therealfarfetchd.quacklib"
-
-apply(from = "publish.gradle")
 
 minecraft {
   version = "$mc_version-$forge_version"
@@ -106,6 +104,10 @@ tasks.withType<Jar> {
       "mcversion" to project.minecraft.version
     ))
   }
+}
+
+tasks.getByName<Jar>("jar") {
+  from(java.sourceSets["api"].output)
 
   manifest {
     attributes(mapOf(
@@ -118,6 +120,20 @@ tasks.withType<Jar> {
   }
 }
 
+task("apiJar", Jar::class) {
+  from(java.sourceSets["api"].output)
+
+  classifier = "api"
+}
+
+reobf {
+  create("apiJar")
+}
+
+tasks.getByName("build") {
+  dependsOn("apiJar")
+}
+
 // java {
 //   sourceSets {
 //     "testmod" {
@@ -128,6 +144,8 @@ tasks.withType<Jar> {
 //     }
 //   }
 // }
+
+apply(from = "publish.gradle")
 
 fun getMavenArtifactId(): String {
   var version = project.version.toString()
@@ -149,3 +167,5 @@ fun DependencyHandler.deobfCompile(dependencyNotation: Any): Dependency? =
   add("deobfCompile", dependencyNotation)
 
 fun minecraft(op: UserBaseExtension.() -> Unit) = configure(op)
+
+fun reobf(op: NamedDomainObjectContainer<IReobfuscator>.() -> Unit) = configure(op)
