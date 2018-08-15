@@ -60,7 +60,7 @@ class ComponentSurfacePlacement : BlockComponentPlacement<ComponentSurfacePlacem
 
   class Data : BlockDataPart(version = 0) {
 
-    var facing: Facing by data("facing", Facing.DOWN)
+    var facing: Facing by data("facing", Facing.DOWN, sync = true)
 
   }
 

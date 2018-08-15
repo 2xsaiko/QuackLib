@@ -13,6 +13,7 @@ import therealfarfetchd.quacklib.block.data.PropertyResourceLocation
 import therealfarfetchd.quacklib.block.data.render.PropertyData
 import therealfarfetchd.quacklib.block.data.render.PropertyDataExtended
 import kotlin.reflect.KClass
+import kotlin.reflect.full.isSubclassOf
 
 class RenderPropertyBlockImpl<C : BlockComponentRenderProperties, T>(
   val targetClass: KClass<out C>,
@@ -24,7 +25,9 @@ class RenderPropertyBlockImpl<C : BlockComponentRenderProperties, T>(
   values: List<T>?
 ) : RenderPropertyBlock<C, T> {
 
-  val useExtendedProperty = true // TODO
+  val useExtendedProperty: Boolean =
+    if (type.isSubclassOf(Enum::class)) false
+    else values == null
 
   val pt: PropertyType<T> =
     if (useExtendedProperty) {
@@ -34,7 +37,10 @@ class RenderPropertyBlockImpl<C : BlockComponentRenderProperties, T>(
 
       PropertyType.Extended(PropertyDataExtended(PropertyResourceLocation(rl, name), type, cs))
     } else {
-      PropertyType.Standard(PropertyData(PropertyResourceLocation(rl, name), type, values!!.filter(constraints)))
+      @Suppress("UNCHECKED_CAST")
+      val v = values ?: type.javaObjectType.enumConstants.toList() as List<T>
+
+      PropertyType.Standard(PropertyData(PropertyResourceLocation(rl, name), type, v.filter(constraints)))
     }
 
   override fun getValue(container: Block): T {

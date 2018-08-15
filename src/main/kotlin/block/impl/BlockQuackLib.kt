@@ -1,6 +1,7 @@
 package therealfarfetchd.quacklib.block.impl
 
 import net.minecraft.block.state.BlockStateContainer
+import net.minecraft.block.state.IBlockState
 import net.minecraft.client.particle.ParticleDigging
 import net.minecraft.client.particle.ParticleManager
 import net.minecraft.entity.Entity
@@ -233,6 +234,7 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
   override fun getMetaFromState(state: MCBlock?): Int = 0
 
   // rendering
+  // cullface on other blocks
   override fun isOpaqueCube(state: MCBlock): Boolean {
     // TODO query model
     return if (initDone) type.behavior.isNormalBlock()
@@ -245,9 +247,19 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
   }
 
   // rendering (?)
+  // block creates a shadow
+  // block suffocates player
   override fun isFullCube(state: MCBlock): Boolean {
     return true
     //    return type.behavior.isNormalBlock()
+  }
+
+  override fun getAmbientOcclusionLightValue(state: IBlockState?): Float {
+    return super.getAmbientOcclusionLightValue(state)
+  }
+
+  override fun causesSuffocation(state: MCBlock): Boolean {
+    return super.causesSuffocation(state)
   }
 
   // TODO

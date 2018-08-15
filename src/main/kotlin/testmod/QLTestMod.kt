@@ -58,10 +58,13 @@ object QLTestMod : BaseMod() {
 
       val part = apply(SidedMultipart())
 
+      val model = useModel(ModelWallplate())
+
       link {
         side.facing provides box.facing
         side.facing provides part.facing
         side.facing provides rs.facing
+        side.rpFacing provides model.facing
       }
     }
 
