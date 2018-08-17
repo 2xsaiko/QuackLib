@@ -68,7 +68,7 @@ sealed class QLCommonProxy {
     APIImpl.qlVersion = e.modMetadata.version
     if (isDebugMode) Logger.warn("Don't forget to add '-Dfml.coreMods.load=therealfarfetchd.quacklib.hax.QuackLibPlugin' to the VM arguments!")
     Logger.info(javaClass.classLoader.getResourceAsStream("assets/quacklib/texts").reader().use { it.readLines() }.let { it[Random.nextInt(it.size)] })
-    ModContext.dissociate("therealfarfetchd.quacklib.api", recursive = true) { "Capability" !in it }
+    ModContext.dissociate("therealfarfetchd.quacklib.api", recursive = true)
     ModContext.dissociate("therealfarfetchd.quacklib.tools", recursive = true)
 
     GameRegistry.registerTileEntity(TileQuackLib::class.java, ResourceLocation(ModID, "tile_quacklib"))

@@ -17,11 +17,11 @@ object ModContext : ModContext {
 
   // FIXME remove these and use executeAsMod, this is a horrible hack
 
-  fun dissociate(pkg: String, recursive: Boolean = false, filter: (String) -> Boolean = { true }) {
+  fun dissociate(pkg: String, recursive: Boolean = false) {
     packageOwners.removeAll(pkg)
     if (recursive)
       packageOwners.keys()
-        .filter { it.startsWith("$pkg.") && filter(it) }
+        .filter { it.startsWith("$pkg.") }
         .forEach { packageOwners.removeAll(it) }
   }
 

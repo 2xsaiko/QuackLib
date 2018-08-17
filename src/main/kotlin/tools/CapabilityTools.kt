@@ -17,8 +17,8 @@ fun <T : Any> registerCapability(type: KClass<T>) {
 }
 
 fun registerAnnotatedCapabilities(table: ASMDataTable) {
-  for (data in table.getAll("therealfarfetchd.quacklib.api.tools.RegisterCapability")) {
-    registerCapability(Class.forName(data.className).kotlin)
+  for (c in table.getAll("therealfarfetchd.quacklib.api.tools.RegisterCapability").map { it.className }.distinct()) {
+    registerCapability(Class.forName(c).kotlin)
   }
 }
 
