@@ -3,6 +3,7 @@ package therealfarfetchd.quacklib.core.proxy
 import com.google.common.collect.ListMultimap
 import net.minecraft.block.Block
 import net.minecraft.client.Minecraft
+import net.minecraft.client.resources.IReloadableResourceManager
 import net.minecraft.item.Item
 import net.minecraft.util.EnumHand
 import net.minecraft.util.ResourceLocation
@@ -46,6 +47,7 @@ import therealfarfetchd.quacklib.objects.item.DeferredItemTypeImpl
 import therealfarfetchd.quacklib.objects.item.ItemTypeImpl
 import therealfarfetchd.quacklib.render.client.ModelLoaderQuackLib
 import therealfarfetchd.quacklib.render.client.TESRQuackLib
+import therealfarfetchd.quacklib.render.model.objloader.OBJModelProvider
 import therealfarfetchd.quacklib.render.vanilla.VanillaLoader
 import therealfarfetchd.quacklib.tools.ModContext
 import therealfarfetchd.quacklib.tools.progressbar
@@ -167,6 +169,7 @@ class QLClientProxy : QLCommonProxy() {
     mc = Minecraft.getMinecraft()
     ModelLoaderRegistry.registerLoader(ModelLoaderQuackLib)
     ClientRegistry.bindTileEntitySpecialRenderer(TileQuackLib::class.java, TESRQuackLib)
+    (mc.resourceManager as? IReloadableResourceManager)?.registerReloadListener(OBJModelProvider)
   }
 
   @SubscribeEvent

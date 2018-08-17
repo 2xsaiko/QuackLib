@@ -9,7 +9,13 @@ interface Model {
 
   fun <T : DataSource<*>> accepts(type: KClass<T>): Boolean
 
+  fun getCacheStrategy(): CacheStrategy = CacheStrategy.Mixed
+
   fun <T : DataSource<*>> getStaticRender(data: T, getTexture: (ResourceLocation) -> AtlasTexture): List<Quad>
+
+  fun <T : DataSource<D>, D : DynDataSource> getDynamicRender(data: T, dyndata: D, getTexture: (ResourceLocation) -> AtlasTexture): List<Quad> = emptyList()
+
+  fun <T : DataSource<D>, D : DynDataSource> renderGl(data: T, dyndata: D, getTexture: (ResourceLocation) -> AtlasTexture) {}
 
   fun getUsedTextures(): List<ResourceLocation>
 
@@ -17,10 +23,6 @@ interface Model {
   fun isItemTransformation(): Boolean = false
 
   fun getParticleTexture(getTexture: (ResourceLocation) -> AtlasTexture): AtlasTexture
-
-  fun <T : DataSource<D>, D : DynDataSource> getDynamicRender(data: T, dyndata: D, getTexture: (ResourceLocation) -> AtlasTexture): List<Quad> = emptyList()
-
-  fun <T : DataSource<D>, D : DynDataSource> renderGl(data: T, dyndata: D, getTexture: (ResourceLocation) -> AtlasTexture) {}
 
   fun needsDynamicRender(): Boolean = false
 

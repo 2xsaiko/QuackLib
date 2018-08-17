@@ -48,7 +48,7 @@ group = "therealfarfetchd.quacklib"
 minecraft {
   version = "$mc_version-$forge_version"
   runDir = "run"
-  mappings = "snapshot_$mappings_version"
+  mappings = "$mappings_version"
   isUseDepAts = true
 
   serverJvmArgs = serverJvmArgs + "-Dfml.coreMods.load=therealfarfetchd.quacklib.hax.QuackLibPlugin"
@@ -69,6 +69,7 @@ repositories {
   mavenCentral()
   maven("http://maven.shadowfacts.net/")
   maven("https://modmaven.k-4u.nl/")
+  maven("https://maven.amadorn.es/")
   maven("http://dl.bintray.com/kotlin/kotlin-eap")
 }
 
@@ -81,7 +82,7 @@ dependencies {
   compile("therealfarfetchd.extmath", "extmath", extmath_version)
 
   // MCMP
-  deobfCompile("MCMultiPart2", "MCMultiPart", mcmp_version)
+  deobfCompile("MCMultiPart2", "MCMultiPart-exp", mcmp_version)
 
   // CBMP
   //  deobfCompile("codechicken", "ForgeMultipart", "$mc_version-$cbmp_version", classifier = "universal")

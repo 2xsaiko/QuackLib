@@ -1,15 +1,19 @@
 package therealfarfetchd.quacklib.api.render
 
+import net.minecraft.util.EnumFacing
 import therealfarfetchd.math.Mat4
 import therealfarfetchd.math.Vec2
 import therealfarfetchd.math.Vec3
+import therealfarfetchd.quacklib.api.core.extensions.toVec3
 import therealfarfetchd.quacklib.api.render.texture.AtlasTexture
 import therealfarfetchd.quacklib.api.tools.Axis
 import therealfarfetchd.quacklib.api.tools.Facing
 import java.awt.Color
 
-data class Quad(
-  val texture: AtlasTexture,
+typealias Quad = QuadBase<AtlasTexture>
+
+data class QuadBase<T>(
+  val texture: T,
   val vert1: Vec3, val vert2: Vec3, val vert3: Vec3, val vert4: Vec3,
   val tex1: Vec2, val tex2: Vec2, val tex3: Vec2, val tex4: Vec2,
   val lightmap: Vec2,
@@ -38,12 +42,12 @@ data class Quad(
    * @return The rotated quad
    */
 
-  fun rotate(axis: Axis, a: Float, center: Vec3 = Vec3(0.5f, 0.5f, 0.5f)): Quad {
+  fun rotate(axis: Axis, a: Float, center: Vec3 = Vec3(0.5f, 0.5f, 0.5f)): QuadBase<T> {
     return if (a == 0f) this.copy()
     else {
       val rotate = rotateAround(a, axis, center)
       val r = listOf(vert1, vert2, vert3, vert4).map { rotateAround(a, axis, center) * it }
-      Quad(texture, r[0], r[1], r[2], r[3], tex1, tex2, tex3, tex4, lightmap, color)
+      QuadBase(texture, r[0], r[1], r[2], r[3], tex1, tex2, tex3, tex4, lightmap, color)
     }
   }
 
@@ -63,7 +67,7 @@ data class Quad(
   fun lightmap(x: Float, y: Float) =
     copy(lightmap = Vec2(x, y))
 
-  fun rotateTexture(angle: Int): Quad {
+  fun rotateTexture(angle: Int): QuadBase<T> {
     require(angle % 90 == 0) { "Angle must be a multiple of 90°!" }
     val rotate = Math.floorMod(angle / 90, 4)
     if (rotate == 0) return this
@@ -74,7 +78,7 @@ data class Quad(
   /**
    * Flips the texture on the x axis.
    */
-  val mirrorTextureX: Quad by lazy {
+  val mirrorTextureX by lazy {
     copy(
       tex1 = Vec2(1 - tex1.x, tex1.y),
       tex2 = Vec2(1 - tex2.x, tex2.y),
@@ -85,7 +89,7 @@ data class Quad(
   /**
    * Flips the texture on the y axis.
    */
-  val mirrorTextureY: Quad by lazy {
+  val mirrorTextureY by lazy {
     copy(
       tex1 = Vec2(tex1.x, 1 - tex1.y),
       tex2 = Vec2(tex2.x, 1 - tex2.y),
@@ -96,28 +100,14 @@ data class Quad(
   /**
    * Flips the textured side of this quad.
    */
-  val flipTexturedSide: Quad by lazy { copy(vert1 = vert2, vert2 = vert1, vert3 = vert4, vert4 = vert3).mirrorTextureY }
+  val flipTexturedSide by lazy { copy(vert1 = vert2, vert2 = vert1, vert3 = vert4, vert4 = vert3).mirrorTextureY }
 
-  fun mirror(axis: Axis): Quad {
-    return (when (axis) {
-      Axis.X -> copy(
-        vert1 = Vec3(1 - vert1.x, vert1.y, vert1.z),
-        vert2 = Vec3(1 - vert2.x, vert2.y, vert2.z),
-        vert3 = Vec3(1 - vert3.x, vert3.y, vert3.z),
-        vert4 = Vec3(1 - vert4.x, vert4.y, vert4.z)
-      )
-      Axis.Y -> copy(
-        vert1 = Vec3(vert1.x, 1 - vert1.y, vert1.z),
-        vert2 = Vec3(vert2.x, 1 - vert2.y, vert2.z),
-        vert3 = Vec3(vert3.x, 1 - vert3.y, vert3.z),
-        vert4 = Vec3(vert4.x, 1 - vert4.y, vert4.z)
-      )
-      Axis.Z -> copy(
-        vert1 = Vec3(vert1.x, vert1.y, 1 - vert1.z),
-        vert2 = Vec3(vert2.x, vert2.y, 1 - vert2.z),
-        vert3 = Vec3(vert3.x, vert3.y, 1 - vert3.z),
-        vert4 = Vec3(vert4.x, vert4.y, 1 - vert4.z)
-      )
-    }).flipTexturedSide
+  fun mirror(axis: Axis): QuadBase<T> {
+    // TODO this might not work
+    val x = Vec3(1, 1, 1) - (EnumFacing.getFacingFromAxis(EnumFacing.AxisDirection.POSITIVE, axis).directionVec.toVec3() * 2)
+    return transform(Mat4.scale(x.x, x.y, x.z))
   }
+
+  fun <R> withTexture(texture: R): QuadBase<R> =
+    QuadBase(texture, vert1, vert2, vert3, vert4, tex1, tex2, tex3, tex4, lightmap, color)
 }

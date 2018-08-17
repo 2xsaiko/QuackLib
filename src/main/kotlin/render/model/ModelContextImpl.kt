@@ -95,6 +95,22 @@ open class ModelContextImpl(
 
   data class GlState(val op: SimpleModel.GlContext.() -> Unit)
 
+  class DynWrapper(
+    data: DataSource<*>,
+    getTexture: (ResourceLocation) -> AtlasTexture,
+    allowDyn: Boolean,
+    allowGl: Boolean) : ModelContextImpl(data, getTexture, allowDyn, allowGl) {
+
+    override fun addQuad(q: Quad) {
+      // No-op
+    }
+
+    override fun <T : ModelConfigurationScope> add(prov: ObjectBuilderProvider<T>, op: T.() -> Unit) {
+      // No-op
+    }
+
+  }
+
   class Dynamic(
     state: DynState,
     data: DataSource<*>,

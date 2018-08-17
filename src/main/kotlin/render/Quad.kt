@@ -13,18 +13,25 @@ import therealfarfetchd.quacklib.api.core.extensions.bluef
 import therealfarfetchd.quacklib.api.core.extensions.greenf
 import therealfarfetchd.quacklib.api.core.extensions.redf
 import therealfarfetchd.quacklib.api.render.Quad
+import therealfarfetchd.quacklib.api.render.QuadBase
+import therealfarfetchd.quacklib.api.render.texture.AtlasTexture
 import therealfarfetchd.quacklib.render.texture.AtlasTextureImpl
 
-fun Quad.bake(format: VertexFormat = DefaultVertexFormats.ITEM): BakedQuad {
+fun Quad.bake(format: VertexFormat = DefaultVertexFormats.ITEM) = bake({ it }, format)
+
+fun Quad.pipe(c: IVertexConsumer) = pipe(c) { it }
+
+fun <T> QuadBase<T>.bake(mapper: (T) -> AtlasTexture, format: VertexFormat = DefaultVertexFormats.ITEM): BakedQuad {
   val builder = UnpackedBakedQuad.Builder(format)
-  pipe(builder)
+  pipe(builder, mapper)
   return builder.build()
 }
 
-fun Quad.pipe(c: IVertexConsumer) {
+fun <T> QuadBase<T>.pipe(c: IVertexConsumer, mapper: (T) -> AtlasTexture) {
+  val rt = mapper(texture)
   val vertices = (0..3).map { i ->
     val (xyz, uv) = shuf(i)
-    xyz to texture.interpolate(uv)
+    xyz to rt.interpolate(uv)
   }
 
   c.setApplyDiffuseLighting(true)
@@ -49,7 +56,7 @@ fun Quad.pipe(c: IVertexConsumer) {
   }
 }
 
-private fun Quad.shuf(i: Int): Pair<Vec3, Vec2> {
+private fun QuadBase<*>.shuf(i: Int): Pair<Vec3, Vec2> {
   return when (i) {
     0 -> vert1 to tex1
     1 -> vert2 to tex2

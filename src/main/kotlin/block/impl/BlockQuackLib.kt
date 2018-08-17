@@ -327,32 +327,6 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
       val propRetrievers: SetPropertyRetrievers = mutableSetOf()
       val extpropRetrievers: SetExtendedPropertyRetrievers = mutableSetOf()
 
-      //      for (c in cPart) {
-      //        val defs = c.createPart().defs
-      //        for ((name, def) in defs) {
-      //          if (!def.render) continue
-      //
-      //          val prl = PropertyResourceLocation(c.rl, name)
-      //          val needsExt = def.validValues == null || def.validValues!!.size > 32
-      //          if (needsExt) {
-      //            val prop = PropertyDataExtended(prl, def)
-      //            extproperties += prl to prop
-      //            extpropRetrievers += { state, _, _, te ->
-      //              val value = te.c.parts.getValue(prl.base).storage.get(prl.property)
-      //              state.withProperty(prop, value)
-      //            }
-      //          } else {
-      //            val prop = PropertyData(prl, def)
-      //            properties += prl to prop
-      //            propRetrievers += { state, _, _, te ->
-      //              val value = te.c.parts.getValue(prl.base).storage.get(prl.property)
-      //              @Suppress("UNCHECKED_CAST")
-      //              state.withProperty(prop, prop.wrap(value) as PropertyData.Wrapper<Any?>)
-      //            }
-      //          }
-      //        }
-      //      }
-
       unsafe {
         for (c in cRender) {
           val data = ExtraData.getOrNull(c, ComponentRenderProps.Key) ?: continue

@@ -8,18 +8,23 @@ import therealfarfetchd.quacklib.api.block.component.fix
 import therealfarfetchd.quacklib.api.block.component.renderProperty
 import therealfarfetchd.quacklib.api.objects.block.Block
 import therealfarfetchd.quacklib.api.objects.block.MCBlockType
-import kotlin.math.sin
 
 class DummyComp : BlockComponentRenderProperties, BlockComponentCollision {
 
   override val rl: ResourceLocation = ResourceLocation("qltestmod:dummy")
 
   val rot = renderProperty<Float>("rotation") {
-    output { ((System.currentTimeMillis() % (720 * 50) / 50.0f) * 0.5f) }
+    output {
+      //      ((System.currentTimeMillis() % (720 * 50) / 50.0f) * 0.5f)
+      0.0f
+    }
   } fix this
 
   val scale = renderProperty<Float>("scale") {
-    output { (sin((System.currentTimeMillis() % (31415 * 50) / 50f) * 0.1f) + 1.75f) / 2.75f }
+    output {
+      //      (sin((System.currentTimeMillis() % (31415 * 50) / 50f) * 0.1f) + 1.75f) / 2.75f
+      0.0f
+    }
   } fix this
 
   override fun getCollisionBoundingBoxes(block: Block): List<AxisAlignedBB> {
