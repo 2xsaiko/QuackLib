@@ -106,6 +106,8 @@ object OBJModelProvider : ISelectiveResourceReloadListener {
 
     if (uvs == null) uvs = verts.map { Vec2(0.5f, 0.5f) }
 
+    uvs = uvs.map { it.copy(y = 1 - it.y) } // v is upside down in OBJ
+
     if (tex == null) return null
 
     return when (verts.size) {
