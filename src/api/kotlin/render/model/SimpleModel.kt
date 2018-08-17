@@ -80,6 +80,8 @@ abstract class SimpleModel(val useDynamic: Boolean = false, val useGL: Boolean =
 
     val constraints: AxisAlignedBB?
 
+    val grid: Int
+
     fun texture(pt: PreparedTexture): Texture
 
     fun addQuad(q: Quad)
@@ -101,6 +103,8 @@ abstract class SimpleModel(val useDynamic: Boolean = false, val useGL: Boolean =
     fun coordsScale(i: Int) = coordsScale(i.toFloat())
 
     fun constraints(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float)
+
+    fun grid(i: Int)
 
     fun trNew(op: () -> Unit) {
       trPush()

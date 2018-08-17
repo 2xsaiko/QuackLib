@@ -3,16 +3,14 @@ package therealfarfetchd.quacklib.render.model
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.AxisAlignedBB
-import therealfarfetchd.math.Mat4
-import therealfarfetchd.math.Vec2
-import therealfarfetchd.math.Vec3
-import therealfarfetchd.math.getDistance
+import therealfarfetchd.math.*
 import therealfarfetchd.quacklib.api.render.Quad
 import therealfarfetchd.quacklib.api.render.model.*
 import therealfarfetchd.quacklib.api.render.texture.AtlasTexture
 import therealfarfetchd.quacklib.api.render.texture.Texture
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 open class ModelContextImpl(
   override val data: DataSource<*>,
@@ -27,6 +25,8 @@ open class ModelContextImpl(
   override var coordsScale = 1f
 
   override var constraints: AxisAlignedBB? = null
+
+  override var grid: Int = 512
 
   val quads = mutableListOf<Quad>()
 
@@ -49,8 +49,30 @@ open class ModelContextImpl(
   }
 
   override fun addQuad(q: Quad) {
+    val q1 = processConstraints(processGrid(q.transform(currentTransform)))
+
+    if (q1 != null) quads += q1
+  }
+
+  private fun processGrid(q: Quad): Quad {
+    fun snapToGrid(v: Vec3): Vec3 {
+      val rs = v * grid
+      val g = Vec3i(rs.x.roundToInt(), rs.y.roundToInt(), rs.z.roundToInt())
+      return g.toVec3() / grid
+    }
+
+    return q.copy(
+      vert1 = snapToGrid(q.vert1),
+      vert2 = snapToGrid(q.vert2),
+      vert3 = snapToGrid(q.vert3),
+      vert4 = snapToGrid(q.vert4)
+    )
+  }
+
+  private fun processConstraints(q: Quad): Quad? {
     var q1: Quad?
-    q1 = q.transform(currentTransform)
+    q1 = q
+
     val constraints = constraints
     if (constraints != null) {
       val verts = listOf(q1.vert1, q1.vert2, q1.vert3, q1.vert4)
@@ -108,8 +130,7 @@ open class ModelContextImpl(
         )
       }
     }
-
-    if (q1 != null) quads += q1
+    return q1
   }
 
   override fun <T : ModelConfigurationScope> add(prov: ObjectBuilderProvider<T>, op: T.() -> Unit) {
@@ -145,7 +166,14 @@ open class ModelContextImpl(
   }
 
   override fun constraints(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float) {
-    constraints = AxisAlignedBB(x1.toDouble(), y1.toDouble(), z1.toDouble(), x2.toDouble(), y2.toDouble(), z2.toDouble())
+    constraints = AxisAlignedBB(
+      x1.toDouble() / coordsScale, y1.toDouble() / coordsScale, z1.toDouble() / coordsScale,
+      x2.toDouble() / coordsScale, y2.toDouble() / coordsScale, z2.toDouble() / coordsScale
+    )
+  }
+
+  override fun grid(i: Int) {
+    grid = i
   }
 
   override fun dynamic(op: SimpleModel.Dynamic.() -> Unit) {
