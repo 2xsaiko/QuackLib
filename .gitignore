@@ -21,3 +21,6 @@ build
 # other
 eclipse
 run
+
+/src/main/resources/assets/qltestmod/
+/src/main/kotlin/testmod/

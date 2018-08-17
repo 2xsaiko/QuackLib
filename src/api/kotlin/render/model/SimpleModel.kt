@@ -1,6 +1,7 @@
 package therealfarfetchd.quacklib.api.render.model
 
 import net.minecraft.util.ResourceLocation
+import net.minecraft.util.math.AxisAlignedBB
 import therealfarfetchd.math.Mat4
 import therealfarfetchd.quacklib.api.block.render.BlockRenderState
 import therealfarfetchd.quacklib.api.core.modinterface.QuackLibAPI
@@ -77,6 +78,8 @@ abstract class SimpleModel(val useDynamic: Boolean = false, val useGL: Boolean =
 
     val coordsScale: Float
 
+    val constraints: AxisAlignedBB?
+
     fun texture(pt: PreparedTexture): Texture
 
     fun addQuad(q: Quad)
@@ -96,6 +99,8 @@ abstract class SimpleModel(val useDynamic: Boolean = false, val useGL: Boolean =
 
     fun coordsScale(f: Float)
     fun coordsScale(i: Int) = coordsScale(i.toFloat())
+
+    fun constraints(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float)
 
     fun trNew(op: () -> Unit) {
       trPush()
