@@ -15,11 +15,13 @@ object ModContext : ModContext {
   private val packageOwners: ListMultimap<String, ModContainer> = loadController.access("packageOwners")
   private var activeContainer: ModContainer? by loadController.accessDelegate("activeContainer")
 
-  fun dissociate(pkg: String, recursive: Boolean = false) {
+  // FIXME remove these and use executeAsMod, this is a horrible hack
+
+  fun dissociate(pkg: String, recursive: Boolean = false, filter: (String) -> Boolean = { true }) {
     packageOwners.removeAll(pkg)
     if (recursive)
       packageOwners.keys()
-        .filter { it.startsWith("$pkg.") }
+        .filter { it.startsWith("$pkg.") && filter(it) }
         .forEach { packageOwners.removeAll(it) }
   }
 
