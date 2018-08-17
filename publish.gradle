@@ -7,10 +7,17 @@ apply plugin: 'maven'
 apply plugin: 'maven-publish'
 
 task sourcesJar(type: Jar) {
-  from(sourceSets.main.allSource)
-  from(sourceSets.api.allSource) {
-    into("api")
+  from(sourceSets.main.allSource) {
+    exclude("/assets")
+    exclude("/mcmod.info")
+
+    into("therealfarfetchd/quacklib")
   }
+
+  from(sourceSets.api.allSource) {
+    into("therealfarfetchd/quacklib/api")
+  }
+
   classifier = "sources"
 }
 
