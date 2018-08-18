@@ -79,7 +79,7 @@ interface BlockComponentDataExport : Base
 
 interface BlockComponentDataImport : Base
 
-interface BlockComponentPlacement<T : BlockDataPart> : BlockComponentData<T> {
+interface BlockComponentPlacement : Base {
 
   fun initialize(block: Block, placer: EntityLivingBase, hand: EnumHand, facing: Facing, hit: Vec3)
 

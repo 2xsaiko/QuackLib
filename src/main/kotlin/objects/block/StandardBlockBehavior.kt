@@ -43,7 +43,7 @@ class StandardBlockBehavior(val type: BlockType) : BlockBehavior {
   val cPlacementCheck = getComponentsOfType<BlockComponentPlacementCheck>()
   val cRedstone = getComponentsOfType<BlockComponentRedstone>()
   val cData = getComponentsOfType<BlockComponentData<*>>()
-  val cPlacement = getComponentsOfType<BlockComponentPlacement<BlockDataPart>>()
+  val cPlacement = getComponentsOfType<BlockComponentPlacement>()
 
   private fun getContainer(block: Block) =
     unsafe { (block.getMCTile() as? TileQuackLib)?.c }
