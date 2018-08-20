@@ -151,6 +151,12 @@ interface BlockComponentCustomMouseOver : Base {
 
 }
 
+interface BlockComponentSelection : Base {
+
+  fun getSelectionBoundingBox(block: Block, result: RayTraceResult): AxisAlignedBB?
+
+}
+
 interface BlockComponentNeighborListener : Base {
 
   fun onNeighborChanged(block: Block, side: Facing)

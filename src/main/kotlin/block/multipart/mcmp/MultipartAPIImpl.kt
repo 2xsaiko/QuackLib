@@ -1,6 +1,7 @@
 package therealfarfetchd.quacklib.block.multipart.mcmp
 
 import mcmultipart.MCMultiPart
+import mcmultipart.api.event.DrawMultipartHighlightEvent
 import mcmultipart.api.ref.MCMPCapabilities
 import mcmultipart.api.slot.EnumCenterSlot
 import mcmultipart.api.slot.EnumCornerSlot
@@ -8,6 +9,8 @@ import mcmultipart.api.slot.EnumEdgeSlot
 import mcmultipart.api.slot.EnumFaceSlot
 import mcmultipart.multipart.MultipartRegistry
 import net.minecraft.block.Block
+import net.minecraft.client.renderer.GlStateManager.*
+import net.minecraft.client.renderer.RenderGlobal
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.ResourceLocation
@@ -19,6 +22,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import therealfarfetchd.quacklib.api.block.multipart.PartSlot
 import therealfarfetchd.quacklib.api.item.component.ItemComponent
 import therealfarfetchd.quacklib.api.objects.block.BlockType
+import therealfarfetchd.quacklib.block.impl.BlockAdvancedOutline
 import therealfarfetchd.quacklib.block.impl.BlockExtraDebug
 import therealfarfetchd.quacklib.block.impl.BlockQuackLib
 import therealfarfetchd.quacklib.block.impl.TileQuackLib
@@ -74,6 +78,33 @@ object MultipartAPIImpl : MultipartAPIInternal {
           it.addInformation(part.partWorld, part.partPos, state, player, left, right)
         }
       }
+    }
+  }
+
+  @SubscribeEvent
+  fun onDrawMultipartOverlay(e: DrawMultipartHighlightEvent) {
+    val block = e.partInfo.state.block
+    if (block is BlockAdvancedOutline) {
+      if (e.target.typeOfHit != RayTraceResult.Type.BLOCK) return
+      val box = block.getSelectedBoundingBox(e.partInfo.state, e.partInfo.partWorld, e.partInfo.partPos, e.target)
+      if (box != null) {
+        val player = e.player
+        val x = player.lastTickPosX + (player.posX - player.lastTickPosX) * e.partialTicks
+        val y = player.lastTickPosY + (player.posY - player.lastTickPosY) * e.partialTicks
+        val z = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * e.partialTicks
+        enableBlend()
+        tryBlendFuncSeparate(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA, SourceFactor.ONE, DestFactor.ZERO)
+        glLineWidth(2.0f)
+        disableTexture2D()
+        depthMask(false)
+
+        RenderGlobal.drawSelectionBoundingBox(box.grow(0.002).offset(-x, -y, -z), 0f, 0f, 0f, .4f)
+
+        depthMask(true)
+        enableTexture2D()
+        disableBlend()
+      }
+      e.isCanceled = true
     }
   }
 

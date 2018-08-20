@@ -59,6 +59,9 @@ interface BehaviorDelegate {
   fun getRaytraceBoundingBoxes(): List<AxisAlignedBB> =
     behavior.getRaytraceBoundingBoxes(block)
 
+  fun getSelectedBoundingBox(result: RayTraceResult) =
+    behavior.getSelectedBoundingBox(block, result)
+
   fun getStrongPower(side: Facing) =
     behavior.getStrongPower(block, side)
 

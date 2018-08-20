@@ -34,7 +34,8 @@ class MultipartQuackLib(private val block: BlockQuackLib) : IMultipart {
   override fun getBlock(): BlockQuackLib = block
 
   override fun getSlotFromWorld(world: MCWorld, pos: BlockPos, state: MCBlock): IPartSlot {
-    return MultipartAPIImpl.slotMap.getValue(cMultipart.getSlot(block.getBlockImpl(world, pos, state)))
+    return MultipartAPIImpl.slotMap.getValue(cMultipart.getSlot(block.getBlockImpl(world, pos, state)
+                                                                ?: error("Couldn't determine part slot: Tile entity not found for block $state")))
   }
 
   override fun getSlotForPlacement(world: MCWorldMutable, pos: BlockPos, state: MCBlock, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float, placer: EntityLivingBase): IPartSlot {

@@ -3,11 +3,15 @@ package therealfarfetchd.quacklib.core.proxy
 import com.google.common.collect.ListMultimap
 import net.minecraft.block.Block
 import net.minecraft.client.Minecraft
+import net.minecraft.client.renderer.GlStateManager
+import net.minecraft.client.renderer.GlStateManager.*
+import net.minecraft.client.renderer.RenderGlobal
 import net.minecraft.client.resources.IReloadableResourceManager
 import net.minecraft.item.Item
 import net.minecraft.util.EnumHand
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.RayTraceResult
+import net.minecraftforge.client.event.DrawBlockHighlightEvent
 import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.client.model.ModelLoaderRegistry
 import net.minecraftforge.common.MinecraftForge
@@ -29,6 +33,7 @@ import therealfarfetchd.quacklib.api.core.unsafe
 import therealfarfetchd.quacklib.api.objects.block.BlockType
 import therealfarfetchd.quacklib.api.tools.access
 import therealfarfetchd.quacklib.api.tools.isDebugMode
+import therealfarfetchd.quacklib.block.impl.BlockAdvancedOutline
 import therealfarfetchd.quacklib.block.impl.BlockExtraDebug
 import therealfarfetchd.quacklib.block.impl.TileQuackLib
 import therealfarfetchd.quacklib.config.QuackLibConfig
@@ -195,6 +200,37 @@ class QLClientProxy : QLCommonProxy() {
       if (item is ItemExtraDebug) {
         item.addInformation(mc.world, stack, hand, mc.player, e.left, e.right)
       }
+    }
+  }
+
+  @SubscribeEvent
+  fun onDrawOutline(e: DrawBlockHighlightEvent) {
+    val rtr = e.target
+    if (rtr.typeOfHit != RayTraceResult.Type.BLOCK) return
+    val world = mc.world
+    val state = world.getBlockState(rtr.blockPos)
+    val block = state.block
+    if (block is BlockAdvancedOutline) {
+      if (rtr.typeOfHit != RayTraceResult.Type.BLOCK) return
+      val box = block.getSelectedBoundingBox(state, world, rtr.blockPos, rtr)
+      if (box != null) {
+        val player = e.player
+        val x = player.lastTickPosX + (player.posX - player.lastTickPosX) * e.partialTicks
+        val y = player.lastTickPosY + (player.posY - player.lastTickPosY) * e.partialTicks
+        val z = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * e.partialTicks
+        enableBlend()
+        tryBlendFuncSeparate(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA, SourceFactor.ONE, DestFactor.ZERO)
+        glLineWidth(2.0f)
+        disableTexture2D()
+        depthMask(false)
+
+        RenderGlobal.drawSelectionBoundingBox(box.grow(0.002).offset(-x, -y, -z), 0f, 0f, 0f, .4f)
+
+        GlStateManager.depthMask(true)
+        GlStateManager.enableTexture2D()
+        GlStateManager.disableBlend()
+      }
+      e.isCanceled = true
     }
   }
 

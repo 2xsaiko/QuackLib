@@ -43,6 +43,8 @@ interface BlockBehavior {
 
   fun getRaytraceBoundingBoxes(block: Block): List<AxisAlignedBB>
 
+  fun getSelectedBoundingBox(block: Block, result: RayTraceResult): AxisAlignedBB?
+
   fun getDrops(block: Block, fortune: Int): List<Item>
 
   fun getPickBlock(block: Block, target: RayTraceResult, player: EntityPlayer): Item

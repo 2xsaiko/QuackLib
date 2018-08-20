@@ -42,10 +42,10 @@ class StandardBlockBehavior(val type: BlockType) : BlockBehavior {
   val cNeighborListener = getComponentsOfType<BlockComponentNeighborListener>()
   val cPlacementCheck = getComponentsOfType<BlockComponentPlacementCheck>()
   val cRedstone = getComponentsOfType<BlockComponentRedstone>()
-  val cData = getComponentsOfType<BlockComponentData<*>>()
   val cInit = getComponentsOfType<BlockComponentDataInit>()
   val cPlacement = getComponentsOfType<BlockComponentPlacement>()
   val cRemoved = getComponentsOfType<BlockComponentRemoved>()
+  val cSelectionBox = getComponentsOfType<BlockComponentSelection>()
 
   private fun getContainer(block: Block) =
     unsafe { (block.getMCTile() as? TileQuackLib)?.c }
@@ -105,6 +105,11 @@ class StandardBlockBehavior(val type: BlockType) : BlockBehavior {
   override fun getRaytraceBoundingBoxes(block: Block): List<AxisAlignedBB> {
     return if (cMouseOver.isNotEmpty()) cMouseOver.flatMap { it.getRaytraceBoundingBoxes(block) }
     else listOf(MCBlockType.FULL_BLOCK_AABB)
+  }
+
+  override fun getSelectedBoundingBox(block: Block, result: RayTraceResult): AxisAlignedBB? {
+    return cSelectionBox.asSequence().mapNotNull { it.getSelectionBoundingBox(block, result) }.firstOrNull()
+           ?: getRaytraceBoundingBox(block)
   }
 
   override fun getDrops(block: Block, fortune: Int): List<Item> {

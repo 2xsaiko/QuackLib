@@ -77,6 +77,10 @@ class VanillaBlockBehavior(val type: MCBlockType) : BlockBehavior {
     TODO("not implemented")
   }
 
+  override fun getSelectedBoundingBox(block: Block, result: RayTraceResult): AxisAlignedBB? {
+    TODO("not implemented")
+  }
+
   override fun getDrops(block: Block, fortune: Int): List<Item> = unsafe {
     val list = NonNullList.create<MCItem>()
     type.getDrops(list, block.world.toMCWorld(), block.pos.toMCVec3i(), block.toMCBlock(), fortune)

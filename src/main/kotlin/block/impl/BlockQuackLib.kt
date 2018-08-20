@@ -53,7 +53,7 @@ private typealias MapProperties = MutableMap<PropertyResourceLocation, PropertyD
 private typealias MapExtendedProperties = MutableMap<PropertyResourceLocation, PropertyDataExtended<*>>
 
 @Suppress("OverridingDeprecatedMember")
-class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { tempBlockConf = type as BlockTypeImpl }), BlockExtraDebug {
+class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { tempBlockConf = type as BlockTypeImpl }), BlockExtraDebug, BlockAdvancedOutline {
 
   private var initDone = false
 
@@ -73,6 +73,8 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
   lateinit var properties: MapProperties
   lateinit var extproperties: MapExtendedProperties
 
+  private var suffocatesPlayer = true
+
   init {
     (type as? BlockTypeImpl)?.block = this
     registryName = type.registryName
@@ -86,11 +88,13 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
     cData.forEach { it.part = PartAccessTokenImpl(it.rl) }
   }
 
-  fun getBlockImpl(world: MCWorld, pos: BlockPos, state: MCBlock): Block =
-    BlockImpl.createExistingFromWorld(world.toWorld(), pos.toVec3i(), state)
+  fun getBlockImpl(world: MCWorld, pos: BlockPos, state: MCBlock): Block? =
+    if (state.block.hasTileEntity(state) && world.getTileEntity(pos)?.blockType != state.block) null
+    else BlockImpl.createExistingFromWorld(world.toWorld(), pos.toVec3i(), state)
 
   override fun onBlockActivated(world: MCWorldMutable, pos: BlockPos, state: MCBlock, playerIn: EntityPlayer, hand: EnumHand, facing: Facing, hitX: Float, hitY: Float, hitZ: Float): Boolean {
-    return getBlockImpl(world, pos, state).onActivated(playerIn, hand, facing, Vec3(hitX, hitY, hitZ))
+    return getBlockImpl(world, pos, state)?.onActivated(playerIn, hand, facing, Vec3(hitX, hitY, hitZ))
+           ?: return false
   }
 
   override fun createBlockState(): BlockStateContainer {
@@ -105,45 +109,49 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
   }
 
   override fun getActualState(state: MCBlock, world: MCWorld, pos: BlockPos): MCBlock {
-    val block = world.toWorld().getBlock(pos.toVec3i()) ?: return state
+    val block = getBlockImpl(world, pos, state) ?: return state
     return propRetrievers.fold(state) { acc, op -> op(acc, block) }
   }
 
   override fun getExtendedState(state: MCBlock, world: MCWorld, pos: BlockPos): MCBlock {
-    val block = world.toWorld().getBlock(pos.toVec3i()) ?: return state
+    val block = getBlockImpl(world, pos, state) ?: return state
     state as? IExtendedBlockState ?: return state
     return extpropRetrievers.fold(state) { acc, op -> op(acc, block) }
   }
 
   // ray trace
   override fun collisionRayTrace(state: MCBlock, world: MCWorldMutable, pos: BlockPos, start: Vec3d, end: Vec3d): RayTraceResult? {
-    return getBlockImpl(world, pos, state).raytrace(start.toVec3(), end.toVec3())
+    return getBlockImpl(world, pos, state)?.raytrace(start.toVec3(), end.toVec3()) ?: return null
   }
 
   // ray trace
   override fun getBoundingBox(state: MCBlock, world: MCWorld, pos: BlockPos): AxisAlignedBB {
-    return getBlockImpl(world, pos, state).getRaytraceBoundingBox() ?: NOPE_AABB
+    return getBlockImpl(world, pos, state)?.getRaytraceBoundingBox() ?: NOPE_AABB
   }
 
   // collision
   override fun getCollisionBoundingBox(state: MCBlock, world: MCWorld, pos: BlockPos): AxisAlignedBB? {
-    return getBlockImpl(world, pos, state).getCollisionBoundingBox()
+    return getBlockImpl(world, pos, state)?.getCollisionBoundingBox()
   }
 
   // collision
   override fun addCollisionBoxToList(state: MCBlock, world: MCWorldMutable, pos: BlockPos, entityBox: AxisAlignedBB, collidingBoxes: MutableList<AxisAlignedBB>, entityIn: Entity?, isActualState: Boolean) {
-    collidingBoxes.addAll(getBlockImpl(world, pos, state).getCollisionBoundingBoxes().map { it.offset(pos) }.filter { it.intersects(entityBox) })
+    val boxes = getBlockImpl(world, pos, state)?.getCollisionBoundingBoxes() ?: return
+    if (suffocatesPlayer) {
+      if (boxes.isEmpty() || FULL_BLOCK_AABB != FULL_BLOCK_AABB.intersect(boxes.reduce(AxisAlignedBB::union)))
+        suffocatesPlayer = false
+    }
+    collidingBoxes.addAll(boxes.map { it.offset(pos) }.filter { it.intersects(entityBox) })
   }
 
   // outline
-  override fun getSelectedBoundingBox(state: MCBlock, world: MCWorldMutable, pos: BlockPos): AxisAlignedBB {
-    // TODO
-    return super.getSelectedBoundingBox(state, world, pos)
+  override fun getSelectedBoundingBox(state: MCBlock, world: MCWorld, pos: BlockPos, mouseover: RayTraceResult): AxisAlignedBB? {
+    return getBlockImpl(world, pos, state)?.getSelectedBoundingBox(mouseover)?.offset(pos)
   }
 
   override fun neighborChanged(state: MCBlock, world: MCWorldMutable, pos: BlockPos, block: MCBlockType, fromPos: BlockPos) {
     val facing = fromPos.subtract(pos).let { Facing.getFacingFromVector(it.x.toFloat(), it.y.toFloat(), it.z.toFloat()) }
-    getBlockImpl(world, pos, state).onNeighborChanged(facing)
+    getBlockImpl(world, pos, state)?.onNeighborChanged(facing)
   }
 
   override fun canPlaceBlockOnSide(world: MCWorldMutable, pos: BlockPos, side: Facing): Boolean {
@@ -155,16 +163,16 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
   }
 
   override fun breakBlock(worldIn: MCWorldMutable, pos: BlockPos, state: MCBlock) {
-    getBlockImpl(worldIn, pos, state).onRemoved()
+    getBlockImpl(worldIn, pos, state)?.onRemoved()
     super.breakBlock(worldIn, pos, state)
   }
 
   override fun getStrongPower(state: MCBlock, world: MCWorld, pos: BlockPos, side: Facing): Int {
-    return getBlockImpl(world, pos, state).getStrongPower(side.opposite)
+    return getBlockImpl(world, pos, state)?.getStrongPower(side.opposite) ?: 0
   }
 
   override fun getWeakPower(state: MCBlock, world: MCWorld, pos: BlockPos, side: Facing): Int {
-    return getBlockImpl(world, pos, state).getWeakPower(side.opposite)
+    return getBlockImpl(world, pos, state)?.getWeakPower(side.opposite) ?: 0
   }
 
   override fun canProvidePower(state: MCBlock): Boolean {
@@ -174,7 +182,7 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
   override fun canConnectRedstone(state: MCBlock, world: MCWorld, pos: BlockPos, side: Facing?): Boolean {
     if (side == null) return false
 
-    return getBlockImpl(world, pos, state).canConnectRedstone(side.opposite)
+    return getBlockImpl(world, pos, state)?.canConnectRedstone(side.opposite) ?: false
   }
 
   override fun getRenderLayer(): BlockRenderLayer {
@@ -203,7 +211,7 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
   }
 
   private fun getComponentInfo(world: MCWorldMutable, pos: BlockPos, state: MCBlock, c: BlockComponent): List<String> {
-    val bi = getBlockImpl(world, pos, state)
+    val bi = getBlockImpl(world, pos, state) ?: return emptyList()
 
     var descString = " - "
     descString += c::class.simpleName ?: c::class.qualifiedName ?: c::class.jvmName
@@ -264,7 +272,7 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
   }
 
   override fun causesSuffocation(state: MCBlock): Boolean {
-    return super.causesSuffocation(state)
+    return suffocatesPlayer
   }
 
   // TODO
@@ -273,13 +281,13 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
   override fun getDrops(drops: NonNullList<MCItem>, world: MCWorld, pos: BlockPos, state: MCBlock, fortune: Int) {
     // super.getDrops(drops, world, pos, state, fortune)
     unsafe {
-      drops.addAll(getBlockImpl(world, pos, state).getDrops(fortune).map { it.toMCItem() })
+      drops.addAll(getBlockImpl(world, pos, state)?.getDrops(fortune)?.map { it.toMCItem() }.orEmpty())
     }
   }
 
   override fun getPickBlock(state: MCBlock, target: RayTraceResult, world: MCWorldMutable, pos: BlockPos, player: EntityPlayer): MCItem {
     return unsafe {
-      getBlockImpl(world, pos, state).getPickBlock(target, player).toMCItem()
+      getBlockImpl(world, pos, state)?.getPickBlock(target, player)?.toMCItem() ?: MCItem.EMPTY
     }
   }
 
