@@ -79,9 +79,21 @@ interface BlockComponentDataExport : Base
 
 interface BlockComponentDataImport : Base
 
-interface BlockComponentPlacement : Base {
+interface BlockComponentDataInit : Base {
 
   fun initialize(block: Block, placer: EntityLivingBase, hand: EnumHand, facing: Facing, hit: Vec3)
+
+}
+
+interface BlockComponentPlacement : Base {
+
+  fun onPlaced(block: Block, player: EntityPlayer, item: Item)
+
+}
+
+interface BlockComponentRemoved : Base {
+
+  fun onRemoved(block: Block)
 
 }
 

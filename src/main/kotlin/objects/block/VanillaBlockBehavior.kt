@@ -49,6 +49,10 @@ class VanillaBlockBehavior(val type: MCBlockType) : BlockBehavior {
     TODO("not implemented")
   }
 
+  override fun onRemoved(block: Block) {
+    TODO("not implemented")
+  }
+
   override fun getFaceShape(self: Block, side: Facing): BlockFaceShape = unsafe {
     self.toMCBlock().getBlockFaceShape(self.world.toMCWorld(), self.pos.toMCVec3i(), side)
   }

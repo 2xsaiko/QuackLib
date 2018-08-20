@@ -29,6 +29,8 @@ interface BlockBehavior {
 
   fun onPlaced(block: Block, player: EntityPlayer, item: Item)
 
+  fun onRemoved(block: Block)
+
   fun getFaceShape(self: Block, side: Facing): BlockFaceShape
 
   fun getSoundType(block: Block, entity: Entity?): SoundType

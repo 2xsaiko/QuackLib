@@ -154,6 +154,11 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
     return super.canPlaceBlockAt(world, pos) && type.behavior.canPlaceBlockAt(world.toWorld(), pos.toVec3i(), null)
   }
 
+  override fun breakBlock(worldIn: MCWorldMutable, pos: BlockPos, state: MCBlock) {
+    getBlockImpl(worldIn, pos).onRemoved()
+    super.breakBlock(worldIn, pos, state)
+  }
+
   override fun getStrongPower(state: MCBlock, world: MCWorld, pos: BlockPos, side: Facing): Int {
     return getBlockImpl(world, pos).getStrongPower(side.opposite)
   }

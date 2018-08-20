@@ -43,7 +43,9 @@ class StandardBlockBehavior(val type: BlockType) : BlockBehavior {
   val cPlacementCheck = getComponentsOfType<BlockComponentPlacementCheck>()
   val cRedstone = getComponentsOfType<BlockComponentRedstone>()
   val cData = getComponentsOfType<BlockComponentData<*>>()
+  val cInit = getComponentsOfType<BlockComponentDataInit>()
   val cPlacement = getComponentsOfType<BlockComponentPlacement>()
+  val cRemoved = getComponentsOfType<BlockComponentRemoved>()
 
   private fun getContainer(block: Block) =
     unsafe { (block.getMCTile() as? TileQuackLib)?.c }
@@ -68,7 +70,11 @@ class StandardBlockBehavior(val type: BlockType) : BlockBehavior {
   }
 
   override fun onPlaced(block: Block, player: EntityPlayer, item: Item) {
-    // TODO
+    cPlacement.forEach { it.onPlaced(block, player, item) }
+  }
+
+  override fun onRemoved(block: Block) {
+    cRemoved.forEach { it.onRemoved(block) }
   }
 
   override fun getFaceShape(self: Block, side: Facing): BlockFaceShape {
@@ -151,7 +157,7 @@ class StandardBlockBehavior(val type: BlockType) : BlockBehavior {
   }
 
   override fun initialize(block: Block, player: EntityPlayer, hand: EnumHand, hitSide: Facing, hitVec: Vec3) {
-    cPlacement.forEach { it.initialize(block, player, hand, hitSide, hitVec) }
+    cInit.forEach { it.initialize(block, player, hand, hitSide, hitVec) }
   }
 
   private inline fun <reified T : BlockComponent> getComponentsOfType() =

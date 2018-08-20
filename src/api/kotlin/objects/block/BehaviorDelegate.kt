@@ -35,6 +35,9 @@ interface BehaviorDelegate {
   fun onPlaced(player: EntityPlayer, item: Item) =
     behavior.onPlaced(block, player, item)
 
+  fun onRemoved() =
+    behavior.onRemoved(block)
+
   fun onNeighborChanged(side: EnumFacing) =
     behavior.onNeighborChanged(block, side)
 
