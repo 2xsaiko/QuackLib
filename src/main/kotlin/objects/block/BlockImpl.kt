@@ -84,6 +84,16 @@ class BlockImpl(
       }
     }
 
+    fun createExistingFromWorld(world: World, pos: PositionGrid, state: MCBlock): BlockImpl {
+      return unsafe {
+        val pos1 = pos.toMCVec3i()
+        val tile = world.toMCWorld().getTileEntity(pos1)
+        val block = BlockTypeImpl.getBlock(state.block)
+
+        BlockImpl(block, world, pos, state, tile)
+      }
+    }
+
     fun createExistingFromTile(te: TileEntity): BlockImpl {
       return unsafe {
         val pos = te.pos

@@ -86,11 +86,11 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
     cData.forEach { it.part = PartAccessTokenImpl(it.rl) }
   }
 
-  fun getBlockImpl(world: MCWorld, pos: BlockPos): Block =
-    BlockImpl.createExistingFromWorld(world.toWorld(), pos.toVec3i())
+  fun getBlockImpl(world: MCWorld, pos: BlockPos, state: MCBlock): Block =
+    BlockImpl.createExistingFromWorld(world.toWorld(), pos.toVec3i(), state)
 
   override fun onBlockActivated(world: MCWorldMutable, pos: BlockPos, state: MCBlock, playerIn: EntityPlayer, hand: EnumHand, facing: Facing, hitX: Float, hitY: Float, hitZ: Float): Boolean {
-    return getBlockImpl(world, pos).onActivated(playerIn, hand, facing, Vec3(hitX, hitY, hitZ))
+    return getBlockImpl(world, pos, state).onActivated(playerIn, hand, facing, Vec3(hitX, hitY, hitZ))
   }
 
   override fun createBlockState(): BlockStateContainer {
@@ -117,22 +117,22 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
 
   // ray trace
   override fun collisionRayTrace(state: MCBlock, world: MCWorldMutable, pos: BlockPos, start: Vec3d, end: Vec3d): RayTraceResult? {
-    return getBlockImpl(world, pos).raytrace(start.toVec3(), end.toVec3())
+    return getBlockImpl(world, pos, state).raytrace(start.toVec3(), end.toVec3())
   }
 
   // ray trace
   override fun getBoundingBox(state: MCBlock, world: MCWorld, pos: BlockPos): AxisAlignedBB {
-    return getBlockImpl(world, pos).getRaytraceBoundingBox() ?: NOPE_AABB
+    return getBlockImpl(world, pos, state).getRaytraceBoundingBox() ?: NOPE_AABB
   }
 
   // collision
   override fun getCollisionBoundingBox(state: MCBlock, world: MCWorld, pos: BlockPos): AxisAlignedBB? {
-    return getBlockImpl(world, pos).getCollisionBoundingBox()
+    return getBlockImpl(world, pos, state).getCollisionBoundingBox()
   }
 
   // collision
   override fun addCollisionBoxToList(state: MCBlock, world: MCWorldMutable, pos: BlockPos, entityBox: AxisAlignedBB, collidingBoxes: MutableList<AxisAlignedBB>, entityIn: Entity?, isActualState: Boolean) {
-    collidingBoxes.addAll(getBlockImpl(world, pos).getCollisionBoundingBoxes().map { it.offset(pos) }.filter { it.intersects(entityBox) })
+    collidingBoxes.addAll(getBlockImpl(world, pos, state).getCollisionBoundingBoxes().map { it.offset(pos) }.filter { it.intersects(entityBox) })
   }
 
   // outline
@@ -143,7 +143,7 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
 
   override fun neighborChanged(state: MCBlock, world: MCWorldMutable, pos: BlockPos, block: MCBlockType, fromPos: BlockPos) {
     val facing = fromPos.subtract(pos).let { Facing.getFacingFromVector(it.x.toFloat(), it.y.toFloat(), it.z.toFloat()) }
-    getBlockImpl(world, pos).onNeighborChanged(facing)
+    getBlockImpl(world, pos, state).onNeighborChanged(facing)
   }
 
   override fun canPlaceBlockOnSide(world: MCWorldMutable, pos: BlockPos, side: Facing): Boolean {
@@ -155,16 +155,16 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
   }
 
   override fun breakBlock(worldIn: MCWorldMutable, pos: BlockPos, state: MCBlock) {
-    getBlockImpl(worldIn, pos).onRemoved()
+    getBlockImpl(worldIn, pos, state).onRemoved()
     super.breakBlock(worldIn, pos, state)
   }
 
   override fun getStrongPower(state: MCBlock, world: MCWorld, pos: BlockPos, side: Facing): Int {
-    return getBlockImpl(world, pos).getStrongPower(side.opposite)
+    return getBlockImpl(world, pos, state).getStrongPower(side.opposite)
   }
 
   override fun getWeakPower(state: MCBlock, world: MCWorld, pos: BlockPos, side: Facing): Int {
-    return getBlockImpl(world, pos).getWeakPower(side.opposite)
+    return getBlockImpl(world, pos, state).getWeakPower(side.opposite)
   }
 
   override fun canProvidePower(state: MCBlock): Boolean {
@@ -174,7 +174,7 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
   override fun canConnectRedstone(state: MCBlock, world: MCWorld, pos: BlockPos, side: Facing?): Boolean {
     if (side == null) return false
 
-    return getBlockImpl(world, pos).canConnectRedstone(side.opposite)
+    return getBlockImpl(world, pos, state).canConnectRedstone(side.opposite)
   }
 
   override fun getRenderLayer(): BlockRenderLayer {
@@ -203,7 +203,7 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
   }
 
   private fun getComponentInfo(world: MCWorldMutable, pos: BlockPos, state: MCBlock, c: BlockComponent): List<String> {
-    val bi = getBlockImpl(world, pos)
+    val bi = getBlockImpl(world, pos, state)
 
     var descString = " - "
     descString += c::class.simpleName ?: c::class.qualifiedName ?: c::class.jvmName
@@ -273,18 +273,19 @@ class BlockQuackLib(val type: BlockType) : MCBlockType(type.material.also { temp
   override fun getDrops(drops: NonNullList<MCItem>, world: MCWorld, pos: BlockPos, state: MCBlock, fortune: Int) {
     // super.getDrops(drops, world, pos, state, fortune)
     unsafe {
-      drops.addAll(getBlockImpl(world, pos).getDrops(fortune).map { it.toMCItem() })
+      drops.addAll(getBlockImpl(world, pos, state).getDrops(fortune).map { it.toMCItem() })
     }
   }
 
   override fun getPickBlock(state: MCBlock, target: RayTraceResult, world: MCWorldMutable, pos: BlockPos, player: EntityPlayer): MCItem {
     return unsafe {
-      getBlockImpl(world, pos).getPickBlock(target, player).toMCItem()
+      getBlockImpl(world, pos, state).getPickBlock(target, player).toMCItem()
     }
   }
 
   override fun addDestroyEffects(world: MCWorldMutable, pos: BlockPos, manager: ParticleManager): Boolean {
     val state = world.getBlockState(pos)
+    if (state.block != this) return false
     val bb = state.getBoundingBox(world, pos)
     val particlesX = maxOf(1, (4 * (bb.maxX - bb.minX)).roundToInt())
     val particlesY = maxOf(1, (4 * (bb.maxY - bb.minY)).roundToInt())
