@@ -40,6 +40,10 @@ interface BlockType : Instantiable, Registered, ComponentHost<BlockComponent> {
 
   fun Unsafe.toMCBlockType(): MCBlockType
 
+  companion object {
+    val Empty: BlockType = airBlockType
+  }
+
 }
 
 enum class BlockRender {

@@ -24,6 +24,10 @@ interface ItemType : Instantiable, Registered, ComponentHost<ItemComponent> {
 
   fun Unsafe.toMCItemType(): MCItemType
 
+  companion object {
+    val Empty: ItemType = airItemType
+  }
+
 }
 
 interface Item : Instance<ItemType>, BehaviorDelegate {
