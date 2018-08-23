@@ -3,6 +3,7 @@ package therealfarfetchd.quacklib.api.objects.block
 import net.minecraft.block.SoundType
 import net.minecraft.block.material.Material
 import net.minecraft.util.ResourceLocation
+import net.minecraftforge.common.capabilities.ICapabilityProvider
 import therealfarfetchd.quacklib.api.block.component.BlockComponent
 import therealfarfetchd.quacklib.api.core.Unsafe
 import therealfarfetchd.quacklib.api.core.modinterface.block
@@ -56,7 +57,7 @@ enum class BlockGeometry {
   NonFull,
 }
 
-interface Block : Instance<BlockType>, BehaviorDelegate {
+interface Block : Instance<BlockType>, BehaviorDelegate, ICapabilityProvider {
 
   val world: World
 

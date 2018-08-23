@@ -2,6 +2,8 @@ package therealfarfetchd.quacklib.objects.block
 
 import net.minecraft.block.state.BlockFaceShape
 import net.minecraft.tileentity.TileEntity
+import net.minecraft.util.EnumFacing
+import net.minecraftforge.common.capabilities.Capability
 import therealfarfetchd.quacklib.api.core.Unsafe
 import therealfarfetchd.quacklib.api.core.extensions.toMCVec3i
 import therealfarfetchd.quacklib.api.core.extensions.toVec3i
@@ -66,6 +68,12 @@ class BlockImpl(
     this@BlockImpl.state = block
     this@BlockImpl.tile = tile
   }
+
+  override fun <T : Any?> getCapability(capability: Capability<T>, facing: EnumFacing?): T? =
+    tile?.getCapability(capability, facing)
+
+  override fun hasCapability(capability: Capability<*>, facing: EnumFacing?): Boolean =
+    tile?.hasCapability(capability, facing) ?: false
 
   override fun toString(): String {
     return "$state;$tile ($type)"

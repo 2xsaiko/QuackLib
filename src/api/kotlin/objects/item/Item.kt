@@ -1,6 +1,7 @@
 package therealfarfetchd.quacklib.api.objects.item
 
 import net.minecraft.util.ResourceLocation
+import net.minecraftforge.common.capabilities.ICapabilityProvider
 import therealfarfetchd.quacklib.api.core.Unsafe
 import therealfarfetchd.quacklib.api.core.modinterface.QuackLibAPI
 import therealfarfetchd.quacklib.api.core.modinterface.item
@@ -30,7 +31,7 @@ interface ItemType : Instantiable, Registered, ComponentHost<ItemComponent> {
 
 }
 
-interface Item : Instance<ItemType>, BehaviorDelegate {
+interface Item : Instance<ItemType>, BehaviorDelegate, ICapabilityProvider {
 
   fun Unsafe.toMCItem(): MCItem
 

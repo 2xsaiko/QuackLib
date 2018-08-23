@@ -1,6 +1,8 @@
 package therealfarfetchd.quacklib.objects.item
 
 import net.minecraft.item.ItemStack
+import net.minecraft.util.EnumFacing
+import net.minecraftforge.common.capabilities.Capability
 import therealfarfetchd.quacklib.api.core.Unsafe
 import therealfarfetchd.quacklib.api.core.unsafe
 import therealfarfetchd.quacklib.api.objects.item.Item
@@ -23,6 +25,12 @@ class ItemImpl(
     set(value) {
       stack.count = value
     }
+
+  override fun <T : Any?> getCapability(capability: Capability<T>, facing: EnumFacing?): T? =
+    stack.getCapability(capability, facing)
+
+  override fun hasCapability(capability: Capability<*>, facing: EnumFacing?): Boolean =
+    stack.hasCapability(capability, facing)
 
   override val behavior = type.behavior
 
