@@ -115,6 +115,8 @@ class BakedModelBuilder private constructor() {
     }
 
     fun getCullFace(q: Quad): EnumFacing? {
+      if (q.xyzComponents().any { it.components().any { it !in 0f..1f } }) return null
+
       val f = q.facing
       val xyz = (f.directionVec.toVec3() + Vec3(1, 1, 1)) / 2
       val useX = f.axis == EnumFacing.Axis.X
