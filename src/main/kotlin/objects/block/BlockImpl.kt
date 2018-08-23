@@ -49,6 +49,10 @@ class BlockImpl(
     return behavior.getFaceShape(this, side)
   }
 
+  override fun markDirty() {
+    tile?.markDirty()
+  }
+
   override fun copy(): Block {
     return BlockImpl(type, world, pos, state, tile?.copy())
   }

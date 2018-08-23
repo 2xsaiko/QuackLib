@@ -69,6 +69,8 @@ interface Block : Instance<BlockType>, BehaviorDelegate, ICapabilityProvider {
   override val block: Block
     get() = this
 
+  fun markDirty()
+
   fun copy(): Block
 
   fun Unsafe.toMCBlock(): MCBlock
