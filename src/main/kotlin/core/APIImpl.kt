@@ -7,6 +7,7 @@ import therealfarfetchd.quacklib.api.block.component.BlockComponentDataImport
 import therealfarfetchd.quacklib.api.block.component.BlockComponentRenderProperties
 import therealfarfetchd.quacklib.api.block.data.BlockDataPart
 import therealfarfetchd.quacklib.api.block.data.DataPartSerializationRegistry
+import therealfarfetchd.quacklib.api.block.data.Serializer
 import therealfarfetchd.quacklib.api.core.UnsafeScope
 import therealfarfetchd.quacklib.api.core.modinterface.QuackLibAPI
 import therealfarfetchd.quacklib.api.item.component.ItemComponentDataExport
@@ -98,7 +99,7 @@ object APIImpl : QuackLibAPI {
     getResourceFromName(name)
 
   @Suppress("UNCHECKED_CAST")
-  override fun <T> createBlockDataDelegate(part: BlockDataPart, name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, validValues: List<T>?): ReadWriteProperty<BlockDataPart, T> {
+  override fun <T> createBlockDataDelegate(part: BlockDataPart, name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, validValues: List<T>?, serializer: Serializer<T>?): ReadWriteProperty<BlockDataPart, T> {
     val delegate = object : ReadWriteProperty<BlockDataPart, T> {
 
       @Suppress("UNCHECKED_CAST")
@@ -114,7 +115,7 @@ object APIImpl : QuackLibAPI {
 
     if (name in part.defs) error("Duplicate name")
 
-    part.addDefinition(name, BlockValuePropertiesImpl(name, type as KClass<Any>, default, persistent, sync, validValues))
+    part.addDefinition(name, BlockValuePropertiesImpl(name, type as KClass<Any>, default, persistent, sync, validValues, serializer) as BlockValuePropertiesImpl<Any?>)
 
     return delegate
   }

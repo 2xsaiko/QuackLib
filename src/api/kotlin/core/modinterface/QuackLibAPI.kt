@@ -6,6 +6,7 @@ import therealfarfetchd.quacklib.api.block.component.BlockComponentDataImport
 import therealfarfetchd.quacklib.api.block.component.BlockComponentRenderProperties
 import therealfarfetchd.quacklib.api.block.data.BlockDataPart
 import therealfarfetchd.quacklib.api.block.data.DataPartSerializationRegistry
+import therealfarfetchd.quacklib.api.block.data.Serializer
 import therealfarfetchd.quacklib.api.block.multipart.MultipartAPI
 import therealfarfetchd.quacklib.api.core.UnsafeScope
 import therealfarfetchd.quacklib.api.item.component.ItemComponentDataExport
@@ -64,7 +65,7 @@ interface QuackLibAPI {
 
   fun getResourceFromContext(name: String): ResourceLocation
 
-  fun <T> createBlockDataDelegate(part: BlockDataPart, name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, validValues: List<T>?): ReadWriteProperty<BlockDataPart, T>
+  fun <T> createBlockDataDelegate(part: BlockDataPart, name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, validValues: List<T>?, serializer: Serializer<T>?): ReadWriteProperty<BlockDataPart, T>
 
   fun <T, C : BlockComponentDataImport> createImportedValueBlock(target: C): BlockImportedValue<T>
 

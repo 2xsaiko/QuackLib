@@ -6,6 +6,7 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries
 import therealfarfetchd.quacklib.api.block.component.BlockComponent
 import therealfarfetchd.quacklib.api.block.component.BlockComponentData
 import therealfarfetchd.quacklib.api.block.data.BlockDataPart
+import therealfarfetchd.quacklib.api.block.data.Value
 import therealfarfetchd.quacklib.api.core.modinterface.logException
 import therealfarfetchd.quacklib.api.objects.block.BlockType
 import therealfarfetchd.quacklib.api.tools.Logger
@@ -57,9 +58,16 @@ class DataContainer {
         partNBT.setInteger("@version", part.version)
         val defs = part.defs.filterValues { filter(c, it) }
         val storage = parts.getValue(c.rl).storage
-        for ((name, _) in defs) {
+        for ((name, d) in defs) {
           val v = storage.get(name)
-          DataPartSerializationRegistryImpl.save(partNBT, name, v)
+          val s = d.serializer
+          if (s != null) {
+            val vnbt = NBTTagCompound()
+            s.save(v, vnbt)
+            partNBT.setTag(name, vnbt)
+          } else {
+            DataPartSerializationRegistryImpl.save(partNBT, name, v)
+          }
         }
         if (!partNBT.isEmpty) nbt.setTag(c.rl.toString(), partNBT)
       } catch (e: Exception) {
@@ -88,7 +96,13 @@ class DataContainer {
 
         val defs = part.defs.filterValues { filter(c, it) }
         for ((name, p) in defs) {
-          val load = DataPartSerializationRegistryImpl.load(partNBT, p.type, name)
+          val s = p.serializer
+          val load = if (s != null) {
+            val nbt = partNBT.getCompoundTag(name)
+            s.load(nbt)
+          } else {
+            DataPartSerializationRegistryImpl.load(partNBT, p.type, name) as Value<out Any?>
+          }
           val r = load.let {
             if (it == null) {
               p.default

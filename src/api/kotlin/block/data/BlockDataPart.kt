@@ -1,5 +1,6 @@
 package therealfarfetchd.quacklib.api.block.data
 
+import net.minecraft.nbt.NBTTagCompound
 import therealfarfetchd.quacklib.api.core.modinterface.QuackLibAPI
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
@@ -31,6 +32,7 @@ abstract class BlockDataPart(val version: Int) {
     val persistent: Boolean
     val sync: Boolean
     val validValues: List<T>?
+    val serializer: Serializer<T>?
 
     fun isValid(value: T): Boolean
 
@@ -38,14 +40,16 @@ abstract class BlockDataPart(val version: Int) {
 
 }
 
-fun <T> BlockDataPart.data(name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, validValues: List<T>?): ReadWriteProperty<BlockDataPart, T> =
-  QuackLibAPI.impl.createBlockDataDelegate(this, name, type, default, persistent, sync, validValues)
+data class Serializer<T>(val load: (NBTTagCompound) -> Value<T>?, val save: (T, NBTTagCompound) -> Unit)
 
-inline fun <reified T> BlockDataPart.data(name: String, default: T, persistent: Boolean = true, sync: Boolean = false, validValues: Iterable<T>? = null): ReadWriteProperty<BlockDataPart, T> =
-  data(name, T::class, default, persistent, sync, validValues?.toList())
+fun <T> BlockDataPart.data(name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, validValues: List<T>?, serializer: Serializer<T>?): ReadWriteProperty<BlockDataPart, T> =
+  QuackLibAPI.impl.createBlockDataDelegate(this, name, type, default, persistent, sync, validValues, serializer)
 
-inline fun <reified T> BlockDataPart.data(name: String, default: T, persistent: Boolean = true, sync: Boolean = false, validValues: Array<T>): ReadWriteProperty<BlockDataPart, T> =
-  data(name, T::class, default, persistent, sync, validValues.toList())
+inline fun <reified T> BlockDataPart.data(name: String, default: T, persistent: Boolean = true, sync: Boolean = false, serializer: Serializer<T>? = null, validValues: Iterable<T>? = null): ReadWriteProperty<BlockDataPart, T> =
+  data(name, T::class, default, persistent, sync, validValues?.toList(), serializer)
 
-inline fun <reified T : Enum<T>> BlockDataPart.data(name: String, default: T, persistent: Boolean = true, sync: Boolean = false): ReadWriteProperty<BlockDataPart, T> =
-  data(name, T::class, default, persistent, sync, T::class.java.enumConstants.toList())
+inline fun <reified T> BlockDataPart.data(name: String, default: T, persistent: Boolean = true, sync: Boolean = false, serializer: Serializer<T>? = null, validValues: Array<T>): ReadWriteProperty<BlockDataPart, T> =
+  data(name, T::class, default, persistent, sync, validValues.toList(), serializer)
+
+inline fun <reified T : Enum<T>> BlockDataPart.data(name: String, default: T, persistent: Boolean = true, sync: Boolean = false, serializer: Serializer<T>? = null): ReadWriteProperty<BlockDataPart, T> =
+  data(name, T::class, default, persistent, sync, T::class.java.enumConstants.toList(), serializer)
