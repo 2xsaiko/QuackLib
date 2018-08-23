@@ -2,6 +2,7 @@ package therealfarfetchd.quacklib.render.model.objloader
 
 import net.minecraft.util.ResourceLocation
 import therealfarfetchd.math.Vec3
+import therealfarfetchd.quacklib.api.render.model.obj.*
 import therealfarfetchd.quacklib.core.QuackLib.Logger
 
 fun loadOBJ(rl: ResourceLocation): OBJRoot? {

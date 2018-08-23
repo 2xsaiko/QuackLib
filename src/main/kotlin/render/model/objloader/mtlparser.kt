@@ -1,6 +1,7 @@
 package therealfarfetchd.quacklib.render.model.objloader
 
 import net.minecraft.util.ResourceLocation
+import therealfarfetchd.quacklib.api.render.model.obj.Material
 import therealfarfetchd.quacklib.core.QuackLib.Logger
 import java.awt.Color
 

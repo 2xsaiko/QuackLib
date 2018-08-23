@@ -1,4 +1,4 @@
-package therealfarfetchd.quacklib.render.model.objloader
+package therealfarfetchd.quacklib.api.render.model.obj
 
 import therealfarfetchd.math.Vec3
 import java.awt.Color

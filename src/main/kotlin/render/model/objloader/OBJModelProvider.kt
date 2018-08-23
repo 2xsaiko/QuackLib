@@ -12,6 +12,8 @@ import therealfarfetchd.quacklib.api.core.modinterface.logException
 import therealfarfetchd.quacklib.api.render.Quad
 import therealfarfetchd.quacklib.api.render.QuadBase
 import therealfarfetchd.quacklib.api.render.model.SimpleModel
+import therealfarfetchd.quacklib.api.render.model.obj.Face
+import therealfarfetchd.quacklib.api.render.model.obj.OBJRoot
 import therealfarfetchd.quacklib.api.render.texture.AtlasTexture
 import therealfarfetchd.quacklib.core.ModID
 import therealfarfetchd.quacklib.render.client.texGetter
@@ -101,7 +103,7 @@ object OBJModelProvider : ISelectiveResourceReloadListener {
       if (uvs == null) Texture.Empty
       else when (face.material) {
         null -> Texture.Empty
-        else -> Texture.Named(face.material)
+        else -> Texture.Named(face.material!!)
       }
 
     if (uvs == null) uvs = verts.map { Vec2(0.5f, 0.5f) }

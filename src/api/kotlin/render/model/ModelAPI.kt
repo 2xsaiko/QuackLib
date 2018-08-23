@@ -2,6 +2,7 @@ package therealfarfetchd.quacklib.api.render.model
 
 import net.minecraft.util.ResourceLocation
 import therealfarfetchd.quacklib.api.render.Quad
+import therealfarfetchd.quacklib.api.render.model.obj.OBJRoot
 import therealfarfetchd.quacklib.api.render.texture.AtlasTexture
 
 interface ModelAPI {
@@ -11,5 +12,7 @@ interface ModelAPI {
   fun <T : DynDataSource> getDynamicRender(model: SimpleModel, data: DataSource<T>, dyndata: T, texture: (ResourceLocation) -> AtlasTexture): List<Quad>
 
   fun <T : DynDataSource> renderGl(model: SimpleModel, data: DataSource<T>, dyndata: T, texture: (ResourceLocation) -> AtlasTexture)
+
+  fun loadOBJ(rl: ResourceLocation): OBJRoot?
 
 }

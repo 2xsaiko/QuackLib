@@ -6,7 +6,9 @@ import therealfarfetchd.quacklib.api.render.model.DataSource
 import therealfarfetchd.quacklib.api.render.model.DynDataSource
 import therealfarfetchd.quacklib.api.render.model.ModelAPI
 import therealfarfetchd.quacklib.api.render.model.SimpleModel
+import therealfarfetchd.quacklib.api.render.model.obj.OBJRoot
 import therealfarfetchd.quacklib.api.render.texture.AtlasTexture
+import therealfarfetchd.quacklib.render.model.objloader.OBJModelProvider
 
 object ModelAPIImpl : ModelAPI {
 
@@ -36,5 +38,8 @@ object ModelAPIImpl : ModelAPI {
       state.op(ctx)
     }
   }
+
+  override fun loadOBJ(rl: ResourceLocation): OBJRoot? =
+    OBJModelProvider.load(rl)
 
 }
