@@ -6,11 +6,9 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries
 import therealfarfetchd.quacklib.api.block.component.BlockComponent
 import therealfarfetchd.quacklib.api.block.component.BlockComponentData
 import therealfarfetchd.quacklib.api.block.data.BlockDataPart
-import therealfarfetchd.quacklib.api.block.data.Value
 import therealfarfetchd.quacklib.api.core.modinterface.logException
 import therealfarfetchd.quacklib.api.objects.block.BlockType
 import therealfarfetchd.quacklib.api.tools.Logger
-import therealfarfetchd.quacklib.block.data.DataPartSerializationRegistryImpl
 import therealfarfetchd.quacklib.block.data.StorageImpl
 import therealfarfetchd.quacklib.block.data.get
 import therealfarfetchd.quacklib.block.data.set
@@ -61,13 +59,7 @@ class DataContainer {
         for ((name, d) in defs) {
           val v = storage.get(name)
           val s = d.serializer
-          if (s != null) {
-            val vnbt = NBTTagCompound()
-            s.save(v, vnbt)
-            partNBT.setTag(name, vnbt)
-          } else {
-            DataPartSerializationRegistryImpl.save(partNBT, name, v)
-          }
+          s.save(name, partNBT, v)
         }
         if (!partNBT.isEmpty) nbt.setTag(c.rl.toString(), partNBT)
       } catch (e: Exception) {
@@ -97,20 +89,13 @@ class DataContainer {
         val defs = part.defs.filterValues { filter(c, it) }
         for ((name, p) in defs) {
           val s = p.serializer
-          val load = if (s != null) {
-            val nbt = partNBT.getCompoundTag(name)
-            s.load(nbt)
-          } else {
-            DataPartSerializationRegistryImpl.load(partNBT, p.type, name) as Value<out Any?>
+          val load = s.load(name, partNBT)
+
+          if (!load.isDefault) {
+            processed += name
           }
-          val r = load.let {
-            if (it == null) {
-              p.default
-            } else {
-              processed += name
-              it.value
-            }
-          }
+
+          val r = load.value
 
           if (p.isValid(r)) storage.set(name, r)
         }

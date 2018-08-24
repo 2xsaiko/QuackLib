@@ -65,7 +65,7 @@ interface QuackLibAPI {
 
   fun getResourceFromContext(name: String): ResourceLocation
 
-  fun <T> createBlockDataDelegate(part: BlockDataPart, name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, validValues: List<T>?, serializer: Serializer<T>?): ReadWriteProperty<BlockDataPart, T>
+  fun <T> createBlockDataDelegate(part: BlockDataPart, name: String, type: KClass<*>, serializer: Serializer<T>, persistent: Boolean, sync: Boolean, validValues: List<T>?): ReadWriteProperty<BlockDataPart, T>
 
   fun <T, C : BlockComponentDataImport> createImportedValueBlock(target: C): BlockImportedValue<T>
 

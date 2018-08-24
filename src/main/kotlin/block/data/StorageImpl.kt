@@ -1,10 +1,11 @@
 package therealfarfetchd.quacklib.block.data
 
+import net.minecraft.nbt.NBTTagCompound
 import therealfarfetchd.quacklib.api.block.data.BlockDataPart
 
 class StorageImpl(val part: BlockDataPart) : BlockDataPart.Storage {
 
-  val data: MutableMap<String, Any?> = part.defs.mapValues { it.value.default }.toMutableMap()
+  val data: MutableMap<String, Any?> = part.defs.mapValues { it.value.serializer.load(it.value.name, NBTTagCompound()).value }.toMutableMap()
 
   fun get(name: String): Any? {
     return data[name]

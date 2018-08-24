@@ -99,7 +99,7 @@ object APIImpl : QuackLibAPI {
     getResourceFromName(name)
 
   @Suppress("UNCHECKED_CAST")
-  override fun <T> createBlockDataDelegate(part: BlockDataPart, name: String, type: KClass<*>, default: T, persistent: Boolean, sync: Boolean, validValues: List<T>?, serializer: Serializer<T>?): ReadWriteProperty<BlockDataPart, T> {
+  override fun <T> createBlockDataDelegate(part: BlockDataPart, name: String, type: KClass<*>, serializer: Serializer<T>, persistent: Boolean, sync: Boolean, validValues: List<T>?): ReadWriteProperty<BlockDataPart, T> {
     val delegate = object : ReadWriteProperty<BlockDataPart, T> {
 
       @Suppress("UNCHECKED_CAST")
@@ -115,7 +115,7 @@ object APIImpl : QuackLibAPI {
 
     if (name in part.defs) error("Duplicate name")
 
-    part.addDefinition(name, BlockValuePropertiesImpl(name, type as KClass<Any>, default, persistent, sync, validValues, serializer) as BlockValuePropertiesImpl<Any?>)
+    part.addDefinition(name, BlockValuePropertiesImpl(name, type as KClass<Any>, persistent, sync, validValues, serializer) as BlockValuePropertiesImpl<Any?>)
 
     return delegate
   }
