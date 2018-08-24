@@ -78,9 +78,8 @@ open class TileQuackLib() : TileEntity() {
 
   override fun hasFastRenderer(): Boolean = QuackLib.proxy.canRenderFast(c.type)
 
-  override fun getRenderBoundingBox(): AxisAlignedBB {
-    return c.type.model.getMaxDimensions()
-  }
+  override fun getRenderBoundingBox(): AxisAlignedBB =
+    c.type.model.getMaxDimensions().offset(pos)
 
   override fun hasCapability(capability: Capability<*>, facing: EnumFacing?): Boolean =
     cCapability.any { it.hasCapability(getBlockData(), capability, facing) } ||
