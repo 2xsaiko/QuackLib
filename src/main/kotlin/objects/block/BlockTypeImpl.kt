@@ -17,7 +17,7 @@ import therealfarfetchd.quacklib.block.impl.BlockQuackLib
 import therealfarfetchd.quacklib.render.client.model.ModelError
 import kotlin.reflect.KClass
 
-class BlockTypeImpl(val conf: BlockConfiguration) : BlockType {
+class BlockTypeImpl(val conf: BlockConfiguration) : BlockTypeBase(conf.rl) {
 
   lateinit var block: MCBlockType
 
@@ -45,9 +45,6 @@ class BlockTypeImpl(val conf: BlockConfiguration) : BlockType {
     componentPresence.computeIfAbsent(type) { super.hasComponent(type) }
 
   override fun Unsafe.toMCBlockType(): MCBlockType = block
-
-  override val registryName: ResourceLocation
-    get() = conf.rl
 
   override fun toString(): String {
     return "Block '$registryName' (${components.size} components)"
@@ -83,7 +80,7 @@ class BlockTypeImpl(val conf: BlockConfiguration) : BlockType {
   }
 
   @Suppress("DEPRECATION")
-  class Vanilla(val block: MCBlockType) : BlockType {
+  class Vanilla(val block: MCBlockType) : BlockTypeBase(block.registryName!!) {
 
     val dstate = block.defaultState
 
@@ -103,18 +100,11 @@ class BlockTypeImpl(val conf: BlockConfiguration) : BlockType {
 
     override fun Unsafe.toMCBlockType(): MCBlockType = block
 
-    override val registryName: ResourceLocation
-      get() = block.registryName!!
-
     override val components: List<BlockComponent>
       get() = emptyList()
 
     override val model: Model
       get() = ModelError
-
-    override fun toString(): String {
-      return "Block '$registryName'"
-    }
 
   }
 

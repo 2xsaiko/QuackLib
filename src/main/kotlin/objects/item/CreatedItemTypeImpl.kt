@@ -11,7 +11,7 @@ import therealfarfetchd.quacklib.api.objects.item.ItemType
 import therealfarfetchd.quacklib.api.objects.item.MCItemType
 import therealfarfetchd.quacklib.api.render.model.Model
 
-class CreatedItemTypeImpl(override val registryName: ResourceLocation, val def: ItemConfiguration) : ItemType {
+class CreatedItemTypeImpl(registryName: ResourceLocation, val def: ItemConfiguration) : ItemTypeBase(registryName) {
 
   var realInstance: ItemType? = null
 
@@ -34,6 +34,10 @@ class CreatedItemTypeImpl(override val registryName: ResourceLocation, val def: 
   override val model: Model
     get() = realInstance?.model
             ?: def.model
+
+  override fun toString(): String =
+    realInstance?.toString()
+    ?: "unresolved created item '$registryName'"
 
   override fun Unsafe.toMCItemType(): MCItemType = unsafe { realInstance?.toMCItemType() }
                                                    ?: crash()

@@ -10,7 +10,7 @@ import therealfarfetchd.quacklib.api.objects.item.ItemType
 import therealfarfetchd.quacklib.api.objects.item.MCItemType
 import therealfarfetchd.quacklib.api.render.model.Model
 
-class DeferredItemTypeImpl(override val registryName: ResourceLocation) : ItemType {
+class DeferredItemTypeImpl(registryName: ResourceLocation) : ItemTypeBase(registryName) {
 
   init {
     instances += this
@@ -36,6 +36,10 @@ class DeferredItemTypeImpl(override val registryName: ResourceLocation) : ItemTy
   override val model: Model
     get() = realInstance?.model
             ?: crash()
+
+  override fun toString(): String =
+    realInstance?.toString()
+    ?: "unresolved deferred item '$registryName'"
 
   @Suppress("NOTHING_TO_INLINE")
   private inline fun crash(): Nothing = error("Item not resolved yet! Come back after init is done")

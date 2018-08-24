@@ -14,7 +14,7 @@ import therealfarfetchd.quacklib.api.objects.block.BlockType
 import therealfarfetchd.quacklib.api.objects.block.MCBlockType
 import therealfarfetchd.quacklib.api.render.model.Model
 
-class CreatedBlockTypeImpl(override val registryName: ResourceLocation, val def: BlockConfiguration) : BlockType {
+class CreatedBlockTypeImpl(registryName: ResourceLocation, val def: BlockConfiguration) : BlockTypeBase(registryName) {
 
   init {
     instances += this
@@ -58,6 +58,10 @@ class CreatedBlockTypeImpl(override val registryName: ResourceLocation, val def:
   override val validTools: Set<Tool>
     get() = realInstance?.validTools
             ?: def.validTools
+
+  override fun toString(): String =
+    realInstance?.toString()
+    ?: "unresolved created block '$registryName'"
 
   override fun Unsafe.toMCBlockType(): MCBlockType = unsafe { realInstance?.toMCBlockType() }
                                                      ?: crash()

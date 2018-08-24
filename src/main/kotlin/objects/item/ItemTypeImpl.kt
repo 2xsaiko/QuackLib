@@ -12,7 +12,7 @@ import therealfarfetchd.quacklib.api.render.model.Model
 import therealfarfetchd.quacklib.item.impl.ItemQuackLib
 import therealfarfetchd.quacklib.render.client.model.ModelError
 
-class ItemTypeImpl(val conf: ItemConfiguration) : ItemType {
+class ItemTypeImpl(val conf: ItemConfiguration) : ItemTypeBase(conf.rl) {
 
   lateinit var item: MCItemType
 
@@ -21,8 +21,6 @@ class ItemTypeImpl(val conf: ItemConfiguration) : ItemType {
   override val model: Model = conf.model
 
   override val behavior = StandardItemBehavior(this)
-
-  override val registryName: ResourceLocation = conf.rl
 
   override fun create(amount: Int, meta: Int): Item =
     ItemImpl(this, amount, meta)
@@ -63,7 +61,7 @@ class ItemTypeImpl(val conf: ItemConfiguration) : ItemType {
 
   }
 
-  class Vanilla(val item: MCItemType) : ItemType {
+  class Vanilla(val item: MCItemType) : ItemTypeBase(item.registryName!!) {
 
     override val components: List<ItemComponent>
       get() = emptyList()
@@ -73,16 +71,10 @@ class ItemTypeImpl(val conf: ItemConfiguration) : ItemType {
 
     override val behavior = VanillaItemBehavior(item)
 
-    override val registryName: ResourceLocation = item.registryName!!
-
     override fun create(amount: Int, meta: Int): Item =
       ItemImpl(this, amount, meta)
 
     override fun Unsafe.toMCItemType(): MCItemType = item
-
-    override fun toString(): String {
-      return "Item '$registryName'"
-    }
 
   }
 

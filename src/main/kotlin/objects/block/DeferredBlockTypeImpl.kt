@@ -13,7 +13,7 @@ import therealfarfetchd.quacklib.api.objects.block.BlockType
 import therealfarfetchd.quacklib.api.objects.block.MCBlockType
 import therealfarfetchd.quacklib.api.render.model.Model
 
-class DeferredBlockTypeImpl(override val registryName: ResourceLocation) : BlockType {
+class DeferredBlockTypeImpl(registryName: ResourceLocation) : BlockTypeBase(registryName) {
 
   var realInstance: BlockType? = null
 
@@ -52,6 +52,10 @@ class DeferredBlockTypeImpl(override val registryName: ResourceLocation) : Block
   override val validTools: Set<Tool>
     get() = realInstance?.validTools
             ?: crash()
+
+  override fun toString(): String =
+    realInstance?.toString()
+    ?: "unresolved deferred block '$registryName'"
 
   override fun Unsafe.toMCBlockType(): MCBlockType = unsafe { realInstance?.toMCBlockType() }
                                                      ?: crash()
