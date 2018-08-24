@@ -9,6 +9,7 @@ import net.minecraft.util.ITickable
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraftforge.common.capabilities.Capability
 import therealfarfetchd.quacklib.api.block.component.BlockComponentCapability
+import therealfarfetchd.quacklib.api.block.component.BlockComponentCustomClientData
 import therealfarfetchd.quacklib.api.block.component.BlockComponentTickable
 import therealfarfetchd.quacklib.api.objects.block.BlockType
 import therealfarfetchd.quacklib.core.QuackLib
@@ -19,6 +20,8 @@ open class TileQuackLib() : TileEntity() {
   val c = DataContainer()
 
   var cCapability = c.getComponentsOfType<BlockComponentCapability>()
+
+  val cCustomUpd = c.getComponentsOfType<BlockComponentCustomClientData>()
 
   @Suppress("LeakingThis")
   constructor(type: BlockType) : this() {
@@ -49,12 +52,14 @@ open class TileQuackLib() : TileEntity() {
   override fun getUpdateTag(): NBTTagCompound {
     val nbt = super.getUpdateTag()
     c.saveData(nbt) { _, prop -> /*prop.render ||*/ prop.sync }
+    cCustomUpd.forEach { it.writeClientData(getBlockData(), nbt, true) }
     return nbt
   }
 
   override fun handleUpdateTag(nbt: NBTTagCompound) {
     super.readFromNBT(nbt)
     c.loadData(nbt) { _, prop -> /*prop.render ||*/ prop.sync }
+    cCustomUpd.forEach { it.readClientData(getBlockData(), nbt, true) }
     updateComponents()
   }
 
@@ -66,11 +71,13 @@ open class TileQuackLib() : TileEntity() {
       // if (prop.render) renderUpdate = 1
       /*prop.render ||*/ prop.sync
     }
+    cCustomUpd.forEach { it.writeClientData(getBlockData(), nbt, false) }
     return SPacketUpdateTileEntity(getPos(), renderUpdate, nbt)
   }
 
   override fun onDataPacket(net: NetworkManager, pkt: SPacketUpdateTileEntity) {
     c.loadData(pkt.nbtCompound) { _, prop -> /*prop.render ||*/ prop.sync }
+    cCustomUpd.forEach { it.readClientData(getBlockData(), pkt.nbtCompound, false) }
     if (pkt.tileEntityType == 1) {
       getWorld().markBlockRangeForRenderUpdate(getPos(), getPos())
     }

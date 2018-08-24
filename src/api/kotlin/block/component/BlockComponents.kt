@@ -2,6 +2,7 @@ package therealfarfetchd.quacklib.api.block.component
 
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.EnumHand
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.AxisAlignedBB
@@ -196,5 +197,13 @@ interface BlockComponentRedstoneFace : BlockComponentRedstone {
 interface BlockComponentRedstoneMask : BlockComponentRedstone {
 
   fun connectionMask(block: Block): Set<ConnectionMask>
+
+}
+
+interface BlockComponentCustomClientData : TE {
+
+  fun writeClientData(block: Block, nbt: NBTTagCompound, initialChunkUpdate: Boolean)
+
+  fun readClientData(block: Block, nbt: NBTTagCompound, initialChunkUpdate: Boolean)
 
 }
