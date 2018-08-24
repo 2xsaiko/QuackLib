@@ -2,6 +2,7 @@ package therealfarfetchd.quacklib.api.objects.item
 
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.common.capabilities.ICapabilityProvider
+import therealfarfetchd.math.Vec3
 import therealfarfetchd.quacklib.api.core.Unsafe
 import therealfarfetchd.quacklib.api.core.modinterface.QuackLibAPI
 import therealfarfetchd.quacklib.api.core.modinterface.item
@@ -10,7 +11,9 @@ import therealfarfetchd.quacklib.api.objects.ComponentHost
 import therealfarfetchd.quacklib.api.objects.Instance
 import therealfarfetchd.quacklib.api.objects.Instantiable
 import therealfarfetchd.quacklib.api.objects.Registered
+import therealfarfetchd.quacklib.api.objects.world.WorldMutable
 import therealfarfetchd.quacklib.api.render.model.Model
+import therealfarfetchd.quacklib.api.tools.PositionGrid
 
 typealias MCItemType = net.minecraft.item.Item
 typealias MCItem = net.minecraft.item.ItemStack
@@ -36,6 +39,16 @@ interface Item : Instance<ItemType>, BehaviorDelegate, ICapabilityProvider {
   fun Unsafe.toMCItem(): MCItem
 
   var count: Int
+
+  fun spawnAt(world: WorldMutable, pos: Vec3)
+
+  fun spawnAt(world: WorldMutable, pos: Vec3, speed: Vec3)
+
+  fun spawnAt(world: WorldMutable, pos: PositionGrid) =
+    spawnAt(world, pos.toVec3() + Vec3(0.5f, 0.5f, 0.5f))
+
+  fun spawnAt(world: WorldMutable, pos: PositionGrid, speed: Vec3) =
+    spawnAt(world, pos.toVec3() + Vec3(0.5f, 0.5f, 0.5f), speed)
 
   @Deprecated("Internal usage", ReplaceWith("this"), DeprecationLevel.ERROR)
   override val item: Item

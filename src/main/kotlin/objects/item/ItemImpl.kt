@@ -1,13 +1,16 @@
 package therealfarfetchd.quacklib.objects.item
 
+import net.minecraft.entity.item.EntityItem
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraftforge.common.capabilities.Capability
+import therealfarfetchd.math.Vec3
 import therealfarfetchd.quacklib.api.core.Unsafe
 import therealfarfetchd.quacklib.api.core.unsafe
 import therealfarfetchd.quacklib.api.objects.item.Item
 import therealfarfetchd.quacklib.api.objects.item.ItemType
 import therealfarfetchd.quacklib.api.objects.item.MCItem
+import therealfarfetchd.quacklib.api.objects.world.WorldMutable
 
 class ItemImpl(
   override val type: ItemType,
@@ -25,6 +28,23 @@ class ItemImpl(
     set(value) {
       stack.count = value
     }
+
+  override fun spawnAt(world: WorldMutable, pos: Vec3) {
+    unsafe {
+      val w = world.toMCWorld()
+      val e = EntityItem(w, pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble(), stack.copy())
+      w.spawnEntity(e)
+    }
+  }
+
+  override fun spawnAt(world: WorldMutable, pos: Vec3, speed: Vec3) {
+    unsafe {
+      val w = world.toMCWorld()
+      val e = EntityItem(w, pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble(), stack.copy())
+      e.setVelocity(speed.x.toDouble(), speed.y.toDouble(), speed.z.toDouble())
+      w.spawnEntity(e)
+    }
+  }
 
   override fun <T : Any?> getCapability(capability: Capability<T>, facing: EnumFacing?): T? =
     stack.getCapability(capability, facing)
