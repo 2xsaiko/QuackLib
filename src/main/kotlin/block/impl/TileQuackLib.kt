@@ -21,7 +21,7 @@ open class TileQuackLib() : TileEntity() {
 
   var cCapability = c.getComponentsOfType<BlockComponentCapability>()
 
-  val cCustomUpd = c.getComponentsOfType<BlockComponentCustomClientData>()
+  var cCustomUpd = c.getComponentsOfType<BlockComponentCustomClientData>()
 
   @Suppress("LeakingThis")
   constructor(type: BlockType) : this() {
@@ -35,6 +35,7 @@ open class TileQuackLib() : TileEntity() {
 
   open fun updateComponents() {
     cCapability = c.getComponentsOfType()
+    cCustomUpd = c.getComponentsOfType()
   }
 
   override fun readFromNBT(nbt: NBTTagCompound) {
