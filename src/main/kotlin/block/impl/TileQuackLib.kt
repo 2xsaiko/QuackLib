@@ -6,6 +6,7 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.ITickable
+import net.minecraft.util.math.AxisAlignedBB
 import net.minecraftforge.common.capabilities.Capability
 import therealfarfetchd.quacklib.api.block.component.BlockComponentCapability
 import therealfarfetchd.quacklib.api.block.component.BlockComponentTickable
@@ -76,6 +77,10 @@ open class TileQuackLib() : TileEntity() {
   }
 
   override fun hasFastRenderer(): Boolean = QuackLib.proxy.canRenderFast(c.type)
+
+  override fun getRenderBoundingBox(): AxisAlignedBB {
+    return c.type.model.getMaxDimensions()
+  }
 
   override fun hasCapability(capability: Capability<*>, facing: EnumFacing?): Boolean =
     cCapability.any { it.hasCapability(getBlockData(), capability, facing) } ||

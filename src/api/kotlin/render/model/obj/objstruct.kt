@@ -36,16 +36,16 @@ data class Material(
   // for now
 )
 
-//fun OBJRoot.triangulate(): OBJRoot {
-//  fun triangulateFace(f: Face) =
-//    (2 until f.vertices.size).map { Face(f.material, listOf(f.vertices.first(), f.vertices[it - 1], f.vertices[it])) }
-//
-//  return copy(
-//    faces = faces.flatMap(::triangulateFace),
-//    objects = objects.mapValues { (_, o) -> o.copy(faces = o.faces.flatMap(::triangulateFace)) }
-//  )
-//}
-//
+fun OBJRoot.triangulate(): OBJRoot {
+  fun triangulateFace(f: Face) =
+    (2 until f.vertices.size).map { Face(f.material, listOf(f.vertices.first(), f.vertices[it - 1], f.vertices[it])) }
+
+  return copy(
+    faces = faces.flatMap(::triangulateFace),
+    objects = objects.mapValues { (_, o) -> o.copy(faces = o.faces.flatMap(::triangulateFace)) }
+  )
+}
+
 //fun OBJRoot.quadulate(): OBJRoot {
 //  fun processFaces(f: List<Face>): List<Face> {
 //    val candidates = f.filter { it.vertices.size == 3 }.toMutableList()

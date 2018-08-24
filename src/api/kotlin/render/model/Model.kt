@@ -1,6 +1,8 @@
 package therealfarfetchd.quacklib.api.render.model
 
+import net.minecraft.block.Block
 import net.minecraft.util.ResourceLocation
+import net.minecraft.util.math.AxisAlignedBB
 import therealfarfetchd.quacklib.api.render.Quad
 import therealfarfetchd.quacklib.api.render.texture.AtlasTexture
 import kotlin.reflect.KClass
@@ -21,6 +23,8 @@ interface Model {
 
   // TODO: ugh
   fun isItemTransformation(): Boolean = false
+
+  fun getMaxDimensions(): AxisAlignedBB = Block.FULL_BLOCK_AABB
 
   fun getParticleTexture(getTexture: (ResourceLocation) -> AtlasTexture): AtlasTexture
 
