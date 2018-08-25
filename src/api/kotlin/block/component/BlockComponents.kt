@@ -148,7 +148,7 @@ interface BlockComponentMouseOver : Base {
 
 interface BlockComponentCustomMouseOver : Base {
 
-  fun raytrace(block: Block, from: Vec3, to: Vec3): RayTraceResult
+  fun raytrace(block: Block, from: Vec3, to: Vec3): RayTraceResult?
 
 }
 
