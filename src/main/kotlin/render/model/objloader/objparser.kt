@@ -11,7 +11,7 @@ fun loadOBJ(rl: ResourceLocation): OBJRoot? {
   var materials: Map<String, Material> = emptyMap()
   var vertPos: List<Vec3> = emptyList()
   var vertTex: List<Vec3> = emptyList()
-  // var vertNormal: List<Vec3> = emptyList()
+  var vertNormal: List<Vec3> = emptyList()
   var faces: List<Face> = emptyList()
   var objects: Map<String, Object> = emptyMap()
 
@@ -52,8 +52,8 @@ fun loadOBJ(rl: ResourceLocation): OBJRoot? {
         vertTex += Vec3(c[0], c[1], c.getOrElse(2) { 0f })
       }
       "vn" -> {
-        // val c = readFloats(it, 1, 3, 0)
-        // vertNormal += Vec3(c[0], c[1], c[2])
+        val c = readFloats(it, 1, 3, 0)
+        vertNormal += Vec3(c[0], c[1], c[2])
       }
       "f" -> currentFaces += Face(activeMaterial, readCustom(it, 1, 3, -1).map { parseVertex(it) })
       else -> Logger.warn("Unrecognized OBJ statement '$it'")
@@ -63,13 +63,13 @@ fun loadOBJ(rl: ResourceLocation): OBJRoot? {
   if (objname != null) objects += (objname to Object(objgroups, currentFaces))
   else faces += currentFaces
 
-  return OBJRoot(materials, vertPos, vertTex, faces, objects)
+  return OBJRoot(materials, vertPos, vertTex, vertNormal, faces, objects)
 }
 
 private fun parseVertex(s: String): Vertex {
-  val (c1, c2, _) = s.split("/").map(String::toIntOrNull)
-  return Vertex(c1!!, c2)
+  val (c1, c2, c3) = s.split("/").map(String::toIntOrNull)
+  return Vertex(c1!!, c2, c3)
 }
 
 inline fun OBJRoot?.orEmpty(): OBJRoot =
-  this ?: OBJRoot(emptyMap(), emptyList(), emptyList(), emptyList(), emptyMap())
+  this ?: OBJRoot(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList(), emptyMap())

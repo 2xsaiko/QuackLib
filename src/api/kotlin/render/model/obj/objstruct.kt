@@ -8,6 +8,7 @@ data class OBJRoot(
 
   val vertPos: List<Vec3>,
   val vertTex: List<Vec3>,
+  val vertNormal: List<Vec3>,
 
   // these don't belong to any object
   val faces: List<Face>,
@@ -26,7 +27,8 @@ data class Face(
 
 data class Vertex(
   val xyz: Int,
-  val tex: Int?
+  val tex: Int?,
+  val normal: Int?
 )
 
 data class Material(
