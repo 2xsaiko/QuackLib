@@ -8,12 +8,15 @@ import net.minecraft.util.EnumFacing
 import net.minecraft.util.ITickable
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraftforge.common.capabilities.Capability
+import net.minecraftforge.fml.common.Loader
+import net.minecraftforge.fml.common.ModContainer
 import therealfarfetchd.quacklib.api.block.component.BlockComponentCapability
 import therealfarfetchd.quacklib.api.block.component.BlockComponentCustomClientData
 import therealfarfetchd.quacklib.api.block.component.BlockComponentTickable
 import therealfarfetchd.quacklib.api.objects.block.BlockType
 import therealfarfetchd.quacklib.core.QuackLib
 import therealfarfetchd.quacklib.objects.block.BlockImpl
+import therealfarfetchd.quacklib.tools.ModContext
 
 open class TileQuackLib() : TileEntity() {
 
@@ -113,9 +116,17 @@ open class TileQuackLib() : TileEntity() {
     }
 
     override fun update() {
-      cTickable.forEach { it.onTick(getBlockData()) }
+      execAsCreator {
+        cTickable.forEach { it.onTick(getBlockData()) }
+      }
     }
 
+  }
+
+  var creator: ModContainer? = null
+  protected fun <R> execAsCreator(op: () -> R): R {
+    if (creator == null) creator = Loader.instance().indexedModList.getValue(c.type.registryName.namespace)
+    return ModContext.executeAsMod(creator, op)
   }
 
   override fun toString(): String {
