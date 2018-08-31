@@ -153,7 +153,7 @@ sealed class QLCommonProxy {
 
   open fun openResource(rl: ResourceLocation, respectResourcePack: Boolean): InputStream? {
     val cls = ModContext.currentMod()?.mod?.javaClass ?: QuackLib::class.java
-    return cls.classLoader.getResourceAsStream("/assets/${rl.namespace}/${rl.path}")
+    return cls.classLoader.getResourceAsStream("assets/${rl.namespace}/${rl.path}")
   }
 
   abstract fun addNotification(title: String, body: String?, expireTime: Long, icon: ResourceLocation?)
