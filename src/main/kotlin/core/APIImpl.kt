@@ -19,6 +19,10 @@ import therealfarfetchd.quacklib.api.objects.block.BlockType
 import therealfarfetchd.quacklib.api.objects.block.MCBlockType
 import therealfarfetchd.quacklib.api.objects.block.orEmpty
 import therealfarfetchd.quacklib.api.objects.item.*
+import therealfarfetchd.quacklib.api.objects.world.MCWorld
+import therealfarfetchd.quacklib.api.objects.world.MCWorldMutable
+import therealfarfetchd.quacklib.api.objects.world.World
+import therealfarfetchd.quacklib.api.objects.world.WorldMutable
 import therealfarfetchd.quacklib.api.render.model.ModelAPI
 import therealfarfetchd.quacklib.api.render.property.RenderProperty
 import therealfarfetchd.quacklib.api.render.property.RenderPropertyBlock
@@ -38,6 +42,7 @@ import therealfarfetchd.quacklib.objects.block.DeferredBlockTypeImpl
 import therealfarfetchd.quacklib.objects.item.DeferredItemTypeImpl
 import therealfarfetchd.quacklib.objects.item.ItemImpl
 import therealfarfetchd.quacklib.objects.item.ItemTypeImpl
+import therealfarfetchd.quacklib.objects.world.toWorld
 import therealfarfetchd.quacklib.render.model.ModelAPIImpl
 import therealfarfetchd.quacklib.render.property.RenderPropertyBlockImpl
 import therealfarfetchd.quacklib.render.property.RenderPropertyConfigurationScopeImpl
@@ -190,6 +195,10 @@ object APIImpl : QuackLibAPI {
   override fun notifySend(title: String, body: String?, expireTime: Long, icon: ResourceLocation?) {
     QuackLib.proxy.addNotification(title, body, expireTime, icon)
   }
+
+  override fun getWorld(w: MCWorld): World = w.toWorld()
+
+  override fun getWorld(w: MCWorldMutable): WorldMutable = w.toWorld()
 
   override fun <T : Any> registerCapability(type: KClass<T>) {
     therealfarfetchd.quacklib.tools.registerCapability(type)

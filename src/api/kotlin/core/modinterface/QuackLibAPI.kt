@@ -20,6 +20,10 @@ import therealfarfetchd.quacklib.api.objects.item.Item
 import therealfarfetchd.quacklib.api.objects.item.ItemType
 import therealfarfetchd.quacklib.api.objects.item.MCItem
 import therealfarfetchd.quacklib.api.objects.item.MCItemType
+import therealfarfetchd.quacklib.api.objects.world.MCWorld
+import therealfarfetchd.quacklib.api.objects.world.MCWorldMutable
+import therealfarfetchd.quacklib.api.objects.world.World
+import therealfarfetchd.quacklib.api.objects.world.WorldMutable
 import therealfarfetchd.quacklib.api.render.model.ModelAPI
 import therealfarfetchd.quacklib.api.render.property.RenderProperty
 import therealfarfetchd.quacklib.api.render.property.RenderPropertyBlock
@@ -80,6 +84,10 @@ interface QuackLibAPI {
   fun <T, C : ItemComponentDataExport> createExportedValueItem(target: C, op: (C, Item) -> T): ItemExportedValue<C, T>
 
   fun <T, C : ItemComponentRenderProperties> addRenderPropertyItem(target: C, ptype: KClass<*>, name: String, op: (RenderPropertyConfigurationScope<Item, T>) -> Unit): RenderProperty<C, Item, T>
+
+  fun getWorld(w: MCWorld): World
+
+  fun getWorld(w: MCWorldMutable): WorldMutable
 
   fun <T : Any> registerCapability(type: KClass<T>)
 
