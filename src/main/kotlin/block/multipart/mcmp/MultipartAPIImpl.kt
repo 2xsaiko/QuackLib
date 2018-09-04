@@ -19,6 +19,8 @@ import net.minecraft.world.World
 import net.minecraftforge.event.AttachCapabilitiesEvent
 import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.fml.relauncher.Side
+import net.minecraftforge.fml.relauncher.SideOnly
 import therealfarfetchd.quacklib.api.block.multipart.PartSlot
 import therealfarfetchd.quacklib.api.item.component.ItemComponent
 import therealfarfetchd.quacklib.api.objects.block.BlockType
@@ -63,6 +65,7 @@ object MultipartAPIImpl : MultipartAPIInternal {
     }
   }
 
+  @SideOnly(Side.CLIENT)
   override fun onDrawOverlay(world: World, hit: RayTraceResult, player: EntityPlayer, left: MutableList<String>, right: MutableList<String>) {
     if (hit.typeOfHit == RayTraceResult.Type.BLOCK) {
       val pos = hit.blockPos
@@ -82,6 +85,7 @@ object MultipartAPIImpl : MultipartAPIInternal {
   }
 
   @SubscribeEvent
+  @SideOnly(Side.CLIENT)
   fun onDrawMultipartOverlay(e: DrawMultipartHighlightEvent) {
     val block = e.partInfo.state.block
     if (block is BlockAdvancedOutline) {

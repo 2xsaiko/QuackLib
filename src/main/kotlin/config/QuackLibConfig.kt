@@ -4,14 +4,15 @@ import net.minecraftforge.common.config.Configuration
 import java.io.File
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
-import kotlin.reflect.full.declaredMemberProperties
 
 object QuackLibConfig : Configuration(File("config/quacklib.conf")) {
 
   val alwaysShowMultipartDebug by storedBool(true, "misc", "Show real blockstate for non-QuackLib multiparts")
 
   init {
-    QuackLibConfig::class.declaredMemberProperties.forEach { it.get(this) } // FIXME crashes on server
+    // we read all config properties to initialize the values
+    // can't use kotlin reflect because it makes the server crash. For some reason
+    QuackLibConfig::class.java.declaredMethods.filter { it.parameterCount == 0 }.forEach { it.invoke(this) }
 
     save()
   }

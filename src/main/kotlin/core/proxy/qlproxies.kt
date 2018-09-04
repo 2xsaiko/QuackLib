@@ -28,8 +28,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.registry.GameRegistry
 import therealfarfetchd.math.Random
 import therealfarfetchd.quacklib.api.core.mod.BaseMod
-import therealfarfetchd.quacklib.api.core.modinterface.block
-import therealfarfetchd.quacklib.api.core.unsafe
 import therealfarfetchd.quacklib.api.objects.block.BlockType
 import therealfarfetchd.quacklib.api.tools.access
 import therealfarfetchd.quacklib.api.tools.isDebugMode
@@ -53,7 +51,6 @@ import therealfarfetchd.quacklib.objects.item.ItemTypeImpl
 import therealfarfetchd.quacklib.render.client.ModelLoaderQuackLib
 import therealfarfetchd.quacklib.render.client.TESRQuackLib
 import therealfarfetchd.quacklib.render.model.objloader.OBJModelProvider
-import therealfarfetchd.quacklib.render.vanilla.VanillaLoader
 import therealfarfetchd.quacklib.tools.ModContext
 import therealfarfetchd.quacklib.tools.progressbar
 import therealfarfetchd.quacklib.tools.registerAnnotatedCapabilities
@@ -130,14 +127,7 @@ sealed class QLCommonProxy {
 
   open fun init(e: FMLInitializationEvent) {}
 
-  open fun postInit(e: FMLPostInitializationEvent) {
-    run {
-      val block = unsafe { block("qltestmod:wallplate").toMCBlockType().blockState }
-      val vc = ValidationContextImpl("Model for 'qltestmod:wallplate'")
-      VanillaLoader.load(ResourceLocation("qltestmod", "wallplate"), block, vc)
-      vc.printMessages()
-    }
-  }
+  open fun postInit(e: FMLPostInitializationEvent) {}
 
   private fun fixMods() {
     Loader.instance().activeModList
