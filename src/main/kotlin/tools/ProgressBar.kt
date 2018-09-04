@@ -9,6 +9,7 @@ fun <R> progressbar(name: String, steps: Int, time: Boolean = isDebugMode, op: P
   return try {
     op(ProgressBarScope(bar))
   } finally {
+    while (bar.step < bar.steps) bar.step("")
     ProgressManager.pop(bar)
   }
 }
