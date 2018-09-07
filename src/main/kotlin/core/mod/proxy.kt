@@ -103,14 +103,14 @@ sealed class CommonProxy : ModProxy {
         Logger.info("Adding ${it.describe()}")
         val type = ItemTypeImpl(it)
         val item = ItemQuackLib(type)
-        if (it.model.needsTESR()) {
-          item.tileEntityItemStackRenderer = ItemTESRQuackLib
-        }
+        addItemSpecial(it, type, item)
         ItemTypeImpl.addItem(type, item)
         e.registry.register(item)
       }
     }
   }
+
+  open fun addItemSpecial(template: ItemConfigurationScopeImpl, type: ItemTypeImpl, item: ItemQuackLib) {}
 
   @SubscribeEvent
   fun registerEntities(e: RegistryEvent.Register<EntityEntry>) {
@@ -146,6 +146,12 @@ class ClientProxy : CommonProxy() {
           ModelLoader.setCustomModelResourceLocation(item(it.rl).toMCItemType(), 0, ModelResourceLocation(it.rl, "inventory"))
         }
       }
+    }
+  }
+
+  override fun addItemSpecial(template: ItemConfigurationScopeImpl, type: ItemTypeImpl, item: ItemQuackLib) {
+    if (template.model.needsTESR()) {
+      item.tileEntityItemStackRenderer = ItemTESRQuackLib
     }
   }
 
