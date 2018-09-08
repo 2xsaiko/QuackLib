@@ -56,7 +56,7 @@ dependencies {
 
   deobfCompile("MCMultiPart2", "MCMultiPart", mcmultipart_version)
 
-  runtime("mezz.jei", "jei_$mc_version", jei_version)
+  runtimeOnly("mezz.jei", "jei_$mc_version", jei_version)
   deobfProvided("mezz.jei", "jei_$mc_version", jei_version, classifier = "api")
 }
 

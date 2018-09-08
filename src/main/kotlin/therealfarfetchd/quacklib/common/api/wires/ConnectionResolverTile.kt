@@ -15,6 +15,7 @@ import therealfarfetchd.quacklib.common.api.block.capability.Capabilities
 import therealfarfetchd.quacklib.common.api.extensions.isServer
 import therealfarfetchd.quacklib.common.api.extensions.nibbles
 import therealfarfetchd.quacklib.common.api.extensions.unpackNibbles
+import therealfarfetchd.quacklib.common.api.qblock.limbocon_fix
 import therealfarfetchd.quacklib.common.api.util.EnumFacingExtended
 
 open class ConnectionResolverTile(val tc: TileConnectable) {
@@ -138,17 +139,17 @@ open class ConnectionResolverTile(val tc: TileConnectable) {
   }
 
   private fun EnumFacingExtended.getOpposite(wc: EnumWireConnection) = when (wc) {
-    EnumWireConnection.None     -> error("Invalid connection type $wc")
+    EnumWireConnection.None -> error("Invalid connection type $wc")
     EnumWireConnection.External -> oppositeExternal
     EnumWireConnection.Internal -> oppositeInternal
-    EnumWireConnection.Corner   -> oppositeCorner
+    EnumWireConnection.Corner -> oppositeCorner
   }
 
   private fun BlockPos.getOpposite(e: EnumFacingExtended, wc: EnumWireConnection): BlockPos = when (wc) {
-    EnumWireConnection.None     -> error("Invalid connection type $wc")
+    EnumWireConnection.None -> error("Invalid connection type $wc")
     EnumWireConnection.External -> offset(e.direction)
     EnumWireConnection.Internal -> this
-    EnumWireConnection.Corner   -> offset(e.direction).offset(e.part!!)
+    EnumWireConnection.Corner -> offset(e.direction).offset(e.part!!)
   }
 
   private fun getTile(pos: BlockPos, slot: IPartSlot): TileEntity? {
@@ -171,7 +172,10 @@ interface TileConnectable {
   fun getTile(): TileEntity
 
   fun connectionsChanged() {
-    getTile().markDirty()
+//    limbocon_fix = true
+//    getTile().markDirty()
+    getWorldForScan().markChunkDirty(getTile().pos, getTile())
+    limbocon_fix = false
   }
 
   fun getWorldForScan(): World

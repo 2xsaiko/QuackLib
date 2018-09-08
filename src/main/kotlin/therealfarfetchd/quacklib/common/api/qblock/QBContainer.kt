@@ -247,10 +247,12 @@ open class QBContainer(factory: () -> QBlock) : Block(factory.also { tempFactory
     world.getQBlock(pos)?.onActivated(player, hand, facing, hitX, hitY, hitZ) ?: false
 
   override fun neighborChanged(state: IBlockState?, world: World, pos: BlockPos, blockIn: Block?, fromPos: BlockPos) {
+    if (limbocon_fix) return
     world.getQBlock(pos)?.onNeighborChanged((fromPos - pos).getFacing())
   }
 
   override fun onNeighborChange(world: IBlockAccess, pos: BlockPos, neighbor: BlockPos) {
+    if (limbocon_fix) return
     world.getQBlock(pos)?.onNeighborTEChanged((neighbor - pos).getFacing())
   }
 

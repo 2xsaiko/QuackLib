@@ -40,6 +40,7 @@ enum class EnumEdge(val base: EnumFacing, val side: EnumFacing) {
           Lookup.put(slot.base, slot.side, slot)
         }
       }
+      if (!Lookup.contains(base, side)) return DownNorth
       return Lookup.get(base, side)
     }
   }

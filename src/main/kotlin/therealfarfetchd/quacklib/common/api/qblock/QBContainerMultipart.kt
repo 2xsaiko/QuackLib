@@ -89,6 +89,7 @@ open class QBContainerMultipart(factory: () -> QBlock) : QBContainer(factory), I
   }
 
   override fun onPartChanged(part: IPartInfo, otherPart: IPartInfo) {
+    if (limbocon_fix) return
     (part.tile as QBContainerTile).qb.asmp.onPartChanged(otherPart)
   }
 

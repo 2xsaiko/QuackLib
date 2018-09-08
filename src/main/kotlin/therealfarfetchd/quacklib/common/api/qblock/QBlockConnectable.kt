@@ -18,7 +18,7 @@ abstract class QBlockConnectable : QBlock(), TileConnectable {
   override fun onPlaced(placer: EntityLivingBase?, stack: ItemStack?, sidePlaced: EnumFacing, hitX: Float, hitY: Float, hitZ: Float) {
     super.onPlaced(placer, stack, sidePlaced, hitX, hitY, hitZ)
     cr.updateCableConnections()
-    notifyWires()
+    Scheduler.schedule(0) { notifyWires() }
   }
 
   override fun onBreakBlock() {

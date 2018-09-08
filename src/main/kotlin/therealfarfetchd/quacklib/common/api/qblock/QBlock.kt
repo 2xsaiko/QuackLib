@@ -320,7 +320,9 @@ abstract class QBlock {
     if (world.isServer) {
       container.nextClientUpdateIsRender = renderUpdate || container.nextClientUpdateIsRender
       val state = applyProperties(container.blockType.defaultState)
+      limbocon_fix = true
       world.notifyBlockUpdate(pos, state, state, 3)
+      limbocon_fix = false
     } else {
       if (renderUpdate) {
         world.markBlockRangeForRenderUpdate(pos, pos)
@@ -334,3 +336,6 @@ abstract class QBlock {
     val FullAABB = AxisAlignedBB(0.0, 0.0, 0.0, 1.0, 1.0, 1.0)
   }
 }
+
+// FIXME
+var limbocon_fix = false
