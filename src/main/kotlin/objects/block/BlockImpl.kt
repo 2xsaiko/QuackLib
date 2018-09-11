@@ -53,6 +53,10 @@ class BlockImpl(
     tile?.markDirty()
   }
 
+  override fun notifyNeighbors(updateObservers: Boolean) {
+    unsafe { worldMutable?.toMCWorld()?.notifyNeighborsRespectDebug(pos.toMCVec3i(), type.toMCBlockType(), updateObservers) }
+  }
+
   override fun copy(): Block {
     return BlockImpl(type, world, pos, state, tile?.copy())
   }

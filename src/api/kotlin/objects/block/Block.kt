@@ -71,6 +71,8 @@ interface Block : Instance<BlockType>, BehaviorDelegate, ICapabilityProvider {
 
   fun markDirty()
 
+  fun notifyNeighbors(updateObservers: Boolean = false)
+
   fun copy(): Block
 
   fun Unsafe.toMCBlock(): MCBlock
