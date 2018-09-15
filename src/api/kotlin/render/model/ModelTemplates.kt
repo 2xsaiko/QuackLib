@@ -13,6 +13,8 @@ interface ModelTemplates {
 
   val OBJ: ObjectBuilderProvider<ObjConfigurationScope>
 
+  val InflatedTexture: ObjectBuilderProvider<InflatedTextureConfigurationScope>
+
 }
 
 @SimpleModelDSL
@@ -68,6 +70,23 @@ interface ObjConfigurationScope : ModelConfigurationScope {
   fun texture(t: SimpleModel.PreparedTexture?, material0: String, vararg material: String) {
     texture(t, material0)
     for (m in material) texture(t, m)
+  }
+
+}
+
+interface InflatedTextureConfigurationScope : ModelConfigurationScope {
+
+  fun texture(t: SimpleModel.PreparedTexture, op: TextureConfigScope.() -> Unit = {})
+
+  interface TextureConfigScope {
+
+    fun uv(x1: Float, y1: Float, x2: Float, y2: Float)
+
+    /**
+     * Rotates the texture by the specified angle. 90° increments only.
+     */
+    fun rotate(angle: Int)
+
   }
 
 }

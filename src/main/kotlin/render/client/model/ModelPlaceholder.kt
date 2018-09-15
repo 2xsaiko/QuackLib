@@ -3,9 +3,7 @@ package therealfarfetchd.quacklib.render.client.model
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.AxisAlignedBB
 import therealfarfetchd.quacklib.api.render.model.SimpleModel
-import therealfarfetchd.quacklib.api.render.texture.AtlasTexture
 import therealfarfetchd.quacklib.core.ModID
-import therealfarfetchd.quacklib.render.client.model.objects.InflatedTexture
 
 private val Placeholder = ResourceLocation(ModID, "pablo")
 
@@ -37,7 +35,9 @@ class ModelPlaceholderItem : SimpleModel() {
   override fun isItemTransformation(): Boolean = true
 
   override fun ModelContext.addObjects() {
-    addQuads(InflatedTexture(texture(tex) as AtlasTexture))
+    add(InflatedTexture) {
+      texture(tex)
+    }
   }
 
 }

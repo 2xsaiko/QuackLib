@@ -31,7 +31,7 @@ private fun computeQuadsForTexture(tex: AtlasTexture): List<Quad> {
   val list = mutableListOf<Quad>()
 
   // front + back
-  list += TexturedBox(Vec3(0f, 0f, 7.5f / 16f), Vec3(1f, 1f, 8.5f / 16f), null, null, tex, tex, null, null)
+  list += TexturedBox(Vec3(1f, 1f, 7.5f / 16f), Vec3(0f, 0f, 8.5f / 16f), null, null, tex, tex, null, null)
 
   val image = openResource(fixRes(tex.sourceTexture), true)?.let {
     try {

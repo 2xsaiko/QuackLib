@@ -43,15 +43,15 @@ fun mkQuad16(tex: AtlasTexture, facing: Facing, from: Vec3, to: Vec3, c: Color =
 
 private fun getuvfromxyz(facing: Facing, from: Vec3, to: Vec3): Pair<Vec2, Vec2> {
   val uv1 = when (facing.axis) {
-    X -> Vec2(from.z, from.y)
-    Y -> Vec2(from.x, from.z)
-    Z -> Vec2(from.x, from.y)
-  }
-
-  val uv2 = when (facing.axis) {
     X -> Vec2(to.z, to.y)
     Y -> Vec2(to.x, to.z)
     Z -> Vec2(to.x, to.y)
+  }
+
+  val uv2 = when (facing.axis) {
+    X -> Vec2(from.z, from.y)
+    Y -> Vec2(from.x, from.z)
+    Z -> Vec2(from.x, from.y)
   }
 
   return Pair(uv1, uv2)

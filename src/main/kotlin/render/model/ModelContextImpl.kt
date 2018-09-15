@@ -21,6 +21,7 @@ open class ModelContextImpl(
 
   override val Box: ObjectBuilderProvider<BoxConfigurationScope> = ::BoxConfigurationScopeImpl
   override val OBJ: ObjectBuilderProvider<ObjConfigurationScope> = ::ObjConfigurationScopeImpl
+  override val InflatedTexture: ObjectBuilderProvider<InflatedTextureConfigurationScope> = ::InflatedTextureConfigurationScopeImpl
 
   override var coordsScale = 1f
 

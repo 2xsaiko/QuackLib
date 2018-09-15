@@ -48,7 +48,7 @@ group = "therealfarfetchd.quacklib"
 minecraft {
   version = "$mc_version-$forge_version"
   runDir = "run"
-  mappings = "$mappings_version"
+  mappings = mappings_version
   isUseDepAts = true
 
   serverJvmArgs = serverJvmArgs + "-Dfml.coreMods.load=therealfarfetchd.quacklib.hax.QuackLibPlugin"
