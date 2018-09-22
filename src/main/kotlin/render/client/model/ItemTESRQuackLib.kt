@@ -81,7 +81,7 @@ object ItemTESRQuackLib : TileEntityItemStackRenderer() {
           k = TextureUtil.anaglyphColor(k)
         }
 
-        k = k or 0xFF000000u.toInt()
+        k = k or 0xFF000000.toInt()
       }
 
       LightUtil.renderQuadColor(renderer, quad, k)

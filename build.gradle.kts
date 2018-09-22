@@ -29,7 +29,7 @@ buildscript {
   }
   dependencies {
     classpath("net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT")
-    classpath(kotlin("gradle-plugin", kotlin_version))
+    classpath(kotlin("gradle-plugin", "1.3-M1"))
   }
 }
 
