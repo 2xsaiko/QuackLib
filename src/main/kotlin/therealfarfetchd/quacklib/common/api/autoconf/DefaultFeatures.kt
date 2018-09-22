@@ -6,6 +6,7 @@ import net.minecraftforge.fml.common.registry.GameRegistry
 import therealfarfetchd.quacklib.ModID
 import therealfarfetchd.quacklib.client.gui.GuiAlloyFurnace
 import therealfarfetchd.quacklib.common.QGuiHandler
+import therealfarfetchd.quacklib.common.QuackLibConfig
 import therealfarfetchd.quacklib.common.api.qblock.IQBlockInventory
 import therealfarfetchd.quacklib.common.api.qblock.QBContainerTileMultipart
 import therealfarfetchd.quacklib.common.api.recipe.AlloyFurnaceRecipes
@@ -26,7 +27,8 @@ object DefaultFeatures {
 
   val OreGeneration = Feature("ore generation") {
     action {
-      GameRegistry.registerWorldGenerator(QWorldGenerator, 2)
+      if (QuackLibConfig.generateOres)
+        GameRegistry.registerWorldGenerator(QWorldGenerator, 2)
     }
   }
 
